@@ -8,7 +8,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
-	netboxIpam "internal.keenlogics.com/di/netbox-sync/netbox/ipam"
+	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
 //InterfaceGet retrieves an existing device interface object.

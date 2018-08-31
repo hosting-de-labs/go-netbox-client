@@ -3,12 +3,10 @@ package utils
 import (
 	"strings"
 
+	"github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
+	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
-
-	"internal.keenlogics.com/di/netbox-sync/helper"
-	"internal.keenlogics.com/di/netbox-sync/netbox/ipam"
-	"internal.keenlogics.com/di/netbox-sync/types"
 )
 
 func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.VirtualMachine, interfaces []*models.Interface) types.VirtualServer {
@@ -17,7 +15,7 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 	out.Hostname = *netboxVM.Name
 
 	if netboxVM.PrimaryIp4 != nil {
-		address, cidr, err := helper.SplitCidrFromIP(*netboxVM.PrimaryIp4.Address)
+		address, cidr, err := SplitCidrFromIP(*netboxVM.PrimaryIp4.Address)
 		if err != nil {
 			panic(err)
 		}
@@ -28,7 +26,7 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 	}
 
 	if netboxVM.PrimaryIp6 != nil {
-		address, cidr, err := helper.SplitCidrFromIP(*netboxVM.PrimaryIp6.Address)
+		address, cidr, err := SplitCidrFromIP(*netboxVM.PrimaryIp6.Address)
 		if err != nil {
 			panic(err)
 		}
@@ -79,7 +77,7 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 
 		for _, netboxAddress := range netboxAddresses {
 			var addr types.IPAddress
-			ip, cidr, err := helper.SplitCidrFromIP(*netboxAddress.Address)
+			ip, cidr, err := SplitCidrFromIP(*netboxAddress.Address)
 			if err != nil {
 				panic(err)
 			}

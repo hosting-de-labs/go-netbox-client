@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/swag"
+	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
-	"internal.keenlogics.com/di/netbox-sync/types"
 )
 
 //InterfaceGetAll returns all interfaces of a virtual machine identified by it's id

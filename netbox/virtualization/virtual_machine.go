@@ -4,15 +4,15 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/swag"
+	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 	"github.com/sirupsen/logrus"
-	"internal.keenlogics.com/di/netbox-sync/types"
 
-	netboxDcim "internal.keenlogics.com/di/netbox-sync/netbox/dcim"
-	netboxIpam "internal.keenlogics.com/di/netbox-sync/netbox/ipam"
-	netboxUtils "internal.keenlogics.com/di/netbox-sync/netbox/utils"
+	netboxDcim "github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
+	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
+	netboxUtils "github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 )
 
 //VMCreate creates a new VM object in Netbox.

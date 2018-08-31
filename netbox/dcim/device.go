@@ -7,7 +7,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
-	netboxCache "internal.keenlogics.com/di/netbox-sync/cache"
+	netboxCache "github.com/hosting-de-labs/go-netbox-client/cache"
 )
 
 var cache netboxCache.Cache
