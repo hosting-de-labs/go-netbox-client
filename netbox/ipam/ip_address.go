@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/swag"
+	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/ipam"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
 //IPAddressGet returns an existing ip-address based on the given ip/cidr string.
-func IPAddressGet(netboxClient *client.NetBox, ipWithCIDR string) (*models.IPAddress, error) {
+func IPAddressGet(netboxClient *client.NetBox, ipAddress types.IPAddress) (*models.IPAddress, error) {
 	params := ipam.NewIPAMIPAddressesListParams()
-	params.WithQ(&ipWithCIDR)
+	params.WithAddress(swag.String(ipAddress.String()))
 
 	res, err := netboxClient.IPAM.IPAMIPAddressesList(params, nil)
 
@@ -25,7 +26,7 @@ func IPAddressGet(netboxClient *client.NetBox, ipWithCIDR string) (*models.IPAdd
 	}
 
 	if *res.Payload.Count > 1 {
-		return nil, fmt.Errorf("IP Address %s is not unique", ipWithCIDR)
+		return nil, fmt.Errorf("IP Address %s is not unique", ipAddress)
 	}
 
 	return res.Payload.Results[0], nil
@@ -47,9 +48,9 @@ func IPAddressGetByInterfaceID(netboxClient *client.NetBox, interfaceID int64) (
 
 //IPAddressCreate creates an ip-address based on the given ip/cidr string.
 //Supports both IPv4 and IPv6.
-func IPAddressCreate(netboxClient *client.NetBox, ipWithCIDR string) (*models.IPAddress, error) {
+func IPAddressCreate(netboxClient *client.NetBox, ipAddress *types.IPAddress) (*models.IPAddress, error) {
 	data := new(models.WritableIPAddress)
-	data.Address = &ipWithCIDR
+	data.Address = swag.String(ipAddress.String())
 	data.Tags = []string{}
 
 	params := ipam.NewIPAMIPAddressesCreateParams()
@@ -60,13 +61,13 @@ func IPAddressCreate(netboxClient *client.NetBox, ipWithCIDR string) (*models.IP
 		return nil, err
 	}
 
-	return IPAddressGet(netboxClient, ipWithCIDR)
+	return IPAddressGet(netboxClient, ipAddress)
 }
 
 //IPAddressGetCreate is a convenience function that looks up an existing ip-address from netbox
 //or creates it
-func IPAddressGetCreate(netboxClient *client.NetBox, ipWithCIDR string) (*models.IPAddress, error) {
-	res, err := IPAddressGet(netboxClient, ipWithCIDR)
+func IPAddressGetCreate(netboxClient *client.NetBox, ipAddress *types.IPAddress) (*models.IPAddress, error) {
+	res, err := IPAddressGet(netboxClient, ipAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -75,28 +76,28 @@ func IPAddressGetCreate(netboxClient *client.NetBox, ipWithCIDR string) (*models
 		return res, nil
 	}
 
-	return IPAddressCreate(netboxClient, ipWithCIDR)
+	return IPAddressCreate(netboxClient, ipAddress)
 }
 
 //IPAddressAssignInterface assigns a ip-address/cidr string to an existing interface.
-func IPAddressAssignInterface(netboxClient *client.NetBox, ipWithCIDR string, deviceInterface models.Interface) (*models.IPAddress, error) {
-	ipAddress, err := IPAddressGetCreate(netboxClient, ipWithCIDR)
+func IPAddressAssignInterface(netboxClient *client.NetBox, ipAddress *types.IPAddress, deviceInterface models.Interface) (*models.IPAddress, error) {
+	ipAddress2, err := IPAddressGetCreate(netboxClient, ipAddress)
 	if err != nil {
 		return nil, err
 	}
 
 	//Do not update ipAddress if interface is already correct
-	if ipAddress.Interface != nil && ipAddress.Interface.ID == deviceInterface.ID {
-		return ipAddress, nil
+	if ipAddress2.Interface != nil && ipAddress2.Interface.ID == deviceInterface.ID {
+		return ipAddress2, nil
 	}
 
 	data := new(models.WritableIPAddress)
-	data.Address = &ipWithCIDR
+	data.Address = swag.String(ipAddress.String())
 	data.Tags = []string{}
 	data.Interface = deviceInterface.ID
 
 	params := ipam.NewIPAMIPAddressesPartialUpdateParams()
-	params.WithID(ipAddress.ID)
+	params.WithID(ipAddress2.ID)
 	params.WithData(data)
 
 	_, err = netboxClient.IPAM.IPAMIPAddressesPartialUpdate(params, nil)
@@ -104,7 +105,7 @@ func IPAddressAssignInterface(netboxClient *client.NetBox, ipWithCIDR string, de
 		return nil, err
 	}
 
-	return IPAddressGet(netboxClient, ipWithCIDR)
+	return IPAddressGet(netboxClient, ipAddress)
 }
 
 //VlanGet returns a vlan-object based on the given vlanTag

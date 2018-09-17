@@ -6,12 +6,11 @@ import (
 
 //VirtualServer represents a virtual server
 type VirtualServer struct {
+	Host
 	OriginalHost *VirtualServer
 
-	Host
 	Hypervisor string
-
-	Resources VirtualServerResources
+	Resources  VirtualServerResources
 }
 
 //Copy creates a deep copy of a VirtualServer object

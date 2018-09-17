@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/swag"
-	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
@@ -12,13 +11,13 @@ import (
 )
 
 //InterfaceGet retrieves an existing device interface object.
-func InterfaceGet(netboxClient *client.NetBox, interfaceName string, device *models.Device) (*models.Interface, error) {
+func (c *Client) InterfaceGet(interfaceName string, device *models.Device) (*models.Interface, error) {
 	params := dcim.NewDcimInterfacesListParams()
 	params.Name = &interfaceName
 
 	params.DeviceID = &device.ID
 
-	res, err := netboxClient.Dcim.DcimInterfacesList(params, nil)
+	res, err := c.getClient().Dcim.DcimInterfacesList(params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +34,7 @@ func InterfaceGet(netboxClient *client.NetBox, interfaceName string, device *mod
 }
 
 //InterfaceCreate creates a device interface in Netbox.
-func InterfaceCreate(netboxClient *client.NetBox, interfaceName string, device *models.Device, vlanTag *int64, interfaceFormFactor *int64) (*models.Interface, error) {
+func (c *Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *int64, interfaceFormFactor *int64) (*models.Interface, error) {
 	data := new(models.Interface)
 	data.Device.ID = device.ID
 	data.Name = &interfaceName
@@ -43,7 +42,7 @@ func InterfaceCreate(netboxClient *client.NetBox, interfaceName string, device *
 	data.TaggedVlans = []int64{}
 
 	if vlanTag != nil {
-		vlan, err := netboxIpam.VlanGet(netboxClient, *vlanTag, device.Site.ID)
+		vlan, err := netboxIpam.VlanGet(c.getClient(), *vlanTag, device.Site.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -58,23 +57,23 @@ func InterfaceCreate(netboxClient *client.NetBox, interfaceName string, device *
 	params := dcim.NewDcimInterfacesCreateParams()
 	params.WithData(data)
 
-	_, err := netboxClient.Dcim.DcimInterfacesCreate(params, nil)
+	_, err := c.getClient().Dcim.DcimInterfacesCreate(params, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create interface with vlan Tag %d. Original error was %s", vlanTag, err)
 	}
 
-	return InterfaceGet(netboxClient, interfaceName, device)
+	return c.InterfaceGet(interfaceName, device)
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing device interface or otherwise to create it.
-func InterfaceGetCreate(netboxClient *client.NetBox, interfaceName string, device *models.Device, vlanTag *int64) (*models.Interface, error) {
-	res, err := InterfaceGet(netboxClient, interfaceName, device)
+func (c *Client) InterfaceGetCreate(interfaceName string, device *models.Device, vlanTag *int64) (*models.Interface, error) {
+	res, err := c.InterfaceGet(interfaceName, device)
 	if err != nil {
 		return nil, err
 	}
 
 	if res == nil {
-		return InterfaceCreate(netboxClient, interfaceName, device, vlanTag, nil)
+		return c.InterfaceCreate(interfaceName, device, vlanTag, nil)
 	}
 
 	return res, nil

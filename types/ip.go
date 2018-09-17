@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 //IPAddressType represents a type an ip-address can have
 type IPAddressType string
 
@@ -16,6 +18,10 @@ type IPAddress struct {
 	Type    IPAddressType
 	Address string
 	CIDR    uint16
+}
+
+func (i IPAddress) String() string {
+	return fmt.Sprintf("%s/%d", i.Address, i.CIDR)
 }
 
 type ByAddress []IPAddress

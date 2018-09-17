@@ -2,9 +2,24 @@ package netbox
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hosting-de-labs/go-netbox-client/types"
 )
+
+//GenerateSlug generates a netbox compatible identifier for eg. manufacturers, devices
+func GenerateSlug(s string) string {
+	//to lower case
+	slug := strings.ToLower(s)
+
+	//replace spaces with hyphens
+	slug = strings.Replace(slug, " ", "-", -1)
+
+	//remove forward-slashes
+	slug = strings.Replace(slug, "/", "", -1)
+
+	return slug
+}
 
 func generateVMComment(host *types.VirtualServer) string {
 	comment := "--- NETBOX SYNC: DO NOT MODIFY ---"

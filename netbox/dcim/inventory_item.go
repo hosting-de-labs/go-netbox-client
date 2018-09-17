@@ -2,16 +2,17 @@ package dcim
 
 import (
 	"github.com/go-openapi/swag"
-	"github.com/hosting-de-labs/go-netbox/netbox/client"
+	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func InventoryItemGetByHostname(netboxClient *client.NetBox, hostname string) ([]*models.InventoryItem, error) {
+func (c *Client) InventoryItemGetAllByHostname(hostname string) ([]*models.InventoryItem, error) {
 	params := dcim.NewDcimInventoryItemsListParams()
 	params.Device = &hostname
+	params.Limit = swag.Int64(100)
 
-	res, err := netboxClient.Dcim.DcimInventoryItemsList(params, nil)
+	res, err := c.getClient().Dcim.DcimInventoryItemsList(params, nil)
 	if err != nil {
 		return []*models.InventoryItem{}, err
 	}
@@ -19,33 +20,31 @@ func InventoryItemGetByHostname(netboxClient *client.NetBox, hostname string) ([
 	return res.Payload.Results, nil
 }
 
-func InventoryItemCreate(netboxClient *client.NetBox) {
+func (c *Client) InventoryItemCreate(deviceID int64, inventoryItem types.InventoryItem) (*models.InventoryItem, error) {
 	params := dcim.NewDcimInventoryItemsCreateParams()
 
-	manufacturer := item.GetManufacturer()
-	model := item.GetModel()
-
-	if manufacturer == "Undefined" || manufacturer == "0000" {
-		manufacturer = "Unknown"
-	}
-
-	if len(model) == 0 {
-		model = "Unknown"
-	}
-
-	params.Data = &models.WritableInventoryItem{
-		Device:       &device.ID,
-		Discovered:   true,
-		Manufacturer: swag.Int64(getManufacturer(manufacturer).ID),
-		Name:         &model,
-		Serial:       item.GetSerialNumber(),
-		AssetTag:     GenerateItemHash(item),
-		Description:  item.GetDescription(),
-		Tags:         []string{},
-	}
-
-	_, err := netbox.Dcim.DcimInventoryItemsCreate(params, nil)
+	data, err := c.InventoryItemConvertToNetbox(inventoryItem, deviceID)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+
+	params.Data = data
+
+	res, err := c.getClient().Dcim.DcimInventoryItemsCreate(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Payload, nil
+}
+
+func (c *Client) InventoryItemDelete(id int64) error {
+	params := dcim.NewDcimInventoryItemsDeleteParams().WithID(id)
+
+	_, err := c.getClient().Dcim.DcimInventoryItemsDelete(params, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
