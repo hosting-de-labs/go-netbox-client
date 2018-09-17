@@ -1,21 +1,22 @@
-package utils
+package virtualization
 
 import (
 	"strings"
 
-	"github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
+	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
-	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
+
+	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
-func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.VirtualMachine, interfaces []*models.Interface) types.VirtualServer {
+func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.Interface) types.VirtualServer {
 	var out types.VirtualServer
 	out.ID = netboxVM.ID
 	out.Hostname = *netboxVM.Name
 
 	if netboxVM.PrimaryIp4 != nil {
-		address, cidr, err := SplitCidrFromIP(*netboxVM.PrimaryIp4.Address)
+		address, cidr, err := utils.SplitCidrFromIP(*netboxVM.PrimaryIp4.Address)
 		if err != nil {
 			panic(err)
 		}
@@ -26,7 +27,7 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 	}
 
 	if netboxVM.PrimaryIp6 != nil {
-		address, cidr, err := SplitCidrFromIP(*netboxVM.PrimaryIp6.Address)
+		address, cidr, err := utils.SplitCidrFromIP(*netboxVM.PrimaryIp6.Address)
 		if err != nil {
 			panic(err)
 		}
@@ -53,7 +54,7 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 		}
 	}
 
-	customFields := ConvertCustomFields(netboxVM.CustomFields)
+	customFields := utils.ConvertCustomFields(netboxVM.CustomFields)
 	for key, val := range customFields {
 		switch key {
 		case "hypervisor_label":
@@ -70,14 +71,15 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 		//TODO: netIf.VlanTag = netboxInterface.UntaggedVlan
 		netIf.MACAddress = netboxInterface.MacAddress
 
-		netboxAddresses, err := ipam.IPAddressGetByInterfaceID(netboxClient, netboxInterface.ID)
+		ipamClient := netboxIpam.NewClient(c.client)
+		netboxAddresses, err := ipamClient.IPAddressGetByInterfaceID(netboxInterface.ID)
 		if err != nil {
 			panic(err)
 		}
 
 		for _, netboxAddress := range netboxAddresses {
 			var addr types.IPAddress
-			ip, cidr, err := SplitCidrFromIP(*netboxAddress.Address)
+			ip, cidr, err := utils.SplitCidrFromIP(*netboxAddress.Address)
 			if err != nil {
 				panic(err)
 			}
@@ -97,25 +99,6 @@ func ConvertVMToVirtualServer(netboxClient *client.NetBox, netboxVM models.Virtu
 	}
 
 	out.OriginalHost = out.Copy()
-
-	return out
-}
-
-func ConvertCustomFields(customFields interface{}) map[string]string {
-	tmp := customFields.(map[string]interface{})
-
-	out := make(map[string]string)
-	for key, val := range tmp {
-		if val != nil {
-			tmpVal, ok := val.(string)
-			if ok {
-				out[key] = tmpVal
-				continue
-			}
-
-			//TODO: parse maps
-		}
-	}
 
 	return out
 }

@@ -11,13 +11,13 @@ import (
 )
 
 //InterfaceGet retrieves an existing device interface object.
-func (c *Client) InterfaceGet(interfaceName string, device *models.Device) (*models.Interface, error) {
+func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*models.Interface, error) {
 	params := dcim.NewDcimInterfacesListParams()
 	params.Name = &interfaceName
 
 	params.DeviceID = &device.ID
 
-	res, err := c.getClient().Dcim.DcimInterfacesList(params, nil)
+	res, err := c.client.Dcim.DcimInterfacesList(params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -34,15 +34,17 @@ func (c *Client) InterfaceGet(interfaceName string, device *models.Device) (*mod
 }
 
 //InterfaceCreate creates a device interface in Netbox.
-func (c *Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *int64, interfaceFormFactor *int64) (*models.Interface, error) {
+func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *int64, interfaceFormFactor *int64) (*models.Interface, error) {
 	data := new(models.Interface)
 	data.Device.ID = device.ID
 	data.Name = &interfaceName
 	data.Mode.Value = swag.Int64(100)
 	data.TaggedVlans = []int64{}
 
+	ipamClient := netboxIpam.NewClient(c.client)
+
 	if vlanTag != nil {
-		vlan, err := netboxIpam.VlanGet(c.getClient(), *vlanTag, device.Site.ID)
+		vlan, err := ipamClient.VlanGet(*vlanTag, device.Site.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -57,7 +59,7 @@ func (c *Client) InterfaceCreate(interfaceName string, device *models.Device, vl
 	params := dcim.NewDcimInterfacesCreateParams()
 	params.WithData(data)
 
-	_, err := c.getClient().Dcim.DcimInterfacesCreate(params, nil)
+	_, err := c.client.Dcim.DcimInterfacesCreate(params, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create interface with vlan Tag %d. Original error was %s", vlanTag, err)
 	}
@@ -66,7 +68,7 @@ func (c *Client) InterfaceCreate(interfaceName string, device *models.Device, vl
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing device interface or otherwise to create it.
-func (c *Client) InterfaceGetCreate(interfaceName string, device *models.Device, vlanTag *int64) (*models.Interface, error) {
+func (c Client) InterfaceGetCreate(interfaceName string, device *models.Device, vlanTag *int64) (*models.Interface, error) {
 	res, err := c.InterfaceGet(interfaceName, device)
 	if err != nil {
 		return nil, err

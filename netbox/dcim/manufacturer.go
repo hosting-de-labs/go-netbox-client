@@ -12,7 +12,7 @@ import (
 func (c *Client) ManufacturerGet(manufacturerName string) (*models.Manufacturer, error) {
 	params := dcim.NewDcimManufacturersListParams().WithName(&manufacturerName)
 
-	res, err := c.getClient().Dcim.DcimManufacturersList(params, nil)
+	res, err := c.client.Dcim.DcimManufacturersList(params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *Client) ManufacturerCreate(manufacturerName string) (*models.Manufactur
 
 	params := dcim.NewDcimManufacturersCreateParams().WithData(&manufacturer)
 
-	res, err := c.getClient().Dcim.DcimManufacturersCreate(params, nil)
+	res, err := c.client.Dcim.DcimManufacturersCreate(params, nil)
 	if err != nil {
 		panic(err)
 	}

@@ -5,18 +5,16 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/hosting-de-labs/go-netbox-client/types"
-	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 	"github.com/sirupsen/logrus"
 
 	netboxDcim "github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
-	netboxUtils "github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 )
 
 //VMCreate creates a new VM object in Netbox.
-func VMCreate(netboxClient *client.NetBox, vm *types.VirtualServer, hyp *models.Device) (*types.VirtualServer, error) {
+func (c Client) VMCreate(vm *types.VirtualServer, hyp *models.Device) (*types.VirtualServer, error) {
 	var netboxVM models.WritableVirtualMachine
 	netboxVM.Name = &vm.Hostname
 	netboxVM.Tags = []string{}
@@ -33,20 +31,20 @@ func VMCreate(netboxClient *client.NetBox, vm *types.VirtualServer, hyp *models.
 	params := virtualization.NewVirtualizationVirtualMachinesCreateParams()
 	params.WithData(&netboxVM)
 
-	_, err := netboxClient.Virtualization.VirtualizationVirtualMachinesCreate(params, nil)
+	_, err := c.client.Virtualization.VirtualizationVirtualMachinesCreate(params, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return VMGet(netboxClient, vm.Hostname, false)
+	return c.VMGet(vm.Hostname, false)
 }
 
 //VMGet retrieves an existing VM object from netbox by it's hostname.
-func VMGet(netboxClient *client.NetBox, hostname string, deep bool) (*types.VirtualServer, error) {
+func (c Client) VMGet(hostname string, deep bool) (*types.VirtualServer, error) {
 	params := virtualization.NewVirtualizationVirtualMachinesListParams()
 	params.WithName(&hostname)
 
-	res, err := netboxClient.Virtualization.VirtualizationVirtualMachinesList(params, nil)
+	res, err := c.client.Virtualization.VirtualizationVirtualMachinesList(params, nil)
 
 	if err != nil {
 		return nil, err
@@ -62,36 +60,36 @@ func VMGet(netboxClient *client.NetBox, hostname string, deep bool) (*types.Virt
 
 	vm := *res.Payload.Results[0]
 
-	interfaces, err := InterfaceGetAll(netboxClient, vm.ID)
+	interfaces, err := c.InterfaceGetAll(vm.ID)
 	if err != nil {
 		panic(err)
 	}
-	out := netboxUtils.ConvertVMToVirtualServer(netboxClient, vm, interfaces)
+	out := c.VirtualMachineConvertFromNetbox(vm, interfaces)
 
 	return &out, nil
 }
 
 //VMGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
-func VMGetCreate(netboxClient *client.NetBox, vm *types.VirtualServer, hyp *models.Device) (*types.VirtualServer, error) {
-	vmOut, err := VMGet(netboxClient, vm.Hostname, false)
+func (c Client) VMGetCreate(vm *types.VirtualServer, hyp *models.Device) (*types.VirtualServer, error) {
+	vmOut, err := c.VMGet(vm.Hostname, false)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if vmOut == nil {
-		return VMCreate(netboxClient, vm, hyp)
+		return c.VMCreate(vm, hyp)
 	}
 
 	return vmOut, nil
 }
 
 //VMDelete deletes a virtual machine in Netbox
-func VMDelete(netboxClient *client.NetBox, vmID int64) error {
+func (c Client) VMDelete(vmID int64) error {
 	params := virtualization.NewVirtualizationVirtualMachinesDeleteParams()
 	params.SetID(vmID)
 
-	_, err := netboxClient.Virtualization.VirtualizationVirtualMachinesDelete(params, nil)
+	_, err := c.client.Virtualization.VirtualizationVirtualMachinesDelete(params, nil)
 	if err != nil {
 		return err
 	}
@@ -100,12 +98,15 @@ func VMDelete(netboxClient *client.NetBox, vmID int64) error {
 }
 
 //VMUpdate returns true if the vm was actually updated
-func VMUpdate(netboxClient *client.NetBox, vm *types.VirtualServer, logger *logrus.Entry) bool {
+func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) bool {
 	if !vm.IsChanged() {
 		return false
 	}
 
-	hyp, err := netboxDcim.HypervisorGet(netboxClient, vm.Hypervisor)
+	dcimClient := netboxDcim.NewClient(c.client)
+	ipamClient := netboxIpam.NewClient(c.client)
+
+	hyp, err := dcimClient.HypervisorGet(vm.Hypervisor)
 	if err != nil {
 		panic(err)
 	}
@@ -114,24 +115,22 @@ func VMUpdate(netboxClient *client.NetBox, vm *types.VirtualServer, logger *logr
 	for _, netIf := range vm.NetworkInterfaces {
 		vlan := new(models.VLAN)
 		if netIf.VlanTag != 0 {
-			vlan, err = netboxIpam.VlanGet(netboxClient, netIf.VlanTag, hyp.Site.ID)
+			vlan, err = ipamClient.VlanGet(netIf.VlanTag, hyp.Site.ID)
 		}
 
-		vmInterface, err := InterfaceGetCreate(netboxClient, vm, netIf.Name, vlan)
+		vmInterface, err := c.InterfaceGetCreate(vm, netIf.Name, vlan)
 		if err != nil {
 			logger.WithError(err).Error("Cannot create interface")
 			continue
 		}
 
 		for _, network := range netIf.IPAddresses {
-			ipWithCIDR := fmt.Sprintf("%s/%d", network.Address, network.CIDR)
-
-			_, err = netboxIpam.IPAddressAssignInterface(netboxClient, ipWithCIDR, *vmInterface)
+			_, err = ipamClient.IPAddressAssignInterface(network, *vmInterface)
 			if err != nil {
 				logger.WithFields(logrus.Fields{
 					"host":  vm.Hostname,
 					"error": err,
-					"ip":    ipWithCIDR,
+					"ip":    fmt.Sprintf("%s/%d", network.Address, network.CIDR),
 				}).Error("Cannot assign ip to interface")
 				continue
 			}
@@ -163,11 +162,12 @@ func VMUpdate(netboxClient *client.NetBox, vm *types.VirtualServer, logger *logr
 			data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 		}
 
+		ipamClient := netboxIpam.NewClient(c.client)
+
 		//Primary IPs
 		// we need this additional check due to a bug in netbox API
 		if len(vm.PrimaryIPv4.Address) > 0 && vm.OriginalHost.PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
-			ipWithCIDR := fmt.Sprintf("%s/%d", vm.PrimaryIPv4.Address, vm.PrimaryIPv4.CIDR)
-			ip4, err := netboxIpam.IPAddressGet(netboxClient, ipWithCIDR)
+			ip4, err := ipamClient.IPAddressGet(vm.PrimaryIPv4)
 			if err != nil {
 				logger.WithError(err).Error("Cannot get ip address")
 				return false
@@ -179,7 +179,7 @@ func VMUpdate(netboxClient *client.NetBox, vm *types.VirtualServer, logger *logr
 
 		//we need this additional check due to a bug in netbox API
 		if len(vm.PrimaryIPv6.Address) > 0 && vm.OriginalHost.PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
-			ip6, err := netboxIpam.IPAddressGet(netboxClient, fmt.Sprintf("%s/%d", vm.PrimaryIPv6.Address, vm.PrimaryIPv6.CIDR))
+			ip6, err := ipamClient.IPAddressGet(vm.PrimaryIPv6)
 			if err != nil {
 				logger.WithError(err).Error("Cannot get ip address")
 				return false
@@ -194,7 +194,7 @@ func VMUpdate(netboxClient *client.NetBox, vm *types.VirtualServer, logger *logr
 		params.WithID(vm.ID)
 		params.WithData(data)
 
-		_, err = netboxClient.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
+		_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
 		if err != nil {
 			logger.WithError(err).Error("Cannot update virtual machine")
 			return false

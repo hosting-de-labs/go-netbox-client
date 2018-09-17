@@ -1,4 +1,4 @@
-package dcim
+package ipam
 
 import "github.com/hosting-de-labs/go-netbox/netbox/client"
 

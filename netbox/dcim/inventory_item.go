@@ -12,7 +12,7 @@ func (c *Client) InventoryItemGetAllByHostname(hostname string) ([]*models.Inven
 	params.Device = &hostname
 	params.Limit = swag.Int64(100)
 
-	res, err := c.getClient().Dcim.DcimInventoryItemsList(params, nil)
+	res, err := c.client.Dcim.DcimInventoryItemsList(params, nil)
 	if err != nil {
 		return []*models.InventoryItem{}, err
 	}
@@ -30,7 +30,7 @@ func (c *Client) InventoryItemCreate(deviceID int64, inventoryItem types.Invento
 
 	params.Data = data
 
-	res, err := c.getClient().Dcim.DcimInventoryItemsCreate(params, nil)
+	res, err := c.client.Dcim.DcimInventoryItemsCreate(params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (c *Client) InventoryItemCreate(deviceID int64, inventoryItem types.Invento
 func (c *Client) InventoryItemDelete(id int64) error {
 	params := dcim.NewDcimInventoryItemsDeleteParams().WithID(id)
 
-	_, err := c.getClient().Dcim.DcimInventoryItemsDelete(params, nil)
+	_, err := c.client.Dcim.DcimInventoryItemsDelete(params, nil)
 	if err != nil {
 		return err
 	}

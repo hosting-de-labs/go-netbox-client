@@ -13,7 +13,7 @@ import (
 var cache netboxCache.Cache
 
 //DeviceGet retrieves a model.Device object from Netbox by looking up the given hostname
-func (c *Client) DeviceGet(hostname string) (*models.Device, error) {
+func (c Client) DeviceGet(hostname string) (*models.Device, error) {
 	it, ok := cache.Get(fmt.Sprintf("DCIM_DEVICE_BY_HOSTNAME_%s", hostname))
 	if ok {
 		return it.(*models.Device), nil
@@ -22,7 +22,7 @@ func (c *Client) DeviceGet(hostname string) (*models.Device, error) {
 	params := dcim.NewDcimDevicesListParams()
 	params.WithName(&hostname)
 
-	res, err := c.getClient().Dcim.DcimDevicesList(params, nil)
+	res, err := c.client.Dcim.DcimDevicesList(params, nil)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (c *Client) DeviceGet(hostname string) (*models.Device, error) {
 }
 
 //TODO: Don't forget to cache
-func (c *Client) DeviceUpdate(host *types.DedicatedServer) error {
+func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 	if host.OriginalHost == nil {
 		oh, err := c.DeviceGet(host.Hostname)
 		if err != nil {
@@ -65,13 +65,13 @@ func (c *Client) DeviceUpdate(host *types.DedicatedServer) error {
 	params := dcim.NewDcimDevicesUpdateParams()
 	params.WithID(host.OriginalHost.ID).WithData(data)
 
-	//Iterate over Inventory Items
+	//TODO: Iterate over Inventory Items
 
 	return nil
 }
 
 //HypervisorGet is like NetboxDeviceGet but checks if the device has a cluster assigned
-func (c *Client) HypervisorGet(hostname string) (*models.Device, error) {
+func (c Client) HypervisorGet(hostname string) (*models.Device, error) {
 	res, err := c.DeviceGet(hostname)
 
 	if err != nil {
