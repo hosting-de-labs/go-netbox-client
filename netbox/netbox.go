@@ -14,11 +14,11 @@ import (
 )
 
 type NetBox struct {
-	netboxClient netboxClient.NetBox
+	NetboxClient netboxClient.NetBox
 
-	dcim           dcimClient.Client
-	ipam           ipamClient.Client
-	virtualization virtualizationClient.Client
+	DCIM           dcimClient.Client
+	IPAM           ipamClient.Client
+	Virtualization virtualizationClient.Client
 }
 
 func NewAPIClient(url string, token string, defaultTimeout time.Duration) NetBox {
@@ -33,9 +33,9 @@ func NewAPIClient(url string, token string, defaultTimeout time.Duration) NetBox
 	c := netboxClient.New(t, strfmt.Default)
 
 	return NetBox{
-		netboxClient:   *c,
-		dcim:           dcimClient.NewClient(*c),
-		ipam:           ipamClient.NewClient(*c),
-		virtualization: virtualizationClient.NewClient(*c),
+		NetboxClient:   *c,
+		DCIM:           dcimClient.NewClient(*c),
+		IPAM:           ipamClient.NewClient(*c),
+		Virtualization: virtualizationClient.NewClient(*c),
 	}
 }
