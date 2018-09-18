@@ -3,7 +3,7 @@ package dcim
 import (
 	"fmt"
 
-	"github.com/hosting-de-labs/go-netbox-client/netbox"
+	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
@@ -33,7 +33,7 @@ func (c *Client) ManufacturerGet(manufacturerName string) (*models.Manufacturer,
 //ManufacturerCreate creates a manufacturer in netbox
 func (c *Client) ManufacturerCreate(manufacturerName string) (*models.Manufacturer, error) {
 	var manufacturer models.Manufacturer
-	var manufacturerSlug = netbox.GenerateSlug(manufacturerName)
+	var manufacturerSlug = utils.GenerateSlug(manufacturerName)
 
 	manufacturer.Name = &manufacturerName
 	manufacturer.Slug = &manufacturerSlug

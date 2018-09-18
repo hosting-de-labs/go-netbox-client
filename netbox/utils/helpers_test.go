@@ -1,4 +1,4 @@
-package netbox
+package utils
 
 import (
 	"testing"
