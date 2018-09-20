@@ -1,6 +1,10 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hosting-de-labs/go-netbox-client/utils"
+)
 
 //IPAddressType represents a type an ip-address can have
 type IPAddressType string
@@ -24,27 +28,7 @@ func (i IPAddress) String() string {
 	return fmt.Sprintf("%s/%d", i.Address, i.CIDR)
 }
 
-type ByAddress []IPAddress
-
-func (a ByAddress) Len() int      { return len(a) }
-func (a ByAddress) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByAddress) Less(i, j int) bool {
-	return a[i].Address < a[j].Address
-}
-
 //IsEqual compares the current IPAddress object against another IPAddress object
-func (n IPAddress) IsEqual(n2 IPAddress) bool {
-	if n.Type != n2.Type {
-		return false
-	}
-
-	if n.Address != n2.Address {
-		return false
-	}
-
-	if n.CIDR != n2.CIDR {
-		return false
-	}
-
-	return true
+func (i IPAddress) IsEqual(i2 IPAddress) bool {
+	return utils.CompareStruct(i, i2, []string{}, []string{})
 }
