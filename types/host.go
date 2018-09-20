@@ -1,10 +1,14 @@
 package types
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/hosting-de-labs/go-netbox-client/utils"
+)
 
 //Host represents a host
 type Host struct {
-	OriginalHost *Host
+	CommonEntity
 
 	ID          int64
 	Hostname    string
@@ -64,32 +68,13 @@ func (h Host) Copy() *Host {
 
 //IsChanged returns true if the current and the original object differ
 func (h Host) IsChanged() bool {
-	return h.IsEqual(*h.OriginalHost, true)
+	return h.IsEqual(h.OriginalEntity.(Host), true)
 }
 
 //IsEqual compares the current object against another Host object
 func (h Host) IsEqual(h2 Host, deep bool) bool {
-	if h.Hostname != h2.Hostname {
+	if !utils.CompareStruct(h, h2, []string{}, []string{"CommonEntity", "Tags", "NetworkInterfaces"}) {
 		return false
-	}
-
-	if h.PrimaryIPv4 != h2.PrimaryIPv4 || h.PrimaryIPv6 != h2.PrimaryIPv6 {
-		return false
-	}
-
-	if h.IsManaged != h2.IsManaged {
-		return false
-	}
-
-	//comments
-	if len(h.Comments) != len(h2.Comments) {
-		return false
-	}
-
-	for i := 0; i < len(h.Comments); i++ {
-		if h.Comments[i] != h2.Comments[i] {
-			return false
-		}
 	}
 
 	//tags
@@ -106,13 +91,17 @@ func (h Host) IsEqual(h2 Host, deep bool) bool {
 		}
 	}
 
+	return true
+
 	if deep {
 		//network interfaces
 		if len(h.NetworkInterfaces) != len(h2.NetworkInterfaces) {
 			return false
 		}
 
-		//TODO: sort!
+		//sort interfaces by name
+		sort.Slice(h.NetworkInterfaces, func(i, j int) bool { return h.NetworkInterfaces[i].Name < h.NetworkInterfaces[j].Name })
+		sort.Slice(h2.NetworkInterfaces, func(i, j int) bool { return h2.NetworkInterfaces[i].Name < h2.NetworkInterfaces[j].Name })
 
 		for i := 0; i < len(h.NetworkInterfaces); i++ {
 			if !h.NetworkInterfaces[i].IsEqual(h2.NetworkInterfaces[i]) {

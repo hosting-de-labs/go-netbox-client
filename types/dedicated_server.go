@@ -1,9 +1,10 @@
 package types
 
+import "sort"
+
 //DedicatedServer represents a dedicated server
 type DedicatedServer struct {
 	Host
-	OriginalHost *DedicatedServer
 
 	Inventory []*InventoryItem
 }
@@ -36,7 +37,9 @@ func (d DedicatedServer) IsEqual(d2 DedicatedServer, deep bool) bool {
 		return false
 	}
 
-	//TODO: sort inventory items
+	//sort inventory items
+	sort.Slice(d.Inventory, func(i, j int) bool { return d.Inventory[i].GetHashableString() < d.Inventory[j].GetHashableString() })
+	sort.Slice(d2.Inventory, func(i, j int) bool { return d2.Inventory[i].GetHashableString() < d2.Inventory[j].GetHashableString() })
 
 	//iterate through inventory items and compare each item using IsEqual
 	for key, item1 := range d.Inventory {

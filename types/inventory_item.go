@@ -3,6 +3,8 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/hosting-de-labs/go-netbox-client/utils"
 )
 
 //InventoryItem represents a device / module that is attached to / built into a dedicated server
@@ -44,31 +46,9 @@ func (i InventoryItem) Copy() *InventoryItem {
 
 //IsEqual compares an InventoryItem with another one
 func (i InventoryItem) IsEqual(i2 InventoryItem) bool {
-	if i.Manufacturer != i2.Manufacturer {
+	if !utils.CompareStruct(i, i2, []string{}, []string{"Details"}) {
 		return false
 	}
-
-	if i.Model != i2.Model {
-		return false
-	}
-
-	if i.PartNumber != i2.PartNumber {
-		return false
-	}
-
-	if i.SerialNumber != i2.SerialNumber {
-		return false
-	}
-
-	if i.AssetTag != i2.AssetTag {
-		return false
-	}
-
-	if len(i.Details) != len(i2.Details) {
-		return false
-	}
-
-	//TODO: sort details
 
 	for key, val1 := range i.Details {
 		if val1 != i2.Details[key] {

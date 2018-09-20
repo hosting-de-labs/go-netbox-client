@@ -7,7 +7,6 @@ import (
 //VirtualServer represents a virtual server
 type VirtualServer struct {
 	Host
-	OriginalHost *VirtualServer
 
 	Hypervisor string
 	Resources  VirtualServerResources
@@ -34,7 +33,7 @@ func (vm VirtualServer) Copy() *VirtualServer {
 
 //IsChanged compares the current object against the original object
 func (vm VirtualServer) IsChanged() bool {
-	return !vm.IsEqual(*vm.OriginalHost, true)
+	return !vm.IsEqual(vm.OriginalEntity.(VirtualServer), true)
 }
 
 //IsEqual compares the current object with another VirtualServer object

@@ -8,7 +8,7 @@ import (
 )
 
 //TODO: move to inventory_item.go
-func TestIsEqual(t *testing.T) {
+func TestDedicatedServerIsEqual(t *testing.T) {
 	cases := []struct {
 		host1   DedicatedServer
 		host2   DedicatedServer
@@ -16,7 +16,7 @@ func TestIsEqual(t *testing.T) {
 	}{
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
+				Inventory: []*InventoryItem{
 					{
 						Manufacturer: "unknown",
 						Model:        "unknown",
@@ -27,7 +27,7 @@ func TestIsEqual(t *testing.T) {
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
+				Inventory: []*InventoryItem{
 					{
 						Manufacturer: "unknown",
 						Model:        "unknown",
@@ -41,108 +41,80 @@ func TestIsEqual(t *testing.T) {
 		},
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						Manufacturer: "unknown",
-					},
+				Inventory: []*InventoryItem{
+					{Manufacturer: "unknown"},
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						Manufacturer: "u. n. owen",
-					},
+				Inventory: []*InventoryItem{
+					{Manufacturer: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						Model: "unknown",
-					},
+				Inventory: []*InventoryItem{
+					{Model: "unknown"},
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						Model: "u. n. owen",
-					},
+				Inventory: []*InventoryItem{
+					{Model: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						PartNumber: "unknown",
-					},
+				Inventory: []*InventoryItem{
+					{PartNumber: "unknown"},
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						PartNumber: "u. n. owen",
-					},
+				Inventory: []*InventoryItem{
+					{PartNumber: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						AssetTag: "unknown",
-					},
+				Inventory: []*InventoryItem{
+					{AssetTag: "unknown"},
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						AssetTag: "u. n. owen",
-					},
+				Inventory: []*InventoryItem{
+					{AssetTag: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						SerialNumber: "unknown",
-					},
+				Inventory: []*InventoryItem{
+					{SerialNumber: "unknown"},
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						SerialNumber: "u. n. owen",
-					},
+				Inventory: []*InventoryItem{
+					{SerialNumber: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
 			host1: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						Manufacturer: "Intel",
-					},
-					{
-						Manufacturer: "AMD",
-					},
+				Inventory: []*InventoryItem{
+					{Manufacturer: "Intel"},
+					{Manufacturer: "AMD"},
 				},
 			},
 			host2: DedicatedServer{
-				InventoryItems: []*InventoryItem{
-					{
-						Manufacturer: "AMD",
-					},
-					{
-						Manufacturer: "Intel",
-					},
+				Inventory: []*InventoryItem{
+					{Manufacturer: "AMD"},
+					{Manufacturer: "Intel"},
 				},
 			},
 			isEqual: true,
