@@ -7,8 +7,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func mockDedicatedServer() DedicatedServer {
+	return DedicatedServer{
+		Host: Host{
+			ID:        10,
+			Hostname:  "host1",
+			IsManaged: false,
+		},
+		Inventory: []*InventoryItem{
+			{
+				Type:         InventoryItemTypeProcessor,
+				Manufacturer: "Intel",
+				Model:        "Xeon X5660",
+			},
+		},
+	}
+}
+
+func TestDedicatedServer_Copy(t *testing.T) {
+	host1 := mockDedicatedServer()
+	host2 := host1.Copy()
+	assert.Equal(t, host1, host2)
+
+	host2.Inventory = append(host2.Inventory, &InventoryItem{
+		Type:         InventoryItemTypeMainboard,
+		Manufacturer: "Supermicro",
+		Model:        "X9SCL-F",
+	})
+	assert.NotEqual(t, host1, host2)
+}
+
 //TODO: move to inventory_item.go
-func TestDedicatedServerIsEqual(t *testing.T) {
+func TestDedicatedServer_IsEqual(t *testing.T) {
 	cases := []struct {
 		host1   DedicatedServer
 		host2   DedicatedServer

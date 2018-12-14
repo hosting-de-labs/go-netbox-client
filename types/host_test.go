@@ -7,7 +7,93 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHostIsEqual(t *testing.T) {
+func mockHost() Host {
+	return Host{
+		ID:       1,
+		Hostname: "host1",
+		PrimaryIPv4: IPAddress{
+			Address: "192.168.1.1",
+			CIDR:    24,
+			Type:    IPAddressTypeIPv4,
+		},
+		PrimaryIPv6: IPAddress{
+			Address: "::1",
+			CIDR:    64,
+			Type:    IPAddressTypeIPv6,
+		},
+	}
+}
+
+func TestHost_HasTag(t *testing.T) {
+	host := mockHost()
+	assert.False(t, host.HasTag("tag1"))
+
+	host.AddTag("tag2")
+	assert.True(t, host.HasTag("tag2"))
+}
+
+func TestHost_AddTag(t *testing.T) {
+	host := mockHost()
+
+	host.AddTag("tag1")
+	assert.True(t, host.HasTag("tag1"))
+	assert.False(t, host.HasTag("tag2"))
+
+	host.AddTag("tag2")
+	assert.True(t, host.HasTag("tag1"))
+	assert.True(t, host.HasTag("tag2"))
+
+	host.AddTag("tag1")
+	assert.True(t, host.HasTag("tag1"))
+	assert.True(t, host.HasTag("tag2"))
+}
+
+func TestHost_Copy(t *testing.T) {
+	host1 := mockHost()
+	host2 := host1.Copy()
+	assert.Equal(t, host1, host2)
+
+	host2.Hostname = "host2"
+	assert.NotEqual(t, host1, host2)
+
+	host3 := mockHost()
+	host3.NetworkInterfaces = append(host3.NetworkInterfaces, HostNetworkInterface{
+		Name:       "vlan.1",
+		MACAddress: "aa:bb:cc:dd:ee:ff",
+		IPAddresses: []IPAddress{
+			{
+				Address: "192.168.10.1",
+				CIDR:    24,
+				Type:    IPAddressTypeIPv4,
+			},
+		},
+	})
+
+	host4 := host3.Copy()
+	assert.Equal(t, host3, host4)
+
+	host4.NetworkInterfaces[0].Name = "vlan.2"
+	assert.NotEqual(t, host3, host4)
+
+	host5 := mockHost()
+	host5.AddTag("tag1")
+	host6 := host5.Copy()
+	assert.Equal(t, host5, host6)
+
+	host6.AddTag("tag2")
+	assert.NotEqual(t, host5, host6)
+}
+
+func TestHost_IsChanged(t *testing.T) {
+	host := mockHost()
+	host.CommonEntity.OriginalEntity = host.Copy()
+	assert.False(t, host.IsChanged())
+
+	host.Hostname = "host2"
+	assert.True(t, host.IsChanged())
+}
+
+func TestHost_IsEqual(t *testing.T) {
 	cases := []struct {
 		host1   Host
 		host2   Host
