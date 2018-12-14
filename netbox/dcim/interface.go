@@ -3,7 +3,6 @@ package dcim
 import (
 	"fmt"
 
-	"github.com/go-openapi/swag"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
@@ -35,10 +34,10 @@ func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*mode
 
 //InterfaceCreate creates a device interface in Netbox.
 func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *int64, interfaceFormFactor *int64) (*models.Interface, error) {
-	data := new(models.Interface)
-	data.Device.ID = device.ID
+	data := new(models.WritableInterface)
+	data.Device = &device.ID
 	data.Name = &interfaceName
-	data.Mode.Value = swag.Int64(100)
+	data.Mode = 100
 	data.TaggedVlans = []int64{}
 
 	ipamClient := netboxIpam.NewClient(c.client)
@@ -49,11 +48,11 @@ func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vla
 			return nil, err
 		}
 
-		data.UntaggedVlan.ID = vlan.ID
+		data.UntaggedVlan = vlan.ID
 	}
 
 	if interfaceFormFactor != nil {
-		data.FormFactor.Value = interfaceFormFactor
+		data.FormFactor = *interfaceFormFactor
 	}
 
 	params := dcim.NewDcimInterfacesCreateParams()

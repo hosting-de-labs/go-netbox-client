@@ -46,7 +46,7 @@ func (h *Host) AddTag(tags ...string) {
 }
 
 //Copy creates a deep copy of the given host
-func (h Host) Copy() *Host {
+func (h Host) Copy() Host {
 	out := Host{
 		ID:          h.ID,
 		Hostname:    h.Hostname,
@@ -56,19 +56,23 @@ func (h Host) Copy() *Host {
 	}
 
 	//copy interfaces
-	out.NetworkInterfaces = make([]HostNetworkInterface, len(h.NetworkInterfaces))
-	copy(out.NetworkInterfaces, h.NetworkInterfaces)
+	if len(h.NetworkInterfaces) > 0 {
+		out.NetworkInterfaces = make([]HostNetworkInterface, len(h.NetworkInterfaces))
+		copy(out.NetworkInterfaces, h.NetworkInterfaces)
+	}
 
 	//copy tags
-	out.Tags = make([]string, len(h.Tags))
-	copy(out.Tags, h.Tags)
+	if len(h.Tags) > 0 {
+		out.Tags = make([]string, len(h.Tags))
+		copy(out.Tags, h.Tags)
+	}
 
-	return &out
+	return out
 }
 
 //IsChanged returns true if the current and the original object differ
 func (h Host) IsChanged() bool {
-	return h.IsEqual(h.OriginalEntity.(Host), true)
+	return !h.IsEqual(h.OriginalEntity.(Host), true)
 }
 
 //IsEqual compares the current object against another Host object
@@ -90,8 +94,6 @@ func (h Host) IsEqual(h2 Host, deep bool) bool {
 			return false
 		}
 	}
-
-	return true
 
 	if deep {
 		//network interfaces

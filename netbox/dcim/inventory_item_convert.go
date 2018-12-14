@@ -32,7 +32,7 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 	}
 
 	out := new(models.WritableInventoryItem)
-	out.Manufacturer = swag.Int64(manufacturer.ID)
+	out.Manufacturer = manufacturer.ID
 	out.Name = swag.String(model)
 
 	out.Device = swag.Int64(deviceID)

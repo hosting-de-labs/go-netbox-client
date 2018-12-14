@@ -10,16 +10,19 @@ type DedicatedServer struct {
 }
 
 //Copy creates a deep copy of the given host
-func (d DedicatedServer) Copy() *DedicatedServer {
-	out := new(DedicatedServer)
+func (d DedicatedServer) Copy() DedicatedServer {
+	out := DedicatedServer{}
 
 	//Copy Host
-	out.Host = *d.Host.Copy()
+	out.Host = d.Host.Copy()
 
 	//Copy Inventory
-	out.Inventory = make([]*InventoryItem, len(d.Inventory), len(d.Inventory))
-	for _, item := range d.Inventory {
-		out.Inventory = append(out.Inventory, item.Copy())
+	if len(d.Inventory) > 0 {
+		out.Inventory = make([]*InventoryItem, 0, len(d.Inventory))
+		for _, item := range d.Inventory {
+			newItem := item.Copy()
+			out.Inventory = append(out.Inventory, &newItem)
+		}
 	}
 
 	return out

@@ -9,7 +9,11 @@ import (
 )
 
 func SplitCidrFromIP(ipWithCidr string) (string, uint16, error) {
-	res := strings.Split(ipWithCidr, "/")
+	res := strings.SplitN(ipWithCidr, "/", 2)
+
+	if len(res) != 2 {
+		return "", 0, fmt.Errorf("invalid input: %q", ipWithCidr)
+	}
 
 	cidrInt, err := strconv.ParseInt(res[1], 10, 16)
 	if err != nil {
@@ -52,7 +56,7 @@ func GenerateSlug(s string) string {
 	return slug
 }
 
-func generateVMComment(host *types.VirtualServer) string {
+func GenerateVMComment(host *types.VirtualServer) string {
 	comment := "--- NETBOX SYNC: DO NOT MODIFY ---"
 
 	//regular comments
@@ -80,3 +84,6 @@ func generateVMComment(host *types.VirtualServer) string {
 
 	return comment
 }
+
+//TODO:
+//func ParseVMComment(comment []string, host *types.VirtualServer)

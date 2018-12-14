@@ -13,10 +13,8 @@ type VirtualServer struct {
 }
 
 //Copy creates a deep copy of a VirtualServer object
-func (vm VirtualServer) Copy() *VirtualServer {
-	var out VirtualServer
-
-	out.Host = *vm.Host.Copy()
+func (vm VirtualServer) Copy() (out VirtualServer) {
+	out.Host = vm.Host.Copy()
 
 	out.Hypervisor = vm.Hypervisor
 	out.Resources = VirtualServerResources{
@@ -28,7 +26,7 @@ func (vm VirtualServer) Copy() *VirtualServer {
 	out.Resources.Disks = make([]VirtualServerDisk, len(vm.Resources.Disks))
 	copy(out.Resources.Disks, vm.Resources.Disks)
 
-	return &out
+	return out
 }
 
 //IsChanged compares the current object against the original object
@@ -40,6 +38,10 @@ func (vm VirtualServer) IsChanged() bool {
 func (vm VirtualServer) IsEqual(vm2 VirtualServer, deep bool) bool {
 	//compare Host struct
 	if !vm.Host.IsEqual(vm2.Host, deep) {
+		return false
+	}
+
+	if vm.Hypervisor != vm2.Hypervisor {
 		return false
 	}
 
@@ -56,43 +58,14 @@ func (vm VirtualServer) IsEqual(vm2 VirtualServer, deep bool) bool {
 		return false
 	}
 
-	sort.Sort(BySize(vm.Resources.Disks))
-	sort.Sort(BySize(vm2.Resources.Disks))
+	sort.Slice(vm.Resources.Disks, func(i int, j int) bool {
+		return vm.Resources.Disks[i].Size < vm.Resources.Disks[j].Size
+	})
 
 	for key, disk := range vm.Resources.Disks {
 		if !disk.IsEqual(vm2.Resources.Disks[key]) {
 			return false
 		}
-	}
-
-	return true
-}
-
-//VirtualServerResources represents the number of cores, memory and disks assigned to a VirtualServer object
-type VirtualServerResources struct {
-	Cores  int
-	Memory int64
-
-	Disks []VirtualServerDisk
-}
-
-//VirtualServerDisk represents a disk of a virtual server
-type VirtualServerDisk struct {
-	Size int64
-}
-
-type BySize []VirtualServerDisk
-
-func (a BySize) Len() int      { return len(a) }
-func (a BySize) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a BySize) Less(i, j int) bool {
-	return a[i].Size < a[j].Size
-}
-
-//IsEqual compares the current object against another VirtualServerDisk object
-func (d VirtualServerDisk) IsEqual(d2 VirtualServerDisk) bool {
-	if d.Size != d2.Size {
-		return false
 	}
 
 	return true

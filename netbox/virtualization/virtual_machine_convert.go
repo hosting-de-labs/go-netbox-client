@@ -10,7 +10,7 @@ import (
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
-func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.Interface) types.VirtualServer {
+func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.VirtualMachineInterface) types.VirtualServer {
 	var out types.VirtualServer
 	out.ID = netboxVM.ID
 	out.Hostname = *netboxVM.Name
@@ -98,7 +98,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 		out.NetworkInterfaces = append(out.NetworkInterfaces, netIf)
 	}
 
-	out.OriginalHost = out.Copy()
+	out.OriginalEntity = out.Copy()
 
 	return out
 }

@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/hosting-de-labs/go-netbox-client/utils"
 )
@@ -29,19 +30,42 @@ func (i *InventoryItem) AddDetail(key string, val string) {
 }
 
 func (i InventoryItem) GetHashableString() string {
-	return fmt.Sprintf("%s%s%s%s%s%s", i.Manufacturer, i.Model, i.PartNumber, i.AssetTag, i.SerialNumber, i.Details)
+	str := fmt.Sprintf("%s:%s:%s:%s:%s", i.Manufacturer, i.Model, i.PartNumber, i.AssetTag, i.SerialNumber)
+
+	//TODO: order of map entries is not always stable
+	if len(i.Details) > 0 {
+		str = fmt.Sprintf("%s:details{", str)
+
+		for key, val := range i.Details {
+			str = fmt.Sprintf("%s%s:%s;", str, key, val)
+		}
+
+		str = fmt.Sprintf("%s}", str)
+	}
+
+	str = strings.Replace(str, " ", "", -1)
+
+	return str
 }
 
-func (i InventoryItem) Copy() *InventoryItem {
-	return &InventoryItem{
+func (i InventoryItem) Copy() (out InventoryItem) {
+	out = InventoryItem{
 		Type:         i.Type,
 		Manufacturer: i.Manufacturer,
 		Model:        i.Model,
 		PartNumber:   i.PartNumber,
 		SerialNumber: i.SerialNumber,
 		AssetTag:     i.AssetTag,
-		Details:      i.Details,
 	}
+
+	if len(i.Details) > 0 {
+		out.Details = make(map[string]string, len(i.Details))
+		for key, val := range i.Details {
+			out.Details[key] = val
+		}
+	}
+
+	return out
 }
 
 //IsEqual compares an InventoryItem with another one
@@ -51,7 +75,7 @@ func (i InventoryItem) IsEqual(i2 InventoryItem) bool {
 	}
 
 	for key, val1 := range i.Details {
-		if val1 != i2.Details[key] {
+		if val2, ok := i2.Details[key]; !ok || val1 != val2 {
 			return false
 		}
 	}

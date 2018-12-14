@@ -24,11 +24,19 @@ type IPAddress struct {
 	CIDR    uint16
 }
 
-func (i IPAddress) String() string {
-	return fmt.Sprintf("%s/%d", i.Address, i.CIDR)
+func (ip IPAddress) String() string {
+	return fmt.Sprintf("%s/%d", ip.Address, ip.CIDR)
+}
+
+func (ip IPAddress) Clone() IPAddress {
+	return IPAddress{
+		Type:    ip.Type,
+		Address: ip.Address,
+		CIDR:    ip.CIDR,
+	}
 }
 
 //IsEqual compares the current IPAddress object against another IPAddress object
-func (i IPAddress) IsEqual(i2 IPAddress) bool {
-	return utils.CompareStruct(i, i2, []string{}, []string{})
+func (ip IPAddress) IsEqual(ip2 IPAddress) bool {
+	return utils.CompareStruct(ip, ip2, []string{}, []string{})
 }

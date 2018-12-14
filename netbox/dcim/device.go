@@ -8,8 +8,29 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-//DeviceGet retrieves a model.Device object from Netbox by looking up the given hostname
-func (c Client) DeviceGet(hostname string) (*models.Device, error) {
+func (c Client) DeviceFindAll(limit int64, offset int64) (int64, []*models.Device, error) {
+	params := dcim.NewDcimDevicesListParams()
+
+	if limit > 0 {
+		params.WithLimit(&limit)
+	}
+
+	if offset > 0 {
+		params.WithOffset(&offset)
+	}
+
+	res, err := c.client.Dcim.DcimDevicesList(params, nil)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return *res.Payload.Count, res.Payload.Results, nil
+}
+
+//DeviceFindByHostname retrieves a model.Device object from Netbox by looking up the given hostname
+//TODO: return *types.DedicatedServer
+func (c Client) DeviceFindByHostname(hostname string) (*models.Device, error) {
 	params := dcim.NewDcimDevicesListParams()
 	params.WithName(&hostname)
 
@@ -32,8 +53,8 @@ func (c Client) DeviceGet(hostname string) (*models.Device, error) {
 
 //TODO: Don't forget to cache
 func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
-	if host.OriginalHost == nil {
-		oh, err := c.DeviceGet(host.Hostname)
+	if host.OriginalEntity == nil {
+		oh, err := c.DeviceFindByHostname(host.Hostname)
 		if err != nil {
 			return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", host.Hostname)
 		}
@@ -43,7 +64,7 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 			return fmt.Errorf("cannot convert to DedicatedServer")
 		}
 
-		host.OriginalHost = res
+		host.OriginalEntity = res
 	}
 
 	data := new(models.WritableDevice)
@@ -51,23 +72,23 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 	//Go through every item and check if it must be updated
 
 	params := dcim.NewDcimDevicesUpdateParams()
-	params.WithID(host.OriginalHost.ID).WithData(data)
+	params.WithID(host.OriginalEntity.(types.DedicatedServer).ID).WithData(data)
 
 	//TODO: Iterate over Inventory Items
 
 	return nil
 }
 
-//HypervisorGet is like NetboxDeviceGet but checks if the device has a cluster assigned
-func (c Client) HypervisorGet(hostname string) (*models.Device, error) {
-	res, err := c.DeviceGet(hostname)
+//HypervisorFindByHostname is like NetboxDeviceGet but checks if the device has a cluster assigned
+func (c Client) HypervisorFindByHostname(hostname string) (*models.Device, error) {
+	res, err := c.DeviceFindByHostname(hostname)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if res.Cluster == nil {
-		return nil, fmt.Errorf("Device %s not assigned to a Virtualization Cluster", hostname)
+		return nil, fmt.Errorf("device %s not assigned to a Virtualization Cluster", hostname)
 	}
 
 	return res, nil

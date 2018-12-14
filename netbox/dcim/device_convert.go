@@ -1,19 +1,20 @@
 package dcim
 
 import (
+	"strings"
+
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
 //TODO: DeviceConvertToNetbox
-
-func (c Client) DeviceConvertToNetbox(device *types.DedicatedServer, createUpdateObject bool) (*models.WritableDevice, error) {
+func (c Client) DeviceConvertToNetbox(device *types.DedicatedServer) (*models.WritableDevice, error) {
 	out := new(models.WritableDevice)
 
-	if !createUpdateObject || (createUpdateObject && device.Hostname != device.OriginalHost.Hostname) {
-		out.Name = device.Hostname
-	}
+	// if !createUpdateObject || (createUpdateObject && device.Hostname != device.OriginalHost.Hostname) {
+	// 	out.Name = device.Hostname
+	// }
 
 	//TODO:
 	// if !createUpdateObject || (createUpdateObject && !device.PrimaryIPv4.IsEqual(device.OriginalHost.PrimaryIPv4)) {
@@ -34,6 +35,7 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 	out.ID = device.ID
 	out.Hostname = device.Name
 	out.Tags = device.Tags
+	out.Comments = strings.Split(device.Comments, "\n")
 
 	//iterate over tags to find managed tag
 	for _, tag := range out.Tags {
@@ -71,9 +73,7 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 		}
 	}
 
-	//TODO: Comments
-
-	out.OriginalHost = out.Copy()
+	out.OriginalEntity = out.Copy()
 
 	return nil, nil
 }

@@ -79,21 +79,21 @@ func (c Client) IPAddressGetCreate(ipAddress types.IPAddress) (*models.IPAddress
 }
 
 //IPAddressAssignInterface assigns a ip-address/cidr string to an existing interface.
-func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, deviceInterface models.Interface) (*models.IPAddress, error) {
+func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID int64) (*models.IPAddress, error) {
 	ipAddress2, err := c.IPAddressGetCreate(ipAddress)
 	if err != nil {
 		return nil, err
 	}
 
 	//Do not update ipAddress if interface is already correct
-	if ipAddress2.Interface != nil && ipAddress2.Interface.ID == deviceInterface.ID {
+	if ipAddress2.Interface != nil && ipAddress2.Interface.ID == interfaceID {
 		return ipAddress2, nil
 	}
 
 	data := new(models.WritableIPAddress)
 	data.Address = swag.String(ipAddress.String())
 	data.Tags = []string{}
-	data.Interface = deviceInterface.ID
+	data.Interface = interfaceID
 
 	params := ipam.NewIPAMIPAddressesPartialUpdateParams()
 	params.WithID(ipAddress2.ID)

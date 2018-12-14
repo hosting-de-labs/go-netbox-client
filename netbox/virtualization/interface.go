@@ -10,7 +10,7 @@ import (
 )
 
 //InterfaceGetAll returns all interfaces of a virtual machine identified by it's id
-func (c Client) InterfaceGetAll(vmID int64) ([]*models.Interface, error) {
+func (c Client) InterfaceGetAll(vmID int64) ([]*models.VirtualMachineInterface, error) {
 	params := virtualization.NewVirtualizationInterfacesListParams()
 	params.VirtualMachineID = swag.Int64(vmID)
 
@@ -27,7 +27,7 @@ func (c Client) InterfaceGetAll(vmID int64) ([]*models.Interface, error) {
 }
 
 //InterfaceGet retrieves an existing VM interface object.
-func (c Client) InterfaceGet(vm *types.VirtualServer, interfaceName string) (*models.Interface, error) {
+func (c Client) InterfaceGet(vm *types.VirtualServer, interfaceName string) (machineInterface *models.VirtualMachineInterface, err error) {
 	params := virtualization.NewVirtualizationInterfacesListParams()
 	params.Name = swag.String(interfaceName)
 	params.VirtualMachineID = &vm.ID
@@ -49,8 +49,8 @@ func (c Client) InterfaceGet(vm *types.VirtualServer, interfaceName string) (*mo
 }
 
 //InterfaceCreate creates a VM interface in Netbox.
-func (c Client) InterfaceCreate(vm *types.VirtualServer, interfaceName string, vlan *models.VLAN) (*models.Interface, error) {
-	data := new(models.WritableVirtualizationInterface)
+func (c Client) InterfaceCreate(vm *types.VirtualServer, interfaceName string, vlan *models.VLAN) (machineInterface *models.VirtualMachineInterface, err error) {
+	data := new(models.WritableVirtualMachineInterface)
 	data.VirtualMachine = &vm.ID
 	data.Tags = []string{}
 	data.Name = &interfaceName
@@ -65,16 +65,16 @@ func (c Client) InterfaceCreate(vm *types.VirtualServer, interfaceName string, v
 	params := virtualization.NewVirtualizationInterfacesCreateParams()
 	params.WithData(data)
 
-	_, err := c.client.Virtualization.VirtualizationInterfacesCreate(params, nil)
+	_, err = c.client.Virtualization.VirtualizationInterfacesCreate(params, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create interface. Original error was %s", err)
+		return nil, fmt.Errorf("unable to create interface: %s", err)
 	}
 
 	return c.InterfaceGet(vm, interfaceName)
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing VM interface or otherwise to create it.
-func (c Client) InterfaceGetCreate(vm *types.VirtualServer, interfaceName string, vlan *models.VLAN) (*models.Interface, error) {
+func (c Client) InterfaceGetCreate(vm *types.VirtualServer, interfaceName string, vlan *models.VLAN) (machineInterface *models.VirtualMachineInterface, err error) {
 	res, err := c.InterfaceGet(vm, interfaceName)
 	if err != nil {
 		return nil, err
