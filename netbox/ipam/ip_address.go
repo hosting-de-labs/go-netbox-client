@@ -93,7 +93,7 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	data := new(models.WritableIPAddress)
 	data.Address = swag.String(ipAddress.String())
 	data.Tags = []string{}
-	data.Interface = interfaceID
+	data.Interface = &interfaceID
 
 	params := ipam.NewIPAMIPAddressesPartialUpdateParams()
 	params.WithID(ipAddress2.ID)

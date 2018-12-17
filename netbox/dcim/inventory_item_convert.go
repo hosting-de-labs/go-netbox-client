@@ -32,13 +32,13 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 	}
 
 	out := new(models.WritableInventoryItem)
-	out.Manufacturer = manufacturer.ID
+	out.Manufacturer = &manufacturer.ID
 	out.Name = swag.String(model)
 
 	out.Device = swag.Int64(deviceID)
 
 	out.Serial = i.SerialNumber
-	out.AssetTag = i.AssetTag
+	out.AssetTag = &i.AssetTag
 	out.Discovered = true
 
 	descriptionByte, err := json.Marshal(i.Details)
@@ -65,7 +65,7 @@ func (c *Client) InventoryItemConvertFromNetbox(i *models.InventoryItem) *types.
 	out.OriginalEntity = i
 	out.Manufacturer = *i.Manufacturer.Name
 	out.SerialNumber = i.Serial
-	out.AssetTag = i.AssetTag
+	out.AssetTag = *i.AssetTag
 
 	result := strings.SplitN(*i.Name, ":", 1)
 	switch len(result) {

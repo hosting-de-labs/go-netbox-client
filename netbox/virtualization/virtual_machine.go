@@ -195,7 +195,7 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) bool {
 			}
 
 			//set primary ip
-			data.PrimaryIp4 = ip4.ID
+			data.PrimaryIp4 = &ip4.ID
 		}
 
 		//we need this additional check due to a bug in netbox API
@@ -207,11 +207,10 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) bool {
 			}
 
 			//set primary ip
-			data.PrimaryIp6 = ip6.ID
+			data.PrimaryIp6 = &ip6.ID
 		}
 
 		params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-
 		params.WithID(vm.ID)
 		params.WithData(data)
 

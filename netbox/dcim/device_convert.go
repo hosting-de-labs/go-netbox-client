@@ -33,7 +33,7 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 	out := new(types.DedicatedServer)
 
 	out.ID = device.ID
-	out.Hostname = device.Name
+	out.Hostname = *device.Name
 	out.Tags = device.Tags
 	out.Comments = strings.Split(device.Comments, "\n")
 
