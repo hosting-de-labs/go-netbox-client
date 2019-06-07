@@ -22,10 +22,10 @@ func TestInventoryItem_GetHashableString(t *testing.T) {
 	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber")
 
 	item1.AddDetail("Cores", "2")
-	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2;}")
+	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2}")
 
 	item1.AddDetail("Threads", "4")
-	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2;Threads:4;}")
+	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2,Threads:4}")
 }
 
 func TestInventoryItem_AddDetail(t *testing.T) {

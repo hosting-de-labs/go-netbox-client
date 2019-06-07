@@ -210,3 +210,45 @@ Size: 10 MBytes
 		assert.Equal(t, testcase.result, GenerateVMComment(&testcase.host))
 	}
 }
+
+func TestParseVMComment(t *testing.T) {
+	cases := []struct {
+		comment string
+		host    types.VirtualServer
+	}{
+		{
+			`--- NETBOX SYNC: DO NOT MODIFY ---
+Comments:
+Foo
+Additional disks:
+Size: 10 MBytes
+--- NETBOX SYNC: DO NOT MODIFY ---`,
+			types.VirtualServer{
+				Host: types.Host{
+					Comments: []string{
+						"Foo",
+					},
+				},
+				Resources: types.VirtualServerResources{
+					Disks: []types.VirtualServerDisk{
+						types.VirtualServerDisk{
+							Size: 20,
+						},
+						types.VirtualServerDisk{
+							Size: 10,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, testcase := range cases {
+		vm := types.VirtualServer{}
+		vm.Resources.Disks = append(vm.Resources.Disks, types.VirtualServerDisk{Size: 20})
+
+		ParseVMComment(testcase.comment, &vm)
+
+		assert.Equal(t, testcase.host, vm)
+	}
+}

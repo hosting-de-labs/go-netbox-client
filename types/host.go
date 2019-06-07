@@ -77,7 +77,10 @@ func (h Host) IsChanged() bool {
 
 //IsEqual compares the current object against another Host object
 func (h Host) IsEqual(h2 Host, deep bool) bool {
-	if !utils.CompareStruct(h, h2, []string{}, []string{"CommonEntity", "Tags", "NetworkInterfaces"}) {
+	h.OriginalEntity = nil
+	h2.OriginalEntity = nil
+
+	if !utils.CompareStruct(h, h2, []string{}, []string{"OriginalEntity", "Tags", "NetworkInterfaces"}) {
 		return false
 	}
 

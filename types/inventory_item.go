@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/hosting-de-labs/go-netbox-client/utils"
@@ -32,15 +33,16 @@ func (i *InventoryItem) AddDetail(key string, val string) {
 func (i InventoryItem) GetHashableString() string {
 	str := fmt.Sprintf("%s:%s:%s:%s:%s", i.Manufacturer, i.Model, i.PartNumber, i.AssetTag, i.SerialNumber)
 
-	//TODO: order of map entries is not always stable
 	if len(i.Details) > 0 {
-		str = fmt.Sprintf("%s:details{", str)
+		var items []string
 
 		for key, val := range i.Details {
-			str = fmt.Sprintf("%s%s:%s;", str, key, val)
+			items = append(items, fmt.Sprintf("%s:%s", key, val))
 		}
 
-		str = fmt.Sprintf("%s}", str)
+		sort.Sort(sort.StringSlice(items))
+
+		str = fmt.Sprintf("%s:details{%s}", str, strings.Join(items, ","))
 	}
 
 	str = strings.Replace(str, " ", "", -1)

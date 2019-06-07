@@ -22,7 +22,7 @@ type NetBox struct {
 }
 
 func NewAPIClient(url string, token string, defaultTimeout time.Duration) NetBox {
-	//TODO: timeout
+	//@TODO: timeout
 	// timeout := 10 * time.Second
 	// if defaultTimeout > 0 {
 	// 	timeout = defaultTimeout

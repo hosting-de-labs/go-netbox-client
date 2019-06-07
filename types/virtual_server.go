@@ -36,6 +36,9 @@ func (vm VirtualServer) IsChanged() bool {
 
 //IsEqual compares the current object with another VirtualServer object
 func (vm VirtualServer) IsEqual(vm2 VirtualServer, deep bool) bool {
+	vm.OriginalEntity = nil
+	vm2.OriginalEntity = nil
+
 	//compare Host struct
 	if !vm.Host.IsEqual(vm2.Host, deep) {
 		return false

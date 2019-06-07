@@ -46,7 +46,6 @@ func (c Client) IPAddressGetByInterfaceID(interfaceID int64) ([]*models.IPAddres
 }
 
 //IPAddressCreate creates an ip-address based on the given ip/cidr string.
-//Supports both IPv4 and IPv6.
 func (c Client) IPAddressCreate(ipAddress types.IPAddress) (*models.IPAddress, error) {
 	data := new(models.WritableIPAddress)
 	data.Address = swag.String(ipAddress.String())
@@ -63,8 +62,7 @@ func (c Client) IPAddressCreate(ipAddress types.IPAddress) (*models.IPAddress, e
 	return c.IPAddressGet(ipAddress)
 }
 
-//IPAddressGetCreate is a convenience function that looks up an existing ip-address from netbox
-//or creates it
+//IPAddressGetCreate is a convenience function that looks up an existing ip-address from netbox or creates it
 func (c Client) IPAddressGetCreate(ipAddress types.IPAddress) (*models.IPAddress, error) {
 	res, err := c.IPAddressGet(ipAddress)
 	if err != nil {
@@ -107,20 +105,11 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	return c.IPAddressGet(ipAddress)
 }
 
-//VlanGet returns a vlan-object based on the given vlanTag
-func (c Client) VlanGet(vlanTag int64, siteID int64) (*models.VLAN, error) {
-	params := ipam.NewIPAMVlansListParams()
-	params.SetVid(&vlanTag)
-	params.SetSiteID(&siteID)
+func (c Client) IPAddressDelete(ipAddressID int64) error {
+	p := ipam.NewIPAMIPAddressesDeleteParams()
+	p.WithID(ipAddressID)
 
-	res, err := c.client.IPAM.IPAMVlansList(params, nil)
-	if err != nil {
-		return nil, err
-	}
+	_, err := c.client.IPAM.IPAMIPAddressesDelete(p, nil)
 
-	if *res.Payload.Count == 0 {
-		return nil, nil
-	}
-
-	return res.Payload.Results[0], nil
+	return err
 }

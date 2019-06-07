@@ -1,16 +1,12 @@
 package virtualization
 
 import (
-	"strings"
-
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
-
-	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
-func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.VirtualMachineInterface) types.VirtualServer {
+func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.VirtualMachineInterface) (*types.VirtualServer, error) {
 	var out types.VirtualServer
 	out.ID = netboxVM.ID
 	out.Hostname = *netboxVM.Name
@@ -18,7 +14,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 	if netboxVM.PrimaryIp4 != nil {
 		address, cidr, err := utils.SplitCidrFromIP(*netboxVM.PrimaryIp4.Address)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		out.PrimaryIPv4.Address = address
@@ -29,7 +25,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 	if netboxVM.PrimaryIp6 != nil {
 		address, cidr, err := utils.SplitCidrFromIP(*netboxVM.PrimaryIp6.Address)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		out.PrimaryIPv6.Address = address
@@ -37,8 +33,13 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 		out.PrimaryIPv6.Type = types.IPAddressTypeIPv6
 	}
 
-	out.Resources.Cores = int(*netboxVM.Vcpus)
-	out.Resources.Memory = *netboxVM.Memory
+	if netboxVM.Vcpus != nil {
+		out.Resources.Cores = int(*netboxVM.Vcpus)
+	}
+
+	if netboxVM.Memory != nil {
+		out.Resources.Memory = *netboxVM.Memory
+	}
 
 	if netboxVM.Disk != nil {
 		out.Resources.Disks = append(out.Resources.Disks, types.VirtualServerDisk{
@@ -54,51 +55,30 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 		}
 	}
 
-	customFields := utils.ConvertCustomFields(netboxVM.CustomFields)
-	for key, val := range customFields {
-		switch key {
-		case "hypervisor_label":
-			out.Hypervisor = val
+	if netboxVM.CustomFields != nil {
+		customFields := utils.ConvertCustomFields(netboxVM.CustomFields)
+		for key, val := range customFields {
+			switch key {
+			case "hypervisor_label":
+				out.Hypervisor = val
+			}
 		}
 	}
 
-	//TODO: import additional disks from comments section
+	//read comments
+	utils.ParseVMComment(netboxVM.Comments, &out)
 
 	//interfaces / ips
 	for _, netboxInterface := range interfaces {
-		var netIf types.HostNetworkInterface
-		netIf.Name = *netboxInterface.Name
-		//TODO: netIf.VlanTag = netboxInterface.UntaggedVlan
-		netIf.MACAddress = netboxInterface.MacAddress
-
-		ipamClient := netboxIpam.NewClient(c.client)
-		netboxAddresses, err := ipamClient.IPAddressGetByInterfaceID(netboxInterface.ID)
+		netIf, err := c.InterfaceConvertFromNetbox(*netboxInterface)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
-		for _, netboxAddress := range netboxAddresses {
-			var addr types.IPAddress
-			ip, cidr, err := utils.SplitCidrFromIP(*netboxAddress.Address)
-			if err != nil {
-				panic(err)
-			}
-
-			addr.Address = ip
-			addr.CIDR = cidr
-
-			addr.Type = types.IPAddressTypeIPv4
-			if strings.Contains(ip, ":") {
-				addr.Type = types.IPAddressTypeIPv6
-			}
-
-			netIf.IPAddresses = append(netIf.IPAddresses, addr)
-		}
-
-		out.NetworkInterfaces = append(out.NetworkInterfaces, netIf)
+		out.NetworkInterfaces = append(out.NetworkInterfaces, *netIf)
 	}
 
 	out.OriginalEntity = out.Copy()
 
-	return out
+	return &out, nil
 }

@@ -38,7 +38,7 @@ func (c Client) InterfaceGet(vm *types.VirtualServer, interfaceName string) (mac
 	}
 
 	if *res.Payload.Count > 1 {
-		return nil, fmt.Errorf("Interface %s is not unique", interfaceName)
+		return nil, fmt.Errorf("interface %s is not unique", interfaceName)
 	}
 
 	if *res.Payload.Count == 0 {
@@ -57,7 +57,7 @@ func (c Client) InterfaceCreate(vm *types.VirtualServer, interfaceName string, v
 	// data.Mode = &models.WritableVirtualizationInterfaceMode{Value: swag.Int64(100)}
 
 	if vlan != nil {
-		data.UntaggedVlan = vlan.ID
+		data.UntaggedVlan = &vlan.ID
 	}
 
 	data.TaggedVlans = []int64{}

@@ -8,9 +8,10 @@ import (
 
 //HostNetworkInterface represents a network interface assigned to a host
 type HostNetworkInterface struct {
-	Name       string
-	VlanTag    int64
-	MACAddress string
+	Name         string
+	UntaggedVlan *VLAN
+	TaggedVlans  []VLAN
+	MACAddress   string
 
 	IPAddresses []IPAddress
 }

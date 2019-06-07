@@ -42,7 +42,7 @@ func (c *Client) ManufacturerCreate(manufacturerName string) (*models.Manufactur
 
 	res, err := c.client.Dcim.DcimManufacturersCreate(params, nil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return res.Payload, nil

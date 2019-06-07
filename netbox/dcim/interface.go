@@ -12,7 +12,7 @@ import (
 )
 
 //InterfaceGet retrieves an existing device interface object.
-func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*models.Interface, error) {
+func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*models.DeviceInterface, error) {
 	params := dcim.NewDcimInterfacesListParams()
 	params.Name = &interfaceName
 
@@ -35,8 +35,8 @@ func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*mode
 }
 
 //InterfaceCreate creates a device interface in Netbox.
-func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *int64, interfaceFormFactor *int64) (*models.Interface, error) {
-	data := new(models.WritableInterface)
+func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *uint16, interfaceFormFactor *int64) (*models.DeviceInterface, error) {
+	data := new(models.WritableDeviceInterface)
 	data.Device = &device.ID
 	data.Name = &interfaceName
 	data.Mode = swag.Int64(100)
@@ -45,7 +45,7 @@ func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vla
 	ipamClient := netboxIpam.NewClient(c.client)
 
 	if vlanTag != nil {
-		vlan, err := ipamClient.VlanGet(*vlanTag, device.Site.ID)
+		vlan, err := ipamClient.VLANGet(*vlanTag, &device.Site.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vla
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing device interface or otherwise to create it.
-func (c Client) InterfaceGetCreate(interfaceName string, device *models.Device, vlanTag *int64) (*models.Interface, error) {
+func (c Client) InterfaceGetCreate(interfaceName string, device *models.Device, vlanTag *uint16) (*models.DeviceInterface, error) {
 	res, err := c.InterfaceGet(interfaceName, device)
 	if err != nil {
 		return nil, err
