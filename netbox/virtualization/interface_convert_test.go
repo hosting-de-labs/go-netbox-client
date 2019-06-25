@@ -1,6 +1,7 @@
 package virtualization
 
 import (
+	"net"
 	"testing"
 
 	"github.com/hosting-de-labs/go-netbox-client/types"
@@ -130,7 +131,11 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, netIf.Name, "eth0")
-	assert.Equal(t, netIf.MACAddress, "aa:bb:cc:dd:ee:ff")
+
+	mac, err := net.ParseMAC("aa:bb:cc:dd:ee:ff")
+	assert.Nil(t, err)
+
+	assert.Equal(t, netIf.MACAddress, mac)
 
 	assert.Equal(t, len(netIf.IPAddresses), 2)
 

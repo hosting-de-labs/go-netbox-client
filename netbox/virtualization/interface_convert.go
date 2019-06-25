@@ -1,6 +1,7 @@
 package virtualization
 
 import (
+	"net"
 	"strings"
 
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
@@ -18,7 +19,12 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 	}
 
 	if netboxInterface.MacAddress != nil {
-		netIf.MACAddress = *netboxInterface.MacAddress
+		mac, err := net.ParseMAC(*netboxInterface.MacAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		netIf.MACAddress = mac
 	}
 
 	if netboxInterface.UntaggedVlan != nil {

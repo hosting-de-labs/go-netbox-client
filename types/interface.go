@@ -1,6 +1,7 @@
 package types
 
 import (
+	"net"
 	"sort"
 
 	"github.com/hosting-de-labs/go-netbox-client/utils"
@@ -11,7 +12,7 @@ type HostNetworkInterface struct {
 	Name         string
 	UntaggedVlan *VLAN
 	TaggedVlans  []VLAN
-	MACAddress   string
+	MACAddress   net.HardwareAddr
 
 	IPAddresses []IPAddress
 }

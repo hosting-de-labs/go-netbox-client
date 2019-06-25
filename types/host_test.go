@@ -1,6 +1,7 @@
 package types
 
 import (
+	"net"
 	"strconv"
 	"testing"
 
@@ -57,9 +58,13 @@ func TestHost_Copy(t *testing.T) {
 	assert.NotEqual(t, host1, host2)
 
 	host3 := mockHost()
+
+	mac, err := net.ParseMAC("aa:bb:cc:dd:ee:ff")
+	assert.Nil(t, err)
+
 	host3.NetworkInterfaces = append(host3.NetworkInterfaces, HostNetworkInterface{
 		Name:       "vlan.1",
-		MACAddress: "aa:bb:cc:dd:ee:ff",
+		MACAddress: mac,
 		IPAddresses: []IPAddress{
 			{
 				Address: "192.168.10.1",
