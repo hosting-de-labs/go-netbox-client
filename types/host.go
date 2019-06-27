@@ -18,7 +18,7 @@ type Host struct {
 	Tags        []string
 	Comments    []string
 
-	NetworkInterfaces []HostNetworkInterface
+	NetworkInterfaces []NetworkInterface
 }
 
 //HasTag checks for a specific tag being assigned to this host
@@ -57,7 +57,7 @@ func (h Host) Copy() Host {
 
 	//copy interfaces
 	if len(h.NetworkInterfaces) > 0 {
-		out.NetworkInterfaces = make([]HostNetworkInterface, len(h.NetworkInterfaces))
+		out.NetworkInterfaces = make([]NetworkInterface, len(h.NetworkInterfaces))
 		copy(out.NetworkInterfaces, h.NetworkInterfaces)
 	}
 

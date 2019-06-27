@@ -1,18 +1,20 @@
-package types
+package types_test
 
 import (
 	"strconv"
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestVirtualServer_Copy(t *testing.T) {
-	vm1 := VirtualServer{
+	vm1 := types.VirtualServer{
 		Hypervisor: "hypervisor1",
-		Resources: VirtualServerResources{
+		Resources: types.VirtualServerResources{
 			Cores: 4,
-			Disks: []VirtualServerDisk{
+			Disks: []types.VirtualServerDisk{
 				{Size: 10},
 			},
 		},
@@ -24,11 +26,11 @@ func TestVirtualServer_Copy(t *testing.T) {
 }
 
 func TestVirtualServer_IsChanged(t *testing.T) {
-	vm := VirtualServer{
+	vm := types.VirtualServer{
 		Hypervisor: "hypervisor1",
-		Resources: VirtualServerResources{
+		Resources: types.VirtualServerResources{
 			Cores: 4,
-			Disks: []VirtualServerDisk{
+			Disks: []types.VirtualServerDisk{
 				{Size: 10},
 			},
 		},
@@ -42,25 +44,25 @@ func TestVirtualServer_IsChanged(t *testing.T) {
 
 func TestVirtualServer_IsEqual(t *testing.T) {
 	cases := []struct {
-		vm1     VirtualServer
-		vm2     VirtualServer
+		vm1     types.VirtualServer
+		vm2     types.VirtualServer
 		isEqual bool
 	}{
 		{
-			vm1: VirtualServer{
+			vm1: types.VirtualServer{
 				Hypervisor: "hypervisor1",
-				Resources: VirtualServerResources{
+				Resources: types.VirtualServerResources{
 					Cores: 4,
-					Disks: []VirtualServerDisk{
+					Disks: []types.VirtualServerDisk{
 						{Size: 10},
 					},
 				},
 			},
-			vm2: VirtualServer{
+			vm2: types.VirtualServer{
 				Hypervisor: "hypervisor1",
-				Resources: VirtualServerResources{
+				Resources: types.VirtualServerResources{
 					Cores: 4,
-					Disks: []VirtualServerDisk{
+					Disks: []types.VirtualServerDisk{
 						{Size: 10},
 					},
 				},
@@ -68,20 +70,20 @@ func TestVirtualServer_IsEqual(t *testing.T) {
 			isEqual: true,
 		},
 		{
-			vm1: VirtualServer{
+			vm1: types.VirtualServer{
 				Hypervisor: "hypervisor1",
-				Resources: VirtualServerResources{
+				Resources: types.VirtualServerResources{
 					Cores: 4,
-					Disks: []VirtualServerDisk{
+					Disks: []types.VirtualServerDisk{
 						{Size: 10},
 					},
 				},
 			},
-			vm2: VirtualServer{
+			vm2: types.VirtualServer{
 				Hypervisor: "hypervisor2",
-				Resources: VirtualServerResources{
+				Resources: types.VirtualServerResources{
 					Cores: 4,
-					Disks: []VirtualServerDisk{
+					Disks: []types.VirtualServerDisk{
 						{Size: 20},
 					},
 				},
@@ -89,20 +91,20 @@ func TestVirtualServer_IsEqual(t *testing.T) {
 			isEqual: false,
 		},
 		{
-			vm1: VirtualServer{
+			vm1: types.VirtualServer{
 				Hypervisor: "hypervisor1",
-				Resources: VirtualServerResources{
+				Resources: types.VirtualServerResources{
 					Cores: 4,
-					Disks: []VirtualServerDisk{
+					Disks: []types.VirtualServerDisk{
 						{Size: 10},
 					},
 				},
 			},
-			vm2: VirtualServer{
+			vm2: types.VirtualServer{
 				Hypervisor: "hypervisor1",
-				Resources: VirtualServerResources{
+				Resources: types.VirtualServerResources{
 					Cores: 4,
-					Disks: []VirtualServerDisk{
+					Disks: []types.VirtualServerDisk{
 						{Size: 20},
 					},
 				},
@@ -113,8 +115,10 @@ func TestVirtualServer_IsEqual(t *testing.T) {
 
 	for key, testcase := range cases {
 		if testcase.isEqual {
+			assert.Equal(t, testcase.vm1, testcase.vm2, "Case ID: "+strconv.Itoa(key))
 			assert.True(t, testcase.vm1.IsEqual(testcase.vm2, true), "Case ID: "+strconv.Itoa(key))
 		} else {
+			assert.NotEqual(t, testcase.vm1, testcase.vm2, "Case ID: "+strconv.Itoa(key))
 			assert.False(t, testcase.vm1.IsEqual(testcase.vm2, true), "Case ID: "+strconv.Itoa(key))
 		}
 	}

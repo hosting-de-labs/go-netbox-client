@@ -1,26 +1,28 @@
-package types
+package types_test
 
 import (
 	"net"
 	"strconv"
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func mockHost() Host {
-	return Host{
+func mockHost() types.Host {
+	return types.Host{
 		ID:       1,
 		Hostname: "host1",
-		PrimaryIPv4: IPAddress{
+		PrimaryIPv4: types.IPAddress{
 			Address: "192.168.1.1",
 			CIDR:    24,
-			Family:  IPAddressFamilyIPv4,
+			Family:  types.IPAddressFamilyIPv4,
 		},
-		PrimaryIPv6: IPAddress{
+		PrimaryIPv6: types.IPAddress{
 			Address: "::1",
 			CIDR:    64,
-			Family:  IPAddressFamilyIPv6,
+			Family:  types.IPAddressFamilyIPv6,
 		},
 	}
 }
@@ -62,14 +64,14 @@ func TestHost_Copy(t *testing.T) {
 	mac, err := net.ParseMAC("aa:bb:cc:dd:ee:ff")
 	assert.Nil(t, err)
 
-	host3.NetworkInterfaces = append(host3.NetworkInterfaces, HostNetworkInterface{
+	host3.NetworkInterfaces = append(host3.NetworkInterfaces, types.NetworkInterface{
 		Name:       "vlan.1",
 		MACAddress: mac,
-		IPAddresses: []IPAddress{
+		IPAddresses: []types.IPAddress{
 			{
 				Address: "192.168.10.1",
 				CIDR:    24,
-				Family:  IPAddressFamilyIPv4,
+				Family:  types.IPAddressFamilyIPv4,
 			},
 		},
 	})
@@ -85,7 +87,7 @@ func TestHost_Copy(t *testing.T) {
 	host6 := host5.Copy()
 	assert.Equal(t, host5, host6)
 
-	host6.AddTag("tag2")
+	host5.AddTag("tag2")
 	assert.NotEqual(t, host5, host6)
 }
 
@@ -100,29 +102,29 @@ func TestHost_IsChanged(t *testing.T) {
 
 func TestHost_IsEqual(t *testing.T) {
 	cases := []struct {
-		host1   Host
-		host2   Host
+		host1   types.Host
+		host2   types.Host
 		isEqual bool
 	}{
 		{
-			host1:   Host{},
-			host2:   Host{},
+			host1:   types.Host{},
+			host2:   types.Host{},
 			isEqual: true,
 		},
 		{
-			host1: Host{
+			host1: types.Host{
 				ID:        10,
 				Hostname:  "Server",
 				IsManaged: true,
-				PrimaryIPv4: IPAddress{
+				PrimaryIPv4: types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
-					Family:  IPAddressFamilyIPv4,
+					Family:  types.IPAddressFamilyIPv4,
 				},
-				PrimaryIPv6: IPAddress{
+				PrimaryIPv6: types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
-					Family:  IPAddressFamilyIPv6,
+					Family:  types.IPAddressFamilyIPv6,
 				},
 				Comments: []string{
 					"Comment1",
@@ -133,19 +135,19 @@ func TestHost_IsEqual(t *testing.T) {
 					"Tag2",
 				},
 			},
-			host2: Host{
+			host2: types.Host{
 				ID:        10,
 				Hostname:  "Server",
 				IsManaged: true,
-				PrimaryIPv4: IPAddress{
+				PrimaryIPv4: types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
-					Family:  IPAddressFamilyIPv4,
+					Family:  types.IPAddressFamilyIPv4,
 				},
-				PrimaryIPv6: IPAddress{
+				PrimaryIPv6: types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
-					Family:  IPAddressFamilyIPv6,
+					Family:  types.IPAddressFamilyIPv6,
 				},
 				Comments: []string{
 					"Comment1",
@@ -159,93 +161,93 @@ func TestHost_IsEqual(t *testing.T) {
 			isEqual: true,
 		},
 		{
-			host1: Host{
+			host1: types.Host{
 				ID: 10,
 			},
-			host2: Host{
+			host2: types.Host{
 				ID: 20,
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
+			host1: types.Host{
 				Hostname: "Server1",
 			},
-			host2: Host{
+			host2: types.Host{
 				Hostname: "Server2",
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
+			host1: types.Host{
 				IsManaged: true,
 			},
-			host2: Host{
+			host2: types.Host{
 				IsManaged: false,
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
-				PrimaryIPv4: IPAddress{
+			host1: types.Host{
+				PrimaryIPv4: types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
-					Family:  IPAddressFamilyIPv4,
+					Family:  types.IPAddressFamilyIPv4,
 				},
 			},
-			host2: Host{
-				PrimaryIPv4: IPAddress{
+			host2: types.Host{
+				PrimaryIPv4: types.IPAddress{
 					Address: "10.10.10.2",
 					CIDR:    24,
-					Family:  IPAddressFamilyIPv4,
+					Family:  types.IPAddressFamilyIPv4,
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
-				PrimaryIPv6: IPAddress{
+			host1: types.Host{
+				PrimaryIPv6: types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
-					Family:  IPAddressFamilyIPv6,
+					Family:  types.IPAddressFamilyIPv6,
 				},
 			},
-			host2: Host{
-				PrimaryIPv6: IPAddress{
+			host2: types.Host{
+				PrimaryIPv6: types.IPAddress{
 					Address: "::2",
 					CIDR:    128,
-					Family:  IPAddressFamilyIPv6,
+					Family:  types.IPAddressFamilyIPv6,
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
+			host1: types.Host{
 				Tags: []string{"Tag1"},
 			},
-			host2: Host{
+			host2: types.Host{
 				Tags: []string{"Tag2"},
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
+			host1: types.Host{
 				Comments: []string{"Comment1"},
 			},
-			host2: Host{
+			host2: types.Host{
 				Comments: []string{"Comment2"},
 			},
 			isEqual: false,
 		},
 		{
-			host1: Host{
-				NetworkInterfaces: []HostNetworkInterface{
+			host1: types.Host{
+				NetworkInterfaces: []types.NetworkInterface{
 					{Name: "eth0"},
 					{Name: "eth1"},
 				},
 			},
-			host2: Host{
-				NetworkInterfaces: []HostNetworkInterface{
+			host2: types.Host{
+				NetworkInterfaces: []types.NetworkInterface{
 					{Name: "eth1"},
 					{Name: "eth0"},
 				},

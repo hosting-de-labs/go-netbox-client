@@ -11,8 +11,8 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/types"
 )
 
-func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.HostNetworkInterface, error) {
-	netIf := types.HostNetworkInterface{}
+func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
+	netIf := types.NetworkInterface{}
 
 	if netboxInterface.FormFactor != nil {
 		netIf.FormFactor = types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
@@ -52,7 +52,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 	}
 
 	ipamClient := netboxIpam.NewClient(c.client)
-	netboxAddresses, err := ipamClient.IPAddressGetByInterfaceID(netboxInterface.ID)
+	netboxAddresses, err := ipamClient.IPAddressFindByInterfaceID(netboxInterface.ID)
 	if err != nil {
 		return nil, err
 	}

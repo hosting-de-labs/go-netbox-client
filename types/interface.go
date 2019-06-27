@@ -71,19 +71,20 @@ const (
 	InterfaceFormFactorOther                            InterfaceFormFactor = 32767
 )
 
-//HostNetworkInterface represents a network interface assigned to a host
-type HostNetworkInterface struct {
+//NetworkInterface represents a network interface assigned to a host
+type NetworkInterface struct {
 	FormFactor   InterfaceFormFactor
 	IPAddresses  []IPAddress
+	IsManagement bool
 	MACAddress   net.HardwareAddr
 	Name         string
 	TaggedVlans  []VLAN
 	UntaggedVlan *VLAN
-	IsOOB        bool
+	Tags         []string
 }
 
-//IsEqual compares the current HostNetworkInterface object against another HostNetworkInterface
-func (netIf HostNetworkInterface) IsEqual(netIf2 HostNetworkInterface) bool {
+//IsEqual compares the current NetworkInterface object against another NetworkInterface
+func (netIf NetworkInterface) IsEqual(netIf2 NetworkInterface) bool {
 	if !utils.CompareStruct(netIf, netIf2, []string{}, []string{"IPAddresses"}) {
 		return false
 	}

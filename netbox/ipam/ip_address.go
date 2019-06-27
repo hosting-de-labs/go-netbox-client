@@ -10,7 +10,7 @@ import (
 )
 
 //IPAddressGet returns an existing ip-address based on the given ip/cidr string.
-func (c Client) IPAddressGet(ipAddress types.IPAddress) (*models.IPAddress, error) {
+func (c Client) IPAddressFind(ipAddress types.IPAddress) (*models.IPAddress, error) {
 	params := ipam.NewIPAMIPAddressesListParams()
 	params.WithAddress(swag.String(ipAddress.String()))
 
@@ -32,7 +32,7 @@ func (c Client) IPAddressGet(ipAddress types.IPAddress) (*models.IPAddress, erro
 }
 
 //IPAddressGetByInterfaceID returns all ip addresses assigned to an interface identified by it's ID
-func (c Client) IPAddressGetByInterfaceID(interfaceID int64) ([]*models.IPAddress, error) {
+func (c Client) IPAddressFindByInterfaceID(interfaceID int64) ([]*models.IPAddress, error) {
 	params := ipam.NewIPAMIPAddressesListParams()
 	params.WithInterfaceID(swag.Int64(interfaceID))
 
@@ -59,12 +59,12 @@ func (c Client) IPAddressCreate(ipAddress types.IPAddress) (*models.IPAddress, e
 		return nil, err
 	}
 
-	return c.IPAddressGet(ipAddress)
+	return c.IPAddressFind(ipAddress)
 }
 
 //IPAddressGetCreate is a convenience function that looks up an existing ip-address from netbox or creates it
-func (c Client) IPAddressGetCreate(ipAddress types.IPAddress) (*models.IPAddress, error) {
-	res, err := c.IPAddressGet(ipAddress)
+func (c Client) IPAddressFindCreate(ipAddress types.IPAddress) (*models.IPAddress, error) {
+	res, err := c.IPAddressFind(ipAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c Client) IPAddressGetCreate(ipAddress types.IPAddress) (*models.IPAddress
 
 //IPAddressAssignInterface assigns a ip-address/cidr string to an existing interface.
 func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID int64) (*models.IPAddress, error) {
-	ipAddress2, err := c.IPAddressGetCreate(ipAddress)
+	ipAddress2, err := c.IPAddressFindCreate(ipAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 		return nil, err
 	}
 
-	return c.IPAddressGet(ipAddress)
+	return c.IPAddressFind(ipAddress)
 }
 
 func (c Client) IPAddressDelete(ipAddressID int64) error {

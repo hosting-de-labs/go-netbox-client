@@ -8,27 +8,6 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-//TODO: DeviceConvertToNetbox
-func (c Client) DeviceConvertToNetbox(device *types.DedicatedServer) (*models.WritableDevice, error) {
-	out := new(models.WritableDevice)
-
-	// if !createUpdateObject || (createUpdateObject && device.Hostname != device.OriginalHost.Hostname) {
-	// 	out.Name = device.Hostname
-	// }
-
-	//TODO:
-	// if !createUpdateObject || (createUpdateObject && !device.PrimaryIPv4.IsEqual(device.OriginalHost.PrimaryIPv4)) {
-	// 	ip, err := ipam.IPAddressGet(c.getClient(), device.PrimaryIPv4)
-	// }
-
-	// out.PrimaryIp4
-	// out.PrimaryIp6
-	// out.Serial
-	// out.Tags
-
-	return out, nil
-}
-
 func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.DedicatedServer, error) {
 	out := new(types.DedicatedServer)
 

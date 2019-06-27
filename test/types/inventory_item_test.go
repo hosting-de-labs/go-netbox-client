@@ -1,14 +1,16 @@
-package types
+package types_test
 
 import (
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func mockInventoryItem() InventoryItem {
-	return InventoryItem{
-		Type:         InventoryItemTypeProcessor,
+func mockInventoryItem() types.InventoryItem {
+	return types.InventoryItem{
+		Type:         types.InventoryItemTypeProcessor,
 		Manufacturer: "Intel",
 		Model:        "Xeon X5670",
 		AssetTag:     "Asset Tag",
@@ -18,14 +20,14 @@ func mockInventoryItem() InventoryItem {
 }
 
 func TestInventoryItem_GetHashableString(t *testing.T) {
-	item1 := mockInventoryItem()
-	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber")
+	item := mockInventoryItem()
+	assert.Equal(t, item.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber")
 
-	item1.AddDetail("Cores", "2")
-	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2}")
+	item.AddDetail("Cores", "2")
+	assert.Equal(t, item.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2}")
 
-	item1.AddDetail("Threads", "4")
-	assert.Equal(t, item1.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2,Threads:4}")
+	item.AddDetail("Threads", "4")
+	assert.Equal(t, item.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber:details{Cores:2,Threads:4}")
 }
 
 func TestInventoryItem_AddDetail(t *testing.T) {
@@ -60,6 +62,6 @@ func TestInventoryItem_IsEqual(t *testing.T) {
 	item2 := item.Copy()
 	assert.Equal(t, item, item2)
 
-	item.AddDetail("L3 Cache", "12MB")
+	item2.AddDetail("L3 Cache", "12MB")
 	assert.NotEqual(t, item, item2)
 }

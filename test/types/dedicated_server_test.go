@@ -1,22 +1,24 @@
-package types
+package types_test
 
 import (
 	"strconv"
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func mockDedicatedServer() DedicatedServer {
-	return DedicatedServer{
-		Host: Host{
+func mockDedicatedServer() types.DedicatedServer {
+	return types.DedicatedServer{
+		Host: types.Host{
 			ID:        10,
 			Hostname:  "host1",
 			IsManaged: false,
 		},
-		Inventory: []*InventoryItem{
+		Inventory: []*types.InventoryItem{
 			{
-				Type:         InventoryItemTypeProcessor,
+				Type:         types.InventoryItemTypeProcessor,
 				Manufacturer: "Intel",
 				Model:        "Xeon X5660",
 			},
@@ -29,8 +31,8 @@ func TestDedicatedServer_Copy(t *testing.T) {
 	host2 := host1.Copy()
 	assert.Equal(t, host1, host2)
 
-	host2.Inventory = append(host2.Inventory, &InventoryItem{
-		Type:         InventoryItemTypeMainboard,
+	host1.Inventory = append(host1.Inventory, &types.InventoryItem{
+		Type:         types.InventoryItemTypeMainboard,
 		Manufacturer: "Supermicro",
 		Model:        "X9SCL-F",
 	})
@@ -40,13 +42,13 @@ func TestDedicatedServer_Copy(t *testing.T) {
 //TODO: move to inventory_item.go
 func TestDedicatedServer_IsEqual(t *testing.T) {
 	cases := []struct {
-		host1   DedicatedServer
-		host2   DedicatedServer
+		host1   types.DedicatedServer
+		host2   types.DedicatedServer
 		isEqual bool
 	}{
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{
 						Manufacturer: "unknown",
 						Model:        "unknown",
@@ -56,8 +58,8 @@ func TestDedicatedServer_IsEqual(t *testing.T) {
 					},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{
 						Manufacturer: "unknown",
 						Model:        "unknown",
@@ -70,79 +72,79 @@ func TestDedicatedServer_IsEqual(t *testing.T) {
 			isEqual: true,
 		},
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{Manufacturer: "unknown"},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{Manufacturer: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{Model: "unknown"},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{Model: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{PartNumber: "unknown"},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{PartNumber: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{AssetTag: "unknown"},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{AssetTag: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{SerialNumber: "unknown"},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{SerialNumber: "u. n. owen"},
 				},
 			},
 			isEqual: false,
 		},
 		{
-			host1: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{Manufacturer: "Intel"},
 					{Manufacturer: "AMD"},
 				},
 			},
-			host2: DedicatedServer{
-				Inventory: []*InventoryItem{
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
 					{Manufacturer: "AMD"},
 					{Manufacturer: "Intel"},
 				},

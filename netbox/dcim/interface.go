@@ -13,7 +13,7 @@ import (
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
-func (c Client) InterfaceGet(interfaceID int64) (*models.DeviceInterface, error) {
+func (c Client) InterfaceGet(interfaceID int64) (*types.NetworkInterface, error) {
 	params := dcim.NewDcimInterfacesReadParams()
 	params.WithID(interfaceID)
 
@@ -22,11 +22,16 @@ func (c Client) InterfaceGet(interfaceID int64) (*models.DeviceInterface, error)
 		return nil, err
 	}
 
-	return res.Payload, nil
+	out, err := c.InterfaceConvertFromNetbox(*res.Payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 //InterfaceGet retrieves an existing device interface object.
-func (c Client) InterfaceFind(deviceID int64, interfaceName string) (*models.DeviceInterface, error) {
+func (c Client) InterfaceFind(deviceID int64, interfaceName string) (*types.NetworkInterface, error) {
 	params := dcim.NewDcimInterfacesListParams()
 	params.Name = &interfaceName
 
@@ -45,10 +50,15 @@ func (c Client) InterfaceFind(deviceID int64, interfaceName string) (*models.Dev
 		return nil, nil
 	}
 
-	return res.Payload.Results[0], nil
+	out, err := c.InterfaceConvertFromNetbox(*res.Payload.Results[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
-func (c Client) InterfaceCreate(deviceID int64, networkInterface *types.HostNetworkInterface) (*models.DeviceInterface, error) {
+func (c Client) InterfaceCreate(deviceID int64, networkInterface *types.NetworkInterface) (*types.NetworkInterface, error) {
 	data := &models.WritableDeviceInterface{}
 	data.Device = &deviceID
 	data.Name = &networkInterface.Name
@@ -127,7 +137,7 @@ func (c Client) InterfaceCreate(deviceID int64, networkInterface *types.HostNetw
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing device interface or otherwise to create it.
-func (c Client) InterfaceGetCreate(deviceID int64, networkInterface *types.HostNetworkInterface) (*models.DeviceInterface, error) {
+func (c Client) InterfaceGetCreate(deviceID int64, networkInterface *types.NetworkInterface) (*types.NetworkInterface, error) {
 	res, err := c.InterfaceFind(deviceID, networkInterface.Name)
 	if err != nil {
 		return nil, err

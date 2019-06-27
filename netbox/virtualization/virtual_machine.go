@@ -197,7 +197,7 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, e
 func (c Client) preparePrimaryIpAddress(primaryIP types.IPAddress) (int64, error) {
 	ipamClient := netboxIpam.NewClient(c.client)
 
-	ip, err := ipamClient.IPAddressGet(primaryIP)
+	ip, err := ipamClient.IPAddressFind(primaryIP)
 	if err != nil {
 		return -1, err
 	}
@@ -209,7 +209,7 @@ func (c Client) preparePrimaryIpAddress(primaryIP types.IPAddress) (int64, error
 		}
 	}
 
-	ip, err = ipamClient.IPAddressGetCreate(primaryIP)
+	ip, err = ipamClient.IPAddressFindCreate(primaryIP)
 	if err != nil {
 		return -1, err
 	}

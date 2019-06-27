@@ -1,28 +1,30 @@
-package types
+package types_test
 
 import (
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func mockIpv4Address() (out IPAddress) {
-	return IPAddress{
-		Family:      IPAddressFamilyIPv4,
+func mockIpv4Address() (out types.IPAddress) {
+	return types.IPAddress{
+		Family:      types.IPAddressFamilyIPv4,
 		Address:     "192.168.10.1",
 		CIDR:        24,
-		Status:      IPAddressStatusActive,
+		Status:      types.IPAddressStatusActive,
 		Description: "An internal ip address",
 		Tags:        []string{"internal", "netbox-sync"},
 	}
 }
 
-func mockIpv6Address() (out IPAddress) {
-	return IPAddress{
-		Family:      IPAddressFamilyIPv6,
+func mockIpv6Address() (out types.IPAddress) {
+	return types.IPAddress{
+		Family:      types.IPAddressFamilyIPv6,
 		Address:     "fc00::1",
 		CIDR:        128,
-		Status:      IPAddressStatusActive,
+		Status:      types.IPAddressStatusActive,
 		Description: "An internal ip address",
 		Tags:        []string{"internal", "netbox-sync"},
 	}

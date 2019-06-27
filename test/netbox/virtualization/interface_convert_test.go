@@ -1,8 +1,12 @@
-package virtualization
+package virtualization_test
 
 import (
 	"net"
 	"testing"
+
+	"github.com/hosting-de-labs/go-netbox-client/test/mock"
+
+	"github.com/hosting-de-labs/go-netbox-client/netbox/virtualization"
 
 	"github.com/hosting-de-labs/go-netbox-client/types"
 
@@ -13,6 +17,10 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 	"github.com/jarcoal/httpmock"
 )
+
+func init() {
+	mock.RunServer()
+}
 
 func mockNetboxVirtualMachineInterface() models.VirtualMachineInterface {
 	o := models.VirtualMachineInterface{}
@@ -127,7 +135,7 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 	)
 
 	netboxClient := netbox.NewNetboxAt("localhost:8000")
-	virtualizationClient := NewClient(*netboxClient)
+	virtualizationClient := virtualization.NewClient(*netboxClient)
 
 	netIf, err := virtualizationClient.InterfaceConvertFromNetbox(mockNetboxVirtualMachineInterface())
 
