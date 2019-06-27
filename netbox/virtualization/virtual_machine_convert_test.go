@@ -7,7 +7,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func mockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bool, addCustomFields bool) (out models.VirtualMachine) {
@@ -95,12 +95,13 @@ func TestVirtualMachineConvertFromNetbox_WithTags(t *testing.T) {
 	vm := mockNetboxVirtualMachine(false, false, true, false)
 
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
-	assert.Equal(t, err, nil)
+	assert.NotNil(t, res)
+	assert.Nil(t, err)
 
-	assert.Equal(t, len(res.Tags), 2)
-	assert.Equal(t, res.Tags[0], "Tag1")
-	assert.Equal(t, res.Tags[1], "managed")
-	assert.Equal(t, res.IsManaged, true)
+	assert.Equal(t, 2, len(res.Tags))
+	assert.Equal(t, "Tag1", res.Tags[0])
+	assert.Equal(t, "managed", res.Tags[1])
+	assert.Equal(t, true, res.IsManaged)
 }
 
 func TestVirtualMachineConvertFromNetbox_WithCustomFields(t *testing.T) {
@@ -108,7 +109,8 @@ func TestVirtualMachineConvertFromNetbox_WithCustomFields(t *testing.T) {
 
 	vm := mockNetboxVirtualMachine(false, false, false, true)
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
-	assert.Equal(t, err, nil)
+	assert.NotNil(t, res)
+	assert.Nil(t, err)
 
-	assert.Equal(t, res.Hypervisor, "Hypervisor1")
+	assert.Equal(t, "Hypervisor1", res.Hypervisor)
 }

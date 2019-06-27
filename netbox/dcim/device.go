@@ -28,6 +28,18 @@ func (c Client) DeviceFindAll(limit int64, offset int64) (int64, []*models.Devic
 	return *res.Payload.Count, res.Payload.Results, nil
 }
 
+func (c Client) DeviceGet(deviceID int64) (*models.DeviceWithConfigContext, error) {
+	params := dcim.NewDcimDevicesReadParams()
+	params.WithID(deviceID)
+
+	res, err := c.client.Dcim.DcimDevicesRead(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Payload, nil
+}
+
 //DeviceFindByHostname retrieves a model.Device object from Netbox by looking up the given hostname
 //TODO: return *types.DedicatedServer
 func (c Client) DeviceFindByHostname(hostname string) (*models.Device, error) {

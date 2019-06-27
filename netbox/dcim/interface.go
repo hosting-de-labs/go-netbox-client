@@ -3,6 +3,8 @@ package dcim
 import (
 	"fmt"
 
+	"github.com/hosting-de-labs/go-netbox-client/types"
+
 	"github.com/go-openapi/swag"
 
 	"github.com/hosting-de-labs/go-netbox/netbox/client/dcim"
@@ -11,12 +13,24 @@ import (
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
+func (c Client) InterfaceGet(interfaceID int64) (*models.DeviceInterface, error) {
+	params := dcim.NewDcimInterfacesReadParams()
+	params.WithID(interfaceID)
+
+	res, err := c.client.Dcim.DcimInterfacesRead(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Payload, nil
+}
+
 //InterfaceGet retrieves an existing device interface object.
-func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*models.DeviceInterface, error) {
+func (c Client) InterfaceFind(deviceID int64, interfaceName string) (*models.DeviceInterface, error) {
 	params := dcim.NewDcimInterfacesListParams()
 	params.Name = &interfaceName
 
-	params.DeviceID = &device.ID
+	params.DeviceID = &deviceID
 
 	res, err := c.client.Dcim.DcimInterfacesList(params, nil)
 	if err != nil {
@@ -34,49 +48,93 @@ func (c Client) InterfaceGet(interfaceName string, device *models.Device) (*mode
 	return res.Payload.Results[0], nil
 }
 
-//InterfaceCreate creates a device interface in Netbox.
-func (c Client) InterfaceCreate(interfaceName string, device *models.Device, vlanTag *uint16, interfaceFormFactor *int64) (*models.DeviceInterface, error) {
-	data := new(models.WritableDeviceInterface)
-	data.Device = &device.ID
-	data.Name = &interfaceName
-	data.Mode = swag.Int64(100)
-	data.TaggedVlans = []int64{}
+func (c Client) InterfaceCreate(deviceID int64, networkInterface *types.HostNetworkInterface) (*models.DeviceInterface, error) {
+	data := &models.WritableDeviceInterface{}
+	data.Device = &deviceID
+	data.Name = &networkInterface.Name
+
+	d, err := c.DeviceGet(deviceID)
+	if err != nil {
+		return nil, err
+	}
 
 	ipamClient := netboxIpam.NewClient(c.client)
 
-	if vlanTag != nil {
-		vlan, err := ipamClient.VLANGet(*vlanTag, &device.Site.ID)
+	if networkInterface.UntaggedVlan != nil && len(networkInterface.TaggedVlans) > 0 {
+		//Set mode to tagged
+		data.Mode = swag.Int64(200)
+
+		netboxVlan, err := ipamClient.VLANGet(networkInterface.UntaggedVlan.ID, &d.Site.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		data.UntaggedVlan = &vlan.ID
+		data.UntaggedVlan = netboxVlan.Vid
+
+		var taggedVlans []int64
+		for _, vlan := range networkInterface.TaggedVlans {
+			netboxVlan, err := ipamClient.VLANGet(vlan.ID, &d.Site.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			taggedVlans = append(taggedVlans, *netboxVlan.Vid)
+		}
+
+		data.TaggedVlans = taggedVlans
+	} else if networkInterface.UntaggedVlan != nil {
+		//Set mode to access
+		data.Mode = swag.Int64(100)
+
+		netboxVlan, err := ipamClient.VLANGet(networkInterface.UntaggedVlan.ID, &d.Site.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		data.UntaggedVlan = netboxVlan.Vid
+	} else if len(networkInterface.TaggedVlans) > 0 {
+		//Set mode to tagged all
+		data.Mode = swag.Int64(300)
+
+		var taggedVlans []int64
+		for _, vlan := range networkInterface.TaggedVlans {
+			netboxVlan, err := ipamClient.VLANGet(vlan.ID, &d.Site.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			taggedVlans = append(taggedVlans, *netboxVlan.Vid)
+		}
+
+		data.TaggedVlans = taggedVlans
+	} else {
+		data.Mode = nil
 	}
 
-	if interfaceFormFactor != nil {
-		data.FormFactor = *interfaceFormFactor
+	if networkInterface.FormFactor > 0 {
+		data.FormFactor = int64(networkInterface.FormFactor)
 	}
 
 	params := dcim.NewDcimInterfacesCreateParams()
 	params.WithData(data)
 
-	_, err := c.client.Dcim.DcimInterfacesCreate(params, nil)
+	res, err := c.client.Dcim.DcimInterfacesCreate(params, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create interface with vlan Tag %d. Original error was %s", vlanTag, err)
+		return nil, err
 	}
 
-	return c.InterfaceGet(interfaceName, device)
+	return c.InterfaceGet(res.Payload.ID)
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing device interface or otherwise to create it.
-func (c Client) InterfaceGetCreate(interfaceName string, device *models.Device, vlanTag *uint16) (*models.DeviceInterface, error) {
-	res, err := c.InterfaceGet(interfaceName, device)
+func (c Client) InterfaceGetCreate(deviceID int64, networkInterface *types.HostNetworkInterface) (*models.DeviceInterface, error) {
+	res, err := c.InterfaceFind(deviceID, networkInterface.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	if res == nil {
-		return c.InterfaceCreate(interfaceName, device, vlanTag, nil)
+		return c.InterfaceCreate(deviceID, networkInterface)
 	}
 
 	return res, nil

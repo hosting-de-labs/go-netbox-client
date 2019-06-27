@@ -73,13 +73,13 @@ const (
 
 //HostNetworkInterface represents a network interface assigned to a host
 type HostNetworkInterface struct {
-	Name         string
 	FormFactor   InterfaceFormFactor
-	UntaggedVlan *VLAN
-	TaggedVlans  []VLAN
+	IPAddresses  []IPAddress
 	MACAddress   net.HardwareAddr
-
-	IPAddresses []IPAddress
+	Name         string
+	TaggedVlans  []VLAN
+	UntaggedVlan *VLAN
+	IsOOB        bool
 }
 
 //IsEqual compares the current HostNetworkInterface object against another HostNetworkInterface

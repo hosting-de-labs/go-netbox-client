@@ -132,6 +132,7 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 	netIf, err := virtualizationClient.InterfaceConvertFromNetbox(mockNetboxVirtualMachineInterface())
 
 	assert.Nil(t, err)
+	assert.NotNil(t, netIf)
 
 	assert.Equal(t, netIf.Name, "eth0")
 
@@ -142,11 +143,11 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 
 	assert.Equal(t, len(netIf.IPAddresses), 2)
 
-	assert.Equal(t, netIf.IPAddresses[0].Address, "123.123.123.123")
-	assert.Equal(t, netIf.IPAddresses[0].CIDR, uint16(24))
-	assert.Equal(t, netIf.IPAddresses[0].Family, types.IPAddressFamilyIPv4)
+	assert.Equal(t, "123.123.123.123", netIf.IPAddresses[0].Address)
+	assert.Equal(t, uint16(24), netIf.IPAddresses[0].CIDR)
+	assert.Equal(t, types.IPAddressFamilyIPv4, netIf.IPAddresses[0].Family)
 
-	assert.Equal(t, netIf.IPAddresses[1].Address, "2001:db8:a::123")
-	assert.Equal(t, netIf.IPAddresses[1].CIDR, uint16(64))
-	assert.Equal(t, netIf.IPAddresses[1].Family, types.IPAddressFamilyIPv6)
+	assert.Equal(t, "2001:db8:a::123", netIf.IPAddresses[1].Address)
+	assert.Equal(t, uint16(64), netIf.IPAddresses[1].CIDR)
+	assert.Equal(t, types.IPAddressFamilyIPv6, netIf.IPAddresses[1].Family)
 }
