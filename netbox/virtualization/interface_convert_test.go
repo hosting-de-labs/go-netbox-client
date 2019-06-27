@@ -70,6 +70,9 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 				"id": 10,
                 "url": "http://localhost:8000/api/virtualization/interfaces/10/",
                 "device": null,
+				"form_factor": {
+					"value": 1000
+				},
                 "virtual_machine": {
                     "id": 5651,
                     "url": "http://localhost:8000/api/virtualization/virtual-machines/15/",
@@ -141,9 +144,9 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 
 	assert.Equal(t, netIf.IPAddresses[0].Address, "123.123.123.123")
 	assert.Equal(t, netIf.IPAddresses[0].CIDR, uint16(24))
-	assert.Equal(t, netIf.IPAddresses[0].Type, types.IPAddressTypeIPv4)
+	assert.Equal(t, netIf.IPAddresses[0].Family, types.IPAddressFamilyIPv4)
 
 	assert.Equal(t, netIf.IPAddresses[1].Address, "2001:db8:a::123")
 	assert.Equal(t, netIf.IPAddresses[1].CIDR, uint16(64))
-	assert.Equal(t, netIf.IPAddresses[1].Type, types.IPAddressTypeIPv6)
+	assert.Equal(t, netIf.IPAddresses[1].Family, types.IPAddressFamilyIPv6)
 }

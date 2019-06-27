@@ -8,7 +8,7 @@ import (
 
 func mockIpv4Address() (out IPAddress) {
 	return IPAddress{
-		Type:        IPAddressTypeIPv4,
+		Family:      IPAddressFamilyIPv4,
 		Address:     "192.168.10.1",
 		CIDR:        24,
 		Status:      IPAddressStatusActive,
@@ -19,7 +19,7 @@ func mockIpv4Address() (out IPAddress) {
 
 func mockIpv6Address() (out IPAddress) {
 	return IPAddress{
-		Type:        IPAddressTypeIPv6,
+		Family:      IPAddressFamilyIPv6,
 		Address:     "fc00::1",
 		CIDR:        128,
 		Status:      IPAddressStatusActive,

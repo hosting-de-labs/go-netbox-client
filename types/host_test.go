@@ -15,12 +15,12 @@ func mockHost() Host {
 		PrimaryIPv4: IPAddress{
 			Address: "192.168.1.1",
 			CIDR:    24,
-			Type:    IPAddressTypeIPv4,
+			Family:  IPAddressFamilyIPv4,
 		},
 		PrimaryIPv6: IPAddress{
 			Address: "::1",
 			CIDR:    64,
-			Type:    IPAddressTypeIPv6,
+			Family:  IPAddressFamilyIPv6,
 		},
 	}
 }
@@ -69,7 +69,7 @@ func TestHost_Copy(t *testing.T) {
 			{
 				Address: "192.168.10.1",
 				CIDR:    24,
-				Type:    IPAddressTypeIPv4,
+				Family:  IPAddressFamilyIPv4,
 			},
 		},
 	})
@@ -117,12 +117,12 @@ func TestHost_IsEqual(t *testing.T) {
 				PrimaryIPv4: IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
-					Type:    IPAddressTypeIPv4,
+					Family:  IPAddressFamilyIPv4,
 				},
 				PrimaryIPv6: IPAddress{
 					Address: "::1",
 					CIDR:    128,
-					Type:    IPAddressTypeIPv6,
+					Family:  IPAddressFamilyIPv6,
 				},
 				Comments: []string{
 					"Comment1",
@@ -140,12 +140,12 @@ func TestHost_IsEqual(t *testing.T) {
 				PrimaryIPv4: IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
-					Type:    IPAddressTypeIPv4,
+					Family:  IPAddressFamilyIPv4,
 				},
 				PrimaryIPv6: IPAddress{
 					Address: "::1",
 					CIDR:    128,
-					Type:    IPAddressTypeIPv6,
+					Family:  IPAddressFamilyIPv6,
 				},
 				Comments: []string{
 					"Comment1",
@@ -190,14 +190,14 @@ func TestHost_IsEqual(t *testing.T) {
 				PrimaryIPv4: IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
-					Type:    IPAddressTypeIPv4,
+					Family:  IPAddressFamilyIPv4,
 				},
 			},
 			host2: Host{
 				PrimaryIPv4: IPAddress{
 					Address: "10.10.10.2",
 					CIDR:    24,
-					Type:    IPAddressTypeIPv4,
+					Family:  IPAddressFamilyIPv4,
 				},
 			},
 			isEqual: false,
@@ -207,14 +207,14 @@ func TestHost_IsEqual(t *testing.T) {
 				PrimaryIPv6: IPAddress{
 					Address: "::1",
 					CIDR:    128,
-					Type:    IPAddressTypeIPv6,
+					Family:  IPAddressFamilyIPv6,
 				},
 			},
 			host2: Host{
 				PrimaryIPv6: IPAddress{
 					Address: "::2",
 					CIDR:    128,
-					Type:    IPAddressTypeIPv6,
+					Family:  IPAddressFamilyIPv6,
 				},
 			},
 			isEqual: false,

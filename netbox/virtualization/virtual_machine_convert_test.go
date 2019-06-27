@@ -85,8 +85,8 @@ func TestVirtualMachineConvertFromNetbox_WithIPAddresses(t *testing.T) {
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, res.PrimaryIPv4, types.IPAddress{Address: "127.0.0.1", CIDR: 32, Type: types.IPAddressTypeIPv4})
-	assert.Equal(t, res.PrimaryIPv6, types.IPAddress{Address: "::1", CIDR: 128, Type: types.IPAddressTypeIPv6})
+	assert.Equal(t, res.PrimaryIPv4, types.IPAddress{Address: "127.0.0.1", CIDR: 32, Family: types.IPAddressFamilyIPv4})
+	assert.Equal(t, res.PrimaryIPv6, types.IPAddress{Address: "::1", CIDR: 128, Family: types.IPAddressFamilyIPv6})
 }
 
 func TestVirtualMachineConvertFromNetbox_WithTags(t *testing.T) {

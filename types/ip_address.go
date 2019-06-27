@@ -7,15 +7,15 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/utils"
 )
 
-//IPAddressType represents a type an ip-address can have
-type IPAddressType string
+//IPAddressFamily represents a type an ip-address can have
+type IPAddressFamily string
 
 const (
-	//IPAddressTypeIPv6 represents an ipv6 ip
-	IPAddressTypeIPv6 IPAddressType = "IPv6"
+	//IPAddressFamilyIPv6 represents an ipv6 ip
+	IPAddressFamilyIPv6 IPAddressFamily = "IPv6"
 
-	//IPAddressTypeIPv4 represents an ipv4 ip
-	IPAddressTypeIPv4 IPAddressType = "IPv4"
+	//IPAddressFamilyIPv4 represents an ipv4 ip
+	IPAddressFamilyIPv4 IPAddressFamily = "IPv4"
 )
 
 type IPAddressStatus int
@@ -45,7 +45,7 @@ const (
 //IPAddress represents an ip address
 type IPAddress struct {
 	//TODO: inherit from net.IPNet, get rid of "Type"
-	Type    IPAddressType
+	Family  IPAddressFamily
 	Address string
 	CIDR    uint16
 
@@ -61,7 +61,7 @@ func (ip IPAddress) String() string {
 
 func (ip IPAddress) Clone() (out IPAddress) {
 	out = IPAddress{
-		Type:        ip.Type,
+		Family:      ip.Family,
 		Address:     ip.Address,
 		CIDR:        ip.CIDR,
 		Status:      ip.Status,

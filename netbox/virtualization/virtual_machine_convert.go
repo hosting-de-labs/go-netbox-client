@@ -19,7 +19,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 
 		out.PrimaryIPv4.Address = address
 		out.PrimaryIPv4.CIDR = cidr
-		out.PrimaryIPv4.Type = types.IPAddressTypeIPv4
+		out.PrimaryIPv4.Family = types.IPAddressFamilyIPv4
 	}
 
 	if netboxVM.PrimaryIp6 != nil {
@@ -30,7 +30,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 
 		out.PrimaryIPv6.Address = address
 		out.PrimaryIPv6.CIDR = cidr
-		out.PrimaryIPv6.Type = types.IPAddressTypeIPv6
+		out.PrimaryIPv6.Family = types.IPAddressFamilyIPv6
 	}
 
 	if netboxVM.Vcpus != nil {

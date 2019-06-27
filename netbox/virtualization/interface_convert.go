@@ -14,6 +14,10 @@ import (
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.HostNetworkInterface, error) {
 	netIf := types.HostNetworkInterface{}
 
+	if netboxInterface.FormFactor != nil {
+		netIf.FormFactor = types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
+	}
+
 	if netboxInterface.Name != nil {
 		netIf.Name = *netboxInterface.Name
 	}
@@ -63,9 +67,9 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 		addr.Address = ip
 		addr.CIDR = cidr
 
-		addr.Type = types.IPAddressTypeIPv4
+		addr.Family = types.IPAddressFamilyIPv4
 		if strings.Contains(ip, ":") {
-			addr.Type = types.IPAddressTypeIPv6
+			addr.Family = types.IPAddressFamilyIPv6
 		}
 
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)

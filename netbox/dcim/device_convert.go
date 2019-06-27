@@ -55,7 +55,7 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 		out.PrimaryIPv4 = types.IPAddress{
 			Address: address,
 			CIDR:    cidr,
-			Type:    types.IPAddressTypeIPv4,
+			Family:  types.IPAddressFamilyIPv4,
 		}
 	}
 
@@ -69,7 +69,7 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 		out.PrimaryIPv6 = types.IPAddress{
 			Address: address,
 			CIDR:    cidr,
-			Type:    types.IPAddressTypeIPv6,
+			Family:  types.IPAddressFamilyIPv6,
 		}
 	}
 
