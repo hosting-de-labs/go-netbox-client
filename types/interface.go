@@ -81,6 +81,7 @@ type NetworkInterface struct {
 	TaggedVlans  []VLAN
 	UntaggedVlan *VLAN
 	Tags         []string
+	Children     []NetworkInterface
 }
 
 //IsEqual compares the current NetworkInterface object against another NetworkInterface
