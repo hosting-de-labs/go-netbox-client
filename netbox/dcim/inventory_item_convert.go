@@ -57,7 +57,7 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 }
 
 func (c *Client) InventoryItemConvertFromNetbox(i models.InventoryItem) (out types.InventoryItem) {
-	out.OriginalEntity = i
+	out.OriginalEntity = &i
 	out.Manufacturer = *i.Manufacturer.Name
 	out.SerialNumber = i.Serial
 	out.AssetTag = *i.AssetTag
