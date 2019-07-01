@@ -5,7 +5,7 @@ go:
   - tip
 
 before_install:
-  - go get
+  - go mod tidy
 
 script:
   - test/coverage.sh
