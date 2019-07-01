@@ -13,51 +13,6 @@ import (
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
-func (c Client) InterfaceGet(interfaceID int64) (*types.NetworkInterface, error) {
-	params := dcim.NewDcimInterfacesReadParams()
-	params.WithID(interfaceID)
-
-	res, err := c.client.Dcim.DcimInterfacesRead(params, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	out, err := c.InterfaceConvertFromNetbox(*res.Payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return out, nil
-}
-
-//InterfaceGet retrieves an existing device interface object.
-func (c Client) InterfaceFind(deviceID int64, interfaceName string) (*types.NetworkInterface, error) {
-	params := dcim.NewDcimInterfacesListParams()
-	params.Name = &interfaceName
-
-	params.DeviceID = &deviceID
-
-	res, err := c.client.Dcim.DcimInterfacesList(params, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if *res.Payload.Count > 1 {
-		return nil, fmt.Errorf("Interface %s is not unique", interfaceName)
-	}
-
-	if *res.Payload.Count == 0 {
-		return nil, nil
-	}
-
-	out, err := c.InterfaceConvertFromNetbox(*res.Payload.Results[0])
-	if err != nil {
-		return nil, err
-	}
-
-	return out, nil
-}
-
 func (c Client) InterfaceCreate(deviceID int64, networkInterface *types.NetworkInterface) (*types.NetworkInterface, error) {
 	data := &models.WritableDeviceInterface{}
 	data.Device = &deviceID
@@ -134,6 +89,76 @@ func (c Client) InterfaceCreate(deviceID int64, networkInterface *types.NetworkI
 	}
 
 	return c.InterfaceGet(res.Payload.ID)
+}
+
+//InterfaceGet retrieves an existing device interface object.
+func (c Client) InterfaceFind(deviceID int64, interfaceName string) (*types.NetworkInterface, error) {
+	params := dcim.NewDcimInterfacesListParams()
+	params.Name = &interfaceName
+
+	params.DeviceID = &deviceID
+
+	res, err := c.client.Dcim.DcimInterfacesList(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if *res.Payload.Count > 1 {
+		return nil, fmt.Errorf("Interface %s is not unique", interfaceName)
+	}
+
+	if *res.Payload.Count == 0 {
+		return nil, nil
+	}
+
+	out, err := c.InterfaceConvertFromNetbox(*res.Payload.Results[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+func (c Client) InterfaceFindAll(deviceID int64) (out []types.NetworkInterface, err error) {
+	params := dcim.NewDcimInterfacesListParams()
+	params.WithDeviceID(&deviceID)
+
+	res, err := c.client.Dcim.DcimInterfacesList(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if *res.Payload.Count == 0 {
+		return nil, nil
+	}
+
+	for _, nbInterface := range res.Payload.Results {
+		intf, err := c.InterfaceConvertFromNetbox(*nbInterface)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, *intf)
+	}
+
+	return out, nil
+}
+
+func (c Client) InterfaceGet(interfaceID int64) (*types.NetworkInterface, error) {
+	params := dcim.NewDcimInterfacesReadParams()
+	params.WithID(interfaceID)
+
+	res, err := c.client.Dcim.DcimInterfacesRead(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := c.InterfaceConvertFromNetbox(*res.Payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing device interface or otherwise to create it.
