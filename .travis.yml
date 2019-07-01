@@ -5,7 +5,7 @@ go:
   - tip
 
 script:
-  - test/coverage.sh
+  - test/scripts/coverage.sh
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
