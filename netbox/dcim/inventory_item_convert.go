@@ -53,9 +53,6 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 
 	out.Description = description
 
-	//TODO: Hash generieren
-	out.Tags = []string{"SysInv:" + types.GetIdentifier(i)}
-
 	return out, nil
 }
 
