@@ -14,6 +14,9 @@ import (
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterface) (*types.NetworkInterface, error) {
 	netIf := types.NetworkInterface{}
 
+	//pass reference as original entity
+	netIf.OriginalEntity = interface{}(&netboxInterface)
+
 	if netboxInterface.FormFactor != nil {
 		netIf.FormFactor = types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
 	}

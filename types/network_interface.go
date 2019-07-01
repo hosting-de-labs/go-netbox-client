@@ -73,6 +73,8 @@ const (
 
 //NetworkInterface represents a network interface assigned to a host
 type NetworkInterface struct {
+	CommonEntity
+
 	FormFactor   InterfaceFormFactor
 	IPAddresses  []IPAddress
 	IsManagement bool
