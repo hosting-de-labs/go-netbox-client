@@ -7,17 +7,20 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func (c *Client) InventoryItemGetAllByHostname(hostname string) ([]*models.InventoryItem, error) {
+func (c *Client) InventoryItemFindAll(deviceID int64) (out []types.InventoryItem, err error) {
 	params := dcim.NewDcimInventoryItemsListParams()
-	params.Device = &hostname
-	params.Limit = swag.Int64(100)
+	params.WithDeviceID(&deviceID).WithLimit(swag.Int64(100))
 
 	res, err := c.client.Dcim.DcimInventoryItemsList(params, nil)
 	if err != nil {
-		return []*models.InventoryItem{}, err
+		return nil, err
 	}
 
-	return res.Payload.Results, nil
+	for _, nbItem := range res.Payload.Results {
+		out = append(out, c.InventoryItemConvertFromNetbox(*nbItem))
+	}
+
+	return out, nil
 }
 
 func (c *Client) InventoryItemCreate(deviceID int64, inventoryItem types.InventoryItem) (*models.InventoryItem, error) {
