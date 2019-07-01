@@ -40,7 +40,7 @@ func (i InventoryItem) GetHashableString() string {
 			items = append(items, fmt.Sprintf("%s:%s", key, val))
 		}
 
-		sort.Sort(sort.StringSlice(items))
+		sort.Strings(items)
 
 		str = fmt.Sprintf("%s:details{%s}", str, strings.Join(items, ","))
 	}

@@ -60,7 +60,7 @@ func (c Client) VMCreate(vm types.VirtualServer, hyp *models.Device) (*types.Vir
 }
 
 //VMGet retrieves an existing VM object from netbox by it's hostname.
-func (c Client) VMGet(hostname string) (*types.VirtualServer, error) {
+func (c Client) VMGet(hostname string) (out *types.VirtualServer, err error) {
 	params := virtualization.NewVirtualizationVirtualMachinesListParams()
 	params.WithName(&hostname)
 
@@ -84,9 +84,8 @@ func (c Client) VMGet(hostname string) (*types.VirtualServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := c.VirtualMachineConvertFromNetbox(vm, interfaces)
 
-	return out, nil
+	return c.VirtualMachineConvertFromNetbox(vm, interfaces)
 }
 
 //VMGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
@@ -105,16 +104,13 @@ func (c Client) VMGetCreate(vm types.VirtualServer, hyp *models.Device) (*types.
 }
 
 //VMDelete deletes a virtual machine in Netbox
-func (c Client) VMDelete(vmID int64) error {
+func (c Client) VMDelete(vmID int64) (err error) {
 	params := virtualization.NewVirtualizationVirtualMachinesDeleteParams()
 	params.SetID(vmID)
 
-	_, err := c.client.Virtualization.VirtualizationVirtualMachinesDelete(params, nil)
-	if err != nil {
-		return err
-	}
+	_, err = c.client.Virtualization.VirtualizationVirtualMachinesDelete(params, nil)
 
-	return nil
+	return err
 }
 
 //VMUpdate returns true if the vm was actually updated
