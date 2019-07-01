@@ -41,6 +41,11 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 	out.AssetTag = &i.AssetTag
 	out.Discovered = true
 
+	out.Tags = []string{}
+	if i.Tags != nil {
+		out.Tags = i.Tags
+	}
+
 	descriptionByte, err := json.Marshal(i.Details)
 	if err != nil {
 		return nil, err

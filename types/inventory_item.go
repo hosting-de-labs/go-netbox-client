@@ -20,6 +20,7 @@ type InventoryItem struct {
 	SerialNumber string
 	AssetTag     string
 	Details      map[string]string
+	Tags         []string
 }
 
 func (i *InventoryItem) AddDetail(key string, val string) {
