@@ -26,10 +26,3 @@ func (c Client) VLANGet(vlanID uint16, siteID *int64) (*models.VLAN, error) {
 
 	return res.Payload.Results[0], nil
 }
-
-//VlanGet returns a vlan-object based on the given vlanTag and siteID
-//
-// Deprecated: use VLANGet instead
-func (c Client) VlanGet(vlanTag int64, siteID int64) (*models.VLAN, error) {
-	return c.VLANGet(uint16(vlanTag), &siteID)
-}

@@ -15,7 +15,8 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 	netIf := types.NetworkInterface{}
 
 	if netboxInterface.FormFactor != nil {
-		netIf.FormFactor = types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
+		ff := types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
+		netIf.FormFactor = &ff
 	}
 
 	if netboxInterface.Name != nil {

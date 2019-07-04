@@ -8,6 +8,7 @@ import (
 
 func RunServer() {
 	//dcim
+	httpmock.RegisterResponder(mock_dcim.DeviceGetResponder())
 	httpmock.RegisterResponder(mock_dcim.InterfaceGetResponder())
 
 	//ipam

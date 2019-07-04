@@ -75,7 +75,7 @@ const (
 type NetworkInterface struct {
 	CommonEntity
 
-	FormFactor   InterfaceFormFactor
+	FormFactor   *InterfaceFormFactor
 	IPAddresses  []IPAddress
 	IsManagement bool
 	MACAddress   net.HardwareAddr

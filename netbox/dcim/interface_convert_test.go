@@ -45,8 +45,18 @@ func mockNetboxDeviceInterface() models.DeviceInterface {
 	return o
 }
 
-func TestConvertDeviceInterface(t *testing.T) {
+func mockNetworkInterface() types.NetworkInterface {
+	ff := types.InterfaceFormFactorEthernetFixed1000BaseT_1G
 
+	return types.NetworkInterface{
+		Name:         "eth0",
+		MACAddress:   net.HardwareAddr([]byte{0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}),
+		IsManagement: false,
+		FormFactor:   &ff,
+	}
+}
+
+func TestInterfaceConvertFromNetboxDeviceInterface(t *testing.T) {
 	netboxClient := netbox.NewNetboxAt("localhost:8000")
 	dcimClient := dcim.NewClient(*netboxClient)
 
@@ -71,4 +81,18 @@ func TestConvertDeviceInterface(t *testing.T) {
 	assert.Equal(t, "2001:db8:a::123", netIf.IPAddresses[1].Address)
 	assert.Equal(t, uint16(64), netIf.IPAddresses[1].CIDR)
 	assert.Equal(t, types.IPAddressFamilyIPv6, netIf.IPAddresses[1].Family)
+}
+
+func TestInterfaceConvertToNetboxDeviceInterface(t *testing.T) {
+	netboxClient := netbox.NewNetboxAt("localhost:8000")
+	dcimClient := dcim.NewClient(*netboxClient)
+
+	intf, err := dcimClient.InterfaceConvertToNetbox(10, mockNetworkInterface())
+	assert.NotNil(t, intf)
+	assert.Nil(t, err)
+
+	assert.Equal(t, "eth0", *intf.Name)
+	assert.Equal(t, "aa:bb:cc:dd:ee:ff", *intf.MacAddress)
+	assert.False(t, intf.MgmtOnly)
+	assert.Equal(t, int64(1000), intf.FormFactor)
 }

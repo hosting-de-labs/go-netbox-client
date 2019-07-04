@@ -1,8 +1,11 @@
 package dcim
 
 import (
+	"fmt"
 	"net"
 	"strings"
+
+	"github.com/go-openapi/swag"
 
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
@@ -18,7 +21,8 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 	netIf.OriginalEntity = interface{}(&netboxInterface)
 
 	if netboxInterface.FormFactor != nil {
-		netIf.FormFactor = types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
+		ff := types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
+		netIf.FormFactor = &ff
 	}
 
 	if netboxInterface.Name != nil {
@@ -81,4 +85,64 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 	}
 
 	return &netIf, nil
+}
+
+func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInterface) (out *models.WritableDeviceInterface, err error) {
+	device, err := c.DeviceGet(deviceID)
+	if err != nil {
+		return nil, err
+	}
+
+	if device.Site == nil {
+		return nil, fmt.Errorf("device with ID %d is not assigned to any site", deviceID)
+	}
+
+	siteID := device.Site.ID
+
+	out = &models.WritableDeviceInterface{}
+
+	out.Device = &deviceID
+	out.Name = &intf.Name
+
+	if intf.FormFactor != nil {
+		out.FormFactor = int64(*intf.FormFactor)
+	}
+
+	out.MgmtOnly = intf.IsManagement
+	out.MacAddress = swag.String(intf.MACAddress.String())
+
+	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
+		//Tagged mode
+		out.Mode = swag.Int64(200)
+	} else if intf.UntaggedVlan != nil {
+		//Access mode
+		out.Mode = swag.Int64(100)
+	} else if len(intf.TaggedVlans) > 0 {
+		//All Tagged mode
+		out.Mode = swag.Int64(300)
+	}
+
+	ipamClient := netboxIpam.NewClient(c.client)
+	if intf.UntaggedVlan != nil {
+		vlan, err := ipamClient.VLANGet(intf.UntaggedVlan.ID, &siteID)
+		if err != nil {
+			return nil, fmt.Errorf("an error occured when fetching vlan with tag %d: %s", intf.UntaggedVlan.ID, err)
+		}
+
+		out.UntaggedVlan = &vlan.ID
+	}
+
+	out.TaggedVlans = []int64{}
+	if len(intf.TaggedVlans) > 0 {
+		for _, vlanTag := range intf.TaggedVlans {
+			vlan, err := ipamClient.VLANGet(vlanTag.ID, &siteID)
+			if err != nil {
+				return nil, fmt.Errorf("an error occured when fetching vlan with tag %d: %s", vlanTag.ID, err)
+			}
+
+			out.TaggedVlans = append(out.TaggedVlans, vlan.ID)
+		}
+	}
+
+	return out, nil
 }
