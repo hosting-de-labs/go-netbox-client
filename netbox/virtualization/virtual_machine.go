@@ -10,62 +10,8 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-//VMGet retrieves an existing VM object from netbox by it's hostname.
-func (c Client) VirtualMachineGet(vmID int64) (out *types.VirtualServer, err error) {
-	params := virtualization.NewVirtualizationVirtualMachinesReadParams()
-	params.WithID(vmID)
-
-	res, err := c.client.Virtualization.VirtualizationVirtualMachinesRead(params, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	interfaces, err := c.InterfaceFindAll(vmID)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.VirtualMachineConvertFromNetbox(*res.Payload, interfaces)
-}
-
-//VirtualMachineFindAll returns all found virtual machines
-func (c Client) VirtualMachineFindAll(limit int64, offset int64) (int64, []*models.VirtualMachine, error) {
-	params := virtualization.NewVirtualizationVirtualMachinesListParams()
-
-	if limit > 0 {
-		params.WithLimit(&limit)
-	}
-
-	if offset > 0 {
-		params.WithOffset(&offset)
-	}
-
-	res, err := c.client.Virtualization.VirtualizationVirtualMachinesList(params, nil)
-
-	if err != nil {
-		return 0, nil, err
-	}
-
-	return *res.Payload.Count, res.Payload.Results, nil
-}
-
-//VirtualMachineFindAll returns the first found virtual machines
-func (c Client) VirtualMachineFind(hostname string) (out *types.VirtualServer, err error) {
-	params := virtualization.NewVirtualizationVirtualMachinesListParams()
-	params.WithName(&hostname)
-
-	res, err := c.client.Virtualization.VirtualizationVirtualMachinesList(params, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return c.VirtualMachineConvertFromNetbox(*res.Payload.Results[0], nil)
-}
-
-//VMCreate creates a new VM object in Netbox.
-func (c Client) VMCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
+//VirtualMachineCreate creates a new VM object in Netbox.
+func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
 	var netboxVM models.WritableVirtualMachine
 	netboxVM.Name = &vm.Hostname
 	netboxVM.Tags = []string{}
@@ -90,23 +36,8 @@ func (c Client) VMCreate(clusterID int64, vm types.VirtualServer) (*types.Virtua
 	return c.VirtualMachineGet(res.Payload.ID)
 }
 
-//VMGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
-func (c Client) VMGetCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
-	vmOut, err := c.VirtualMachineFind(vm.Hostname)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if vmOut == nil {
-		return c.VMCreate(clusterID, vm)
-	}
-
-	return vmOut, nil
-}
-
-//VMDelete deletes a virtual machine in Netbox
-func (c Client) VMDelete(vmID int64) (err error) {
+//VirtualMachineDelete deletes a virtual machine in Netbox
+func (c Client) VirtualMachineDelete(vmID int64) (err error) {
 	params := virtualization.NewVirtualizationVirtualMachinesDeleteParams()
 	params.SetID(vmID)
 
@@ -115,7 +46,76 @@ func (c Client) VMDelete(vmID int64) (err error) {
 	return err
 }
 
-//VMUpdate returns true if the vm was actually updated
+//VirtualMachineFindAll returns all found virtual machines
+func (c Client) VirtualMachineFindAll(limit int64, offset int64) (int64, []*models.VirtualMachine, error) {
+	params := virtualization.NewVirtualizationVirtualMachinesListParams()
+
+	if limit > 0 {
+		params.WithLimit(&limit)
+	}
+
+	if offset > 0 {
+		params.WithOffset(&offset)
+	}
+
+	res, err := c.client.Virtualization.VirtualizationVirtualMachinesList(params, nil)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return *res.Payload.Count, res.Payload.Results, nil
+}
+
+//VirtualMachineFind returns the first found virtual machines
+func (c Client) VirtualMachineFind(hostname string) (out *types.VirtualServer, err error) {
+	params := virtualization.NewVirtualizationVirtualMachinesListParams()
+	params.WithName(&hostname)
+
+	res, err := c.client.Virtualization.VirtualizationVirtualMachinesList(params, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return c.VirtualMachineConvertFromNetbox(*res.Payload.Results[0], nil)
+}
+
+//VirtualMachineGet retrieves an existing VM object from netbox by it's hostname.
+func (c Client) VirtualMachineGet(vmID int64) (out *types.VirtualServer, err error) {
+	params := virtualization.NewVirtualizationVirtualMachinesReadParams()
+	params.WithID(vmID)
+
+	res, err := c.client.Virtualization.VirtualizationVirtualMachinesRead(params, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	interfaces, err := c.InterfaceFindAll(vmID)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.VirtualMachineConvertFromNetbox(*res.Payload, interfaces)
+}
+
+//VMGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
+func (c Client) VirtualMachineGetCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
+	vmOut, err := c.VirtualMachineFind(vm.Hostname)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if vmOut == nil {
+		return c.VirtualMachineCreate(clusterID, vm)
+	}
+
+	return vmOut, nil
+}
+
+//VirtualMachineUpdate returns true if the vm was actually updated
 func (c Client) VirtualMachineUpdate(vm types.VirtualServer, siteID int64, clusterID int64) (updated bool, err error) {
 	if !vm.IsChanged() {
 		return false, nil
