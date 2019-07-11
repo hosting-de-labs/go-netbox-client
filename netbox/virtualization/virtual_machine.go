@@ -116,10 +116,17 @@ func (c Client) VirtualMachineGetCreate(clusterID int64, vm types.VirtualServer)
 }
 
 //VirtualMachineUpdate returns true if the vm was actually updated
-func (c Client) VirtualMachineUpdate(vm types.VirtualServer, siteID int64, clusterID int64) (updated bool, err error) {
+func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err error) {
 	if !vm.IsChanged() {
 		return false, nil
 	}
+
+	res, err := c.VirtualMachineFind(vm.Hostname)
+	if err != nil {
+		return false, err
+	}
+
+	nbVm := res.Metadata.NetboxEntity.(models.VirtualMachine)
 
 	dcimClient := netboxDcim.NewClient(c.client)
 
@@ -140,7 +147,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer, siteID int64, clust
 
 	data.Name = swag.String(vm.Hostname)
 	data.Tags = vm.Tags
-	data.Cluster = &clusterID
+	data.Cluster = &nbVm.Cluster.ID
 	data.Comments = utils.GenerateVMComment(vm)
 
 	//custom fields
@@ -178,7 +185,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer, siteID int64, clust
 
 	//we need to update interfaces before we possibly assign new primary ip addresses
 	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
-	u, err := c.updateInterfaces(vm, siteID)
+	u, err := c.updateInterfaces(vm, nbVm.Site.ID)
 	if err != nil {
 		return false, err
 	}
