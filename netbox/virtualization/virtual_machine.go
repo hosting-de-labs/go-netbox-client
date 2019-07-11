@@ -10,9 +10,9 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
-	"github.com/sirupsen/logrus"
 )
 
+//VirtualMachineFindAll returns all found virtual machines
 func (c Client) VirtualMachineFindAll(limit int64, offset int64) (int64, []*models.VirtualMachine, error) {
 	params := virtualization.NewVirtualizationVirtualMachinesListParams()
 
@@ -34,12 +34,12 @@ func (c Client) VirtualMachineFindAll(limit int64, offset int64) (int64, []*mode
 }
 
 //VMCreate creates a new VM object in Netbox.
-func (c Client) VMCreate(vm types.VirtualServer, hyp *models.Device) (*types.VirtualServer, error) {
+func (c Client) VMCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
 	var netboxVM models.WritableVirtualMachine
 	netboxVM.Name = &vm.Hostname
 	netboxVM.Tags = []string{}
 
-	netboxVM.Cluster = &hyp.Cluster.ID
+	netboxVM.Cluster = &clusterID
 
 	netboxVM.Vcpus = swag.Int64(int64(vm.Resources.Cores))
 	netboxVM.Memory = swag.Int64(vm.Resources.Memory)
@@ -89,7 +89,7 @@ func (c Client) VMGet(hostname string) (out *types.VirtualServer, err error) {
 }
 
 //VMGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
-func (c Client) VMGetCreate(vm types.VirtualServer, hyp *models.Device) (*types.VirtualServer, error) {
+func (c Client) VMGetCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
 	vmOut, err := c.VMGet(vm.Hostname)
 
 	if err != nil {
@@ -97,7 +97,7 @@ func (c Client) VMGetCreate(vm types.VirtualServer, hyp *models.Device) (*types.
 	}
 
 	if vmOut == nil {
-		return c.VMCreate(vm, hyp)
+		return c.VMCreate(clusterID, vm)
 	}
 
 	return vmOut, nil
@@ -114,7 +114,7 @@ func (c Client) VMDelete(vmID int64) (err error) {
 }
 
 //VMUpdate returns true if the vm was actually updated
-func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, error) {
+func (c Client) VMUpdate(vm types.VirtualServer) (updated bool, err error) {
 	if !vm.IsChanged() {
 		return false, nil
 	}
@@ -126,17 +126,21 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, e
 		return false, err
 	}
 
+	h := hyp.Metadata.NetboxEntity.(models.Device)
+
 	//check if base data is equal
 	if vm.IsEqual(vm.OriginalEntity.(types.VirtualServer), false) {
-		c.updateInterfaces(vm, hyp, logger)
-		return true, nil
+		_, err = c.updateInterfaces(vm, h)
+		if err != nil {
+			return false, err
+		}
 	}
 
 	data := new(models.WritableVirtualMachine)
 
 	data.Name = swag.String(vm.Hostname)
 	data.Tags = vm.Tags
-	data.Cluster = &hyp.Cluster.ID
+	data.Cluster = &h.Cluster.ID
 	data.Comments = utils.GenerateVMComment(vm)
 
 	//custom fields
@@ -155,7 +159,7 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, e
 
 	//Primary IPs
 	if len(vm.PrimaryIPv4.Address) > 0 && vm.OriginalEntity.(types.VirtualServer).PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
-		IPID, err := c.preparePrimaryIpAddress(vm.PrimaryIPv4)
+		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv4)
 		if err != nil {
 			return false, err
 		}
@@ -164,7 +168,7 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, e
 	}
 
 	if len(vm.PrimaryIPv6.Address) > 0 && vm.OriginalEntity.(types.VirtualServer).PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
-		IPID, err := c.preparePrimaryIpAddress(vm.PrimaryIPv6)
+		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv6)
 		if err != nil {
 			return false, err
 		}
@@ -174,10 +178,17 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, e
 
 	//we need to update interfaces before we possibly assign new primary ip addresses
 	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
-	c.updateInterfaces(vm, hyp, logger)
+	u, err := c.updateInterfaces(vm, h)
+	if err != nil {
+		return false, err
+	}
+
+	if u != false {
+		updated = true
+	}
 
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.ID)
+	params.WithID(vm.Metadata.NetboxEntity.(models.VirtualMachine).ID)
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
@@ -185,12 +196,12 @@ func (c Client) VMUpdate(vm *types.VirtualServer, logger *logrus.Entry) (bool, e
 		return false, err
 	}
 
-	return true, nil
+	return updated, nil
 }
 
-//preparePrimaryIpAddress is a helper method to clear a possible primary ip address assignment before assigning an ip
+//preparePrimaryIPAddress is a helper method to clear a possible primary ip address assignment before assigning an ip
 //address to a different vm
-func (c Client) preparePrimaryIpAddress(primaryIP types.IPAddress) (int64, error) {
+func (c Client) preparePrimaryIPAddress(primaryIP types.IPAddress) (int64, error) {
 	ipamClient := netboxIpam.NewClient(c.client)
 
 	ip, err := ipamClient.IPAddressFind(primaryIP)
@@ -213,38 +224,32 @@ func (c Client) preparePrimaryIpAddress(primaryIP types.IPAddress) (int64, error
 	return ip.ID, nil
 }
 
-func (c Client) updateInterfaces(vm *types.VirtualServer, hyp *models.Device, logger *logrus.Entry) {
+func (c Client) updateInterfaces(vm types.VirtualServer, hyp models.Device) (updated bool, err error) {
 	ipamClient := netboxIpam.NewClient(c.client)
 
 	//process network interfaces
 	for _, netIf := range vm.NetworkInterfaces {
 		vlan := new(models.VLAN)
 		if netIf.UntaggedVlan != nil {
-			var err error
 			vlan, err = ipamClient.VLANGet(netIf.UntaggedVlan.ID, &hyp.Site.ID)
 
 			if err != nil {
-				logger.WithError(err).Errorln("Cannot get VLAN")
-				continue
+				return false, err
 			}
 		}
 
 		vmInterface, err := c.InterfaceGetCreate(vm, netIf.Name, vlan)
 		if err != nil {
-			logger.WithError(err).Error("Cannot create interface")
-			continue
+			return false, err
 		}
 
 		for _, network := range netIf.IPAddresses {
 			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.ID)
 			if err != nil {
-				logger.WithFields(logrus.Fields{
-					"host":  vm.Hostname,
-					"error": err,
-					"ip":    fmt.Sprintf("%s/%d", network.Address, network.CIDR),
-				}).Error("Cannot assign ip to interface")
-				continue
+				return false, err
 			}
 		}
 	}
+
+	return true, nil
 }

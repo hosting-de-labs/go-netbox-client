@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	NetboxSyncVmCommentStartingEndingLine string = "--- NETBOX SYNC: DO NOT MODIFY ---"
+	//NetboxSyncVMCommentStartingEndingLine
+	NetboxSyncVMCommentStartingEndingLine string = "--- NETBOX SYNC: DO NOT MODIFY ---"
 )
 
 func SplitCidrFromIP(ipWithCidr string) (string, uint16, error) {
@@ -64,8 +65,8 @@ func GenerateSlug(s string) string {
 	return slug
 }
 
-func GenerateVMComment(host *types.VirtualServer) string {
-	comment := NetboxSyncVmCommentStartingEndingLine
+func GenerateVMComment(host types.VirtualServer) string {
+	comment := NetboxSyncVMCommentStartingEndingLine
 
 	//regular comments
 	if len(host.Comments) > 0 {
@@ -85,7 +86,7 @@ func GenerateVMComment(host *types.VirtualServer) string {
 	}
 
 	comment += "\n"
-	comment += NetboxSyncVmCommentStartingEndingLine
+	comment += NetboxSyncVMCommentStartingEndingLine
 
 	return comment
 }
@@ -96,7 +97,7 @@ func ParseVMComment(comments string, host *types.VirtualServer) {
 		//Parse Comments
 		if lines[i] == "Comments:" {
 			for i = i + 1; i < len(lines); i++ {
-				if lines[i] == "" || lines[i] == NetboxSyncVmCommentStartingEndingLine || strings.HasSuffix(lines[i], ":") {
+				if lines[i] == "" || lines[i] == NetboxSyncVMCommentStartingEndingLine || strings.HasSuffix(lines[i], ":") {
 					break
 				}
 
@@ -107,7 +108,7 @@ func ParseVMComment(comments string, host *types.VirtualServer) {
 		//Parse additional disks
 		if lines[i] == "Additional disks:" {
 			for i = i + 1; i < len(lines); i++ {
-				if lines[i] == "" || lines[i] == NetboxSyncVmCommentStartingEndingLine || strings.HasSuffix(lines[i], ":") {
+				if lines[i] == "" || lines[i] == NetboxSyncVMCommentStartingEndingLine || strings.HasSuffix(lines[i], ":") {
 					break
 				}
 

@@ -6,9 +6,12 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.VirtualMachineInterface) (*types.VirtualServer, error) {
-	var out types.VirtualServer
-	out.ID = netboxVM.ID
+//VirtualMachineConvertFromNetbox converts a netbox virtual machine entity to a VirtualServer entity
+func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.VirtualMachineInterface) (out *types.VirtualServer, err error) {
+	out = &types.VirtualServer{}
+	out.Metadata.ID = netboxVM.ID
+	out.Metadata.NetboxEntity = netboxVM
+
 	out.Hostname = *netboxVM.Name
 
 	if netboxVM.PrimaryIp4 != nil {
@@ -66,7 +69,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 	}
 
 	//read comments
-	utils.ParseVMComment(netboxVM.Comments, &out)
+	utils.ParseVMComment(netboxVM.Comments, out)
 
 	//interfaces / ips
 	for _, netboxInterface := range interfaces {
@@ -79,6 +82,5 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 	}
 
 	out.OriginalEntity = out.Copy()
-
-	return &out, nil
+	return out, nil
 }

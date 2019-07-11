@@ -10,7 +10,6 @@ import (
 type Host struct {
 	CommonEntity
 
-	ID          int64
 	Hostname    string
 	PrimaryIPv4 IPAddress
 	PrimaryIPv6 IPAddress
@@ -48,7 +47,6 @@ func (h *Host) AddTag(tags ...string) {
 //Copy creates a deep copy of the given host
 func (h Host) Copy() Host {
 	out := Host{
-		ID:          h.ID,
 		Hostname:    h.Hostname,
 		IsManaged:   h.IsManaged,
 		PrimaryIPv4: h.PrimaryIPv4,

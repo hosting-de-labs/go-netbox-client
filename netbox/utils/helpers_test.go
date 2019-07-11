@@ -93,7 +93,7 @@ func TestGenerateVMComment(t *testing.T) {
 			types.VirtualServer{
 				Resources: types.VirtualServerResources{
 					Disks: []types.VirtualServerDisk{
-						types.VirtualServerDisk{
+						{
 							Size: 20,
 						},
 					},
@@ -106,10 +106,10 @@ func TestGenerateVMComment(t *testing.T) {
 			types.VirtualServer{
 				Resources: types.VirtualServerResources{
 					Disks: []types.VirtualServerDisk{
-						types.VirtualServerDisk{
+						{
 							Size: 20,
 						},
-						types.VirtualServerDisk{
+						{
 							Size: 10,
 						},
 					},
@@ -124,16 +124,16 @@ Size: 10 MBytes
 			types.VirtualServer{
 				Resources: types.VirtualServerResources{
 					Disks: []types.VirtualServerDisk{
-						types.VirtualServerDisk{
+						{
 							Size: 20,
 						},
-						types.VirtualServerDisk{
+						{
 							Size: 10,
 						},
-						types.VirtualServerDisk{
+						{
 							Size: 30,
 						},
-						types.VirtualServerDisk{
+						{
 							Size: 40,
 						},
 					},
@@ -168,7 +168,7 @@ Foo
 				},
 				Resources: types.VirtualServerResources{
 					Disks: []types.VirtualServerDisk{
-						types.VirtualServerDisk{
+						{
 							Size: 20,
 						},
 					},
@@ -188,10 +188,10 @@ Foo
 				},
 				Resources: types.VirtualServerResources{
 					Disks: []types.VirtualServerDisk{
-						types.VirtualServerDisk{
+						{
 							Size: 20,
 						},
-						types.VirtualServerDisk{
+						{
 							Size: 10,
 						},
 					},
@@ -207,7 +207,7 @@ Size: 10 MBytes
 	}
 
 	for _, testcase := range cases {
-		assert.Equal(t, testcase.result, GenerateVMComment(&testcase.host))
+		assert.Equal(t, testcase.result, GenerateVMComment(testcase.host))
 	}
 }
 
@@ -231,10 +231,10 @@ Size: 10 MBytes
 				},
 				Resources: types.VirtualServerResources{
 					Disks: []types.VirtualServerDisk{
-						types.VirtualServerDisk{
+						{
 							Size: 20,
 						},
-						types.VirtualServerDisk{
+						{
 							Size: 10,
 						},
 					},

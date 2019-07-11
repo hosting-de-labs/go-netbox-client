@@ -3,6 +3,7 @@ package dcim
 import (
 	"fmt"
 	"net"
+	"reflect"
 	"strings"
 
 	"github.com/go-openapi/swag"
@@ -14,6 +15,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/types"
 )
 
+//InterfaceConvertFromNetbox allows to convert a DeviceInterface to a NetworkInterface
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterface) (*types.NetworkInterface, error) {
 	netIf := types.NetworkInterface{}
 
@@ -87,17 +89,35 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 	return &netIf, nil
 }
 
+//InterfaceConvertToNetbox allows to convert a NetworkInterface to a netbox compatible device interface
 func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInterface) (out *models.WritableDeviceInterface, err error) {
 	device, err := c.DeviceGet(deviceID)
 	if err != nil {
 		return nil, err
 	}
 
-	if device.Site == nil {
-		return nil, fmt.Errorf("device with ID %d is not assigned to any site", deviceID)
-	}
+	//d := device.Metadata.GetEntity().DcimDeviceWithConfigContext()
 
-	siteID := device.Site.ID
+	var siteID int64
+	switch device.Metadata.NetboxEntity.(type) {
+	case models.Device:
+		d := device.Metadata.NetboxEntity.(models.Device)
+		if d.Site == nil {
+			return nil, fmt.Errorf("device with ID %d is not assigned to any site", deviceID)
+		}
+
+		siteID = d.Site.ID
+	case models.DeviceWithConfigContext:
+		d := device.Metadata.NetboxEntity.(models.DeviceWithConfigContext)
+		if d.Site == nil {
+			return nil, fmt.Errorf("device with ID %d is not assigned to any site", deviceID)
+		}
+
+		siteID = d.Site.ID
+
+	default:
+		return nil, fmt.Errorf("Unsupported type for device: %s", reflect.TypeOf(device.Metadata.NetboxEntity))
+	}
 
 	out = &models.WritableDeviceInterface{}
 

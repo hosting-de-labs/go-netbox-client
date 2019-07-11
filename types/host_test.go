@@ -12,7 +12,6 @@ import (
 
 func mockHost() types.Host {
 	return types.Host{
-		ID:       1,
 		Hostname: "host1",
 		PrimaryIPv4: types.IPAddress{
 			Address: "192.168.1.1",
@@ -113,7 +112,6 @@ func TestHost_IsEqual(t *testing.T) {
 		},
 		{
 			host1: types.Host{
-				ID:        10,
 				Hostname:  "Server",
 				IsManaged: true,
 				PrimaryIPv4: types.IPAddress{
@@ -136,7 +134,6 @@ func TestHost_IsEqual(t *testing.T) {
 				},
 			},
 			host2: types.Host{
-				ID:        10,
 				Hostname:  "Server",
 				IsManaged: true,
 				PrimaryIPv4: types.IPAddress{
@@ -159,15 +156,6 @@ func TestHost_IsEqual(t *testing.T) {
 				},
 			},
 			isEqual: true,
-		},
-		{
-			host1: types.Host{
-				ID: 10,
-			},
-			host2: types.Host{
-				ID: 20,
-			},
-			isEqual: false,
 		},
 		{
 			host1: types.Host{

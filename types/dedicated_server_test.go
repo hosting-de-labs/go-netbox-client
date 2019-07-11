@@ -12,7 +12,6 @@ import (
 func mockDedicatedServer() types.DedicatedServer {
 	return types.DedicatedServer{
 		Host: types.Host{
-			ID:        10,
 			Hostname:  "host1",
 			IsManaged: false,
 		},

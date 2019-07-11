@@ -8,7 +8,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func (c Client) DeviceFindAll(limit int64, offset int64) (int64, []*models.Device, error) {
+func (c Client) DeviceFindAll(limit int64, offset int64) ([]*models.Device, error) {
 	params := dcim.NewDcimDevicesListParams()
 
 	if limit > 0 {
@@ -22,13 +22,13 @@ func (c Client) DeviceFindAll(limit int64, offset int64) (int64, []*models.Devic
 	res, err := c.client.Dcim.DcimDevicesList(params, nil)
 
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 
-	return *res.Payload.Count, res.Payload.Results, nil
+	return res.Payload.Results, nil
 }
 
-func (c Client) DeviceGet(deviceID int64) (*models.DeviceWithConfigContext, error) {
+func (c Client) DeviceGet(deviceID int64) (*types.DedicatedServer, error) {
 	params := dcim.NewDcimDevicesReadParams()
 	params.WithID(deviceID)
 
@@ -37,12 +37,11 @@ func (c Client) DeviceGet(deviceID int64) (*models.DeviceWithConfigContext, erro
 		return nil, err
 	}
 
-	return res.Payload, nil
+	return c.DeviceConvertFromNetbox(*res.Payload)
 }
 
 //DeviceFindByHostname retrieves a model.Device object from Netbox by looking up the given hostname
-//TODO: return *types.DedicatedServer
-func (c Client) DeviceFindByHostname(hostname string) (*models.Device, error) {
+func (c Client) DeviceFindByHostname(hostname string) (out *types.DedicatedServer, err error) {
 	params := dcim.NewDcimDevicesListParams()
 	params.WithName(&hostname)
 
@@ -60,7 +59,7 @@ func (c Client) DeviceFindByHostname(hostname string) (*models.Device, error) {
 		return nil, fmt.Errorf("Hostname %s is not unique", hostname)
 	}
 
-	return res.Payload.Results[0], nil
+	return c.DeviceConvertFromNetbox(*res.Payload.Results[0])
 }
 
 //TODO: Don't forget to cache
@@ -84,7 +83,7 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 	//Go through every item and check if it must be updated
 
 	params := dcim.NewDcimDevicesUpdateParams()
-	params.WithID(host.OriginalEntity.(types.DedicatedServer).ID).WithData(data)
+	params.WithID(host.Metadata.ID).WithData(data)
 
 	//TODO: Iterate over Inventory Items
 
@@ -92,14 +91,15 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 }
 
 //HypervisorFindByHostname is like NetboxDeviceGet but checks if the device has a cluster assigned
-func (c Client) HypervisorFindByHostname(hostname string) (*models.Device, error) {
+func (c Client) HypervisorFindByHostname(hostname string) (*types.DedicatedServer, error) {
 	res, err := c.DeviceFindByHostname(hostname)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if res.Cluster == nil {
+	d := res.Metadata.NetboxEntity.(models.Device)
+	if d.Cluster == nil {
 		return nil, fmt.Errorf("device %s not assigned to a Virtualization Cluster", hostname)
 	}
 

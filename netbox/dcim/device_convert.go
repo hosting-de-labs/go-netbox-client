@@ -1,6 +1,8 @@
 package dcim
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
@@ -8,15 +10,40 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.DedicatedServer, error) {
-	out := new(types.DedicatedServer)
+func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.DedicatedServer, err error) {
+	out = &types.DedicatedServer{}
 
-	out.ID = device.ID
-	out.Hostname = *device.Name
-	out.Tags = device.Tags
-	out.Comments = strings.Split(device.Comments, "\n")
+	primaryIPv4 := &models.NestedIPAddress{}
+	primaryIPv6 := &models.NestedIPAddress{}
+	switch device.(type) {
+	case models.Device:
+		d := device.(models.Device)
 
-	//iterate over tags to find managed tag
+		out.Metadata.ID = d.ID
+		out.Metadata.NetboxEntity = device
+
+		out.Hostname = *d.Name
+		out.Tags = d.Tags
+		out.Comments = strings.Split(d.Comments, "\n")
+
+		primaryIPv4 = d.PrimaryIp4
+		primaryIPv6 = d.PrimaryIp6
+	case models.DeviceWithConfigContext:
+		d := device.(models.DeviceWithConfigContext)
+
+		out.Metadata.ID = d.ID
+		out.Metadata.NetboxEntity = device
+
+		out.Hostname = *d.Name
+		out.Tags = d.Tags
+		out.Comments = strings.Split(d.Comments, "\n")
+
+		primaryIPv4 = d.PrimaryIp4
+		primaryIPv6 = d.PrimaryIp6
+	default:
+		return nil, fmt.Errorf("unsupported type for device: %s", reflect.TypeOf(device))
+	}
+
 	for _, tag := range out.Tags {
 		if tag == "managed" {
 			out.IsManaged = true
@@ -24,9 +51,9 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 		}
 	}
 
-	if device.PrimaryIp4 != nil {
+	if primaryIPv4 != nil {
 		//split cidr
-		address, cidr, err := utils.SplitCidrFromIP(*device.PrimaryIp4.Address)
+		address, cidr, err := utils.SplitCidrFromIP(*primaryIPv4.Address)
 		if err != nil {
 			return nil, err
 		}
@@ -38,9 +65,9 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 		}
 	}
 
-	if device.PrimaryIp6 != nil {
+	if primaryIPv6 != nil {
 		//split cidr
-		address, cidr, err := utils.SplitCidrFromIP(*device.PrimaryIp6.Address)
+		address, cidr, err := utils.SplitCidrFromIP(*primaryIPv6.Address)
 		if err != nil {
 			return nil, err
 		}
@@ -54,5 +81,5 @@ func (c Client) DeviceConvertFromNetbox(device *models.Device) (*types.Dedicated
 
 	out.OriginalEntity = out.Copy()
 
-	return nil, nil
+	return out, nil
 }
