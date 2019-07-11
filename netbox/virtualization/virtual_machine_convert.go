@@ -1,65 +1,124 @@
 package virtualization
 
 import (
+	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
 //VirtualMachineConvertFromNetbox converts a netbox virtual machine entity to a VirtualServer entity
-func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, interfaces []*models.VirtualMachineInterface) (out *types.VirtualServer, err error) {
+func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces []*models.VirtualMachineInterface) (out *types.VirtualServer, err error) {
 	out = &types.VirtualServer{}
-	out.Metadata.ID = netboxVM.ID
-	out.Metadata.NetboxEntity = netboxVM
 
-	out.Hostname = *netboxVM.Name
+	var cf interface{}
+	primaryIPv4 := &models.NestedIPAddress{}
+	primaryIPv6 := &models.NestedIPAddress{}
+	switch netboxVM.(type) {
+	case models.VirtualMachine:
+		vm := netboxVM.(models.VirtualMachine)
 
-	if netboxVM.PrimaryIp4 != nil {
-		address, cidr, err := utils.SplitCidrFromIP(*netboxVM.PrimaryIp4.Address)
-		if err != nil {
-			return nil, err
+		out.Metadata.ID = vm.ID
+		out.Metadata.NetboxEntity = netboxVM
+
+		out.Hostname = *vm.Name
+		out.Tags = vm.Tags
+		out.Comments = strings.Split(vm.Comments, "\n")
+
+		if vm.Vcpus != nil {
+			out.Resources.Cores = int(*vm.Vcpus)
 		}
 
-		out.PrimaryIPv4.Address = address
-		out.PrimaryIPv4.CIDR = cidr
-		out.PrimaryIPv4.Family = types.IPAddressFamilyIPv4
-	}
-
-	if netboxVM.PrimaryIp6 != nil {
-		address, cidr, err := utils.SplitCidrFromIP(*netboxVM.PrimaryIp6.Address)
-		if err != nil {
-			return nil, err
+		if vm.Memory != nil {
+			out.Resources.Memory = *vm.Memory
 		}
 
-		out.PrimaryIPv6.Address = address
-		out.PrimaryIPv6.CIDR = cidr
-		out.PrimaryIPv6.Family = types.IPAddressFamilyIPv6
+		if vm.Disk != nil {
+			out.Resources.Disks = append(out.Resources.Disks, types.VirtualServerDisk{
+				Size: *vm.Disk * 1024,
+			})
+		}
+
+		primaryIPv4 = vm.PrimaryIp4
+		primaryIPv6 = vm.PrimaryIp6
+		cf = vm.CustomFields
+
+		//read comments
+		utils.ParseVMComment(vm.Comments, out)
+	case models.VirtualMachineWithConfigContext:
+		vm := netboxVM.(models.VirtualMachineWithConfigContext)
+
+		out.Metadata.ID = vm.ID
+		out.Metadata.NetboxEntity = netboxVM
+
+		out.Hostname = *vm.Name
+		out.Tags = vm.Tags
+		out.Comments = strings.Split(vm.Comments, "\n")
+
+		if vm.Vcpus != nil {
+			out.Resources.Cores = int(*vm.Vcpus)
+		}
+
+		if vm.Memory != nil {
+			out.Resources.Memory = *vm.Memory
+		}
+
+		if vm.Disk != nil {
+			out.Resources.Disks = append(out.Resources.Disks, types.VirtualServerDisk{
+				Size: *vm.Disk * 1024,
+			})
+		}
+
+		primaryIPv4 = vm.PrimaryIp4
+		primaryIPv6 = vm.PrimaryIp6
+		cf = vm.CustomFields
+
+		//read comments
+		utils.ParseVMComment(vm.Comments, out)
+	default:
+		return nil, fmt.Errorf("unsupported type for device: %s", reflect.TypeOf(netboxVM))
 	}
 
-	if netboxVM.Vcpus != nil {
-		out.Resources.Cores = int(*netboxVM.Vcpus)
-	}
-
-	if netboxVM.Memory != nil {
-		out.Resources.Memory = *netboxVM.Memory
-	}
-
-	if netboxVM.Disk != nil {
-		out.Resources.Disks = append(out.Resources.Disks, types.VirtualServerDisk{
-			Size: *netboxVM.Disk * 1024,
-		})
-	}
-
-	for _, tag := range netboxVM.Tags {
-		out.AddTag(tag)
-
+	for _, tag := range out.Tags {
 		if tag == "managed" {
 			out.IsManaged = true
+			break
 		}
 	}
 
-	if netboxVM.CustomFields != nil {
-		customFields := utils.ConvertCustomFields(netboxVM.CustomFields)
+	if primaryIPv4 != nil {
+		//split cidr
+		address, cidr, err := utils.SplitCidrFromIP(*primaryIPv4.Address)
+		if err != nil {
+			return nil, err
+		}
+
+		out.PrimaryIPv4 = types.IPAddress{
+			Address: address,
+			CIDR:    cidr,
+			Family:  types.IPAddressFamilyIPv4,
+		}
+	}
+
+	if primaryIPv6 != nil {
+		//split cidr
+		address, cidr, err := utils.SplitCidrFromIP(*primaryIPv6.Address)
+		if err != nil {
+			return nil, err
+		}
+
+		out.PrimaryIPv6 = types.IPAddress{
+			Address: address,
+			CIDR:    cidr,
+			Family:  types.IPAddressFamilyIPv6,
+		}
+	}
+
+	if cf != nil {
+		customFields := utils.ConvertCustomFields(cf)
 		for key, val := range customFields {
 			switch key {
 			case "hypervisor_label":
@@ -68,17 +127,16 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM models.VirtualMachine, 
 		}
 	}
 
-	//read comments
-	utils.ParseVMComment(netboxVM.Comments, out)
+	if interfaces != nil {
+		//interfaces / ips
+		for _, netboxInterface := range interfaces {
+			netIf, err := c.InterfaceConvertFromNetbox(*netboxInterface)
+			if err != nil {
+				return nil, err
+			}
 
-	//interfaces / ips
-	for _, netboxInterface := range interfaces {
-		netIf, err := c.InterfaceConvertFromNetbox(*netboxInterface)
-		if err != nil {
-			return nil, err
+			out.NetworkInterfaces = append(out.NetworkInterfaces, *netIf)
 		}
-
-		out.NetworkInterfaces = append(out.NetworkInterfaces, *netIf)
 	}
 
 	out.OriginalEntity = out.Copy()

@@ -8,7 +8,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func (c Client) DeviceFindAll(limit int64, offset int64) ([]*models.Device, error) {
+func (c Client) DeviceFindAll(limit int64, offset int64) (out []types.DedicatedServer, err error) {
 	params := dcim.NewDcimDevicesListParams()
 
 	if limit > 0 {
@@ -20,28 +20,24 @@ func (c Client) DeviceFindAll(limit int64, offset int64) ([]*models.Device, erro
 	}
 
 	res, err := c.client.Dcim.DcimDevicesList(params, nil)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return res.Payload.Results, nil
-}
+	for _, nbDevice := range res.Payload.Results {
+		intf, err := c.DeviceConvertFromNetbox(*nbDevice)
+		if err != nil {
+			return nil, err
+		}
 
-func (c Client) DeviceGet(deviceID int64) (*types.DedicatedServer, error) {
-	params := dcim.NewDcimDevicesReadParams()
-	params.WithID(deviceID)
-
-	res, err := c.client.Dcim.DcimDevicesRead(params, nil)
-	if err != nil {
-		return nil, err
+		out = append(out, *intf)
 	}
 
-	return c.DeviceConvertFromNetbox(*res.Payload)
+	return out, nil
 }
 
-//DeviceFindByHostname retrieves a model.Device object from Netbox by looking up the given hostname
-func (c Client) DeviceFindByHostname(hostname string) (out *types.DedicatedServer, err error) {
+//DeviceFind retrieves a model.Device object from Netbox by looking up the given hostname
+func (c Client) DeviceFind(hostname string) (out *types.DedicatedServer, err error) {
 	params := dcim.NewDcimDevicesListParams()
 	params.WithName(&hostname)
 
@@ -62,10 +58,22 @@ func (c Client) DeviceFindByHostname(hostname string) (out *types.DedicatedServe
 	return c.DeviceConvertFromNetbox(*res.Payload.Results[0])
 }
 
+func (c Client) DeviceGet(deviceID int64) (*types.DedicatedServer, error) {
+	params := dcim.NewDcimDevicesReadParams()
+	params.WithID(deviceID)
+
+	res, err := c.client.Dcim.DcimDevicesRead(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.DeviceConvertFromNetbox(*res.Payload)
+}
+
 //TODO: Don't forget to cache
 func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 	if host.OriginalEntity == nil {
-		oh, err := c.DeviceFindByHostname(host.Hostname)
+		oh, err := c.DeviceFind(host.Hostname)
 		if err != nil {
 			return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", host.Hostname)
 		}
@@ -92,7 +100,7 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 
 //HypervisorFindByHostname is like NetboxDeviceGet but checks if the device has a cluster assigned
 func (c Client) HypervisorFindByHostname(hostname string) (*types.DedicatedServer, error) {
-	res, err := c.DeviceFindByHostname(hostname)
+	res, err := c.DeviceFind(hostname)
 
 	if err != nil {
 		return nil, err

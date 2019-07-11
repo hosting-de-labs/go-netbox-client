@@ -9,8 +9,21 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-//InterfaceGetAll returns all interfaces of a virtual machine identified by it's id
-func (c Client) InterfaceGetAll(vmID int64) ([]*models.VirtualMachineInterface, error) {
+//InterfaceGet fetches an interface from netbox
+func (c Client) InterfaceGet(interfaceID int64) (out *types.NetworkInterface, err error) {
+	params := virtualization.NewVirtualizationInterfacesReadParams()
+	params.WithID(interfaceID)
+
+	res, err := c.client.Virtualization.VirtualizationInterfacesRead(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.InterfaceConvertFromNetbox(*res.Payload)
+}
+
+//InterfaceFindAll returns all interfaces of a virtual machine identified by it's id
+func (c Client) InterfaceFindAll(vmID int64) ([]*models.VirtualMachineInterface, error) {
 	params := virtualization.NewVirtualizationInterfacesListParams()
 	params.VirtualMachineID = swag.Int64(vmID)
 
@@ -26,13 +39,12 @@ func (c Client) InterfaceGetAll(vmID int64) ([]*models.VirtualMachineInterface, 
 	return res.Payload.Results, nil
 }
 
-//InterfaceGet retrieves an existing VM interface object.
-func (c Client) InterfaceGet(vm types.VirtualServer, interfaceName string) (machineInterface *models.VirtualMachineInterface, err error) {
+//InterfaceFind retrieves an existing VM interface object.
+func (c Client) InterfaceFind(vmID int64, interfaceName string) (out *types.NetworkInterface, err error) {
 	params := virtualization.NewVirtualizationInterfacesListParams()
 	params.Name = swag.String(interfaceName)
 
-	v := vm.Metadata.NetboxEntity.(models.VirtualMachineInterface)
-	params.VirtualMachineID = &v.ID
+	params.VirtualMachineID = &vmID
 
 	res, err := c.client.Virtualization.VirtualizationInterfacesList(params, nil)
 	if err != nil {
@@ -47,45 +59,42 @@ func (c Client) InterfaceGet(vm types.VirtualServer, interfaceName string) (mach
 		return nil, nil
 	}
 
-	return res.Payload.Results[0], nil
+	out, err = c.InterfaceConvertFromNetbox(*res.Payload.Results[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 //InterfaceCreate creates a VM interface in Netbox.
-func (c Client) InterfaceCreate(vm types.VirtualServer, interfaceName string, vlan *models.VLAN) (machineInterface *models.VirtualMachineInterface, err error) {
-	data := &models.WritableVirtualMachineInterface{}
+func (c Client) InterfaceCreate(vmID int64, intf types.NetworkInterface) (machineInterface *types.NetworkInterface, err error) {
+	data, err := c.InterfaceConvertToNetbox(vmID, intf)
 
-	v := vm.Metadata.NetboxEntity.(models.VirtualMachineInterface)
-	data.VirtualMachine = &v.ID
-	data.Tags = []string{}
-	data.Name = &interfaceName
-	// data.Mode = &models.WritableVirtualizationInterfaceMode{Value: swag.Int64(100)}
-
-	if vlan != nil {
-		data.UntaggedVlan = &vlan.ID
+	if err != nil {
+		return nil, err
 	}
-
-	data.TaggedVlans = []int64{}
 
 	params := virtualization.NewVirtualizationInterfacesCreateParams()
 	params.WithData(data)
 
-	_, err = c.client.Virtualization.VirtualizationInterfacesCreate(params, nil)
+	res, err := c.client.Virtualization.VirtualizationInterfacesCreate(params, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create interface: %s", err)
 	}
 
-	return c.InterfaceGet(vm, interfaceName)
+	return c.InterfaceFind(res.Payload.ID, intf.Name)
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing VM interface or otherwise to create it.
-func (c Client) InterfaceGetCreate(vm types.VirtualServer, interfaceName string, vlan *models.VLAN) (machineInterface *models.VirtualMachineInterface, err error) {
-	res, err := c.InterfaceGet(vm, interfaceName)
+func (c Client) InterfaceGetCreate(vmID int64, intf types.NetworkInterface) (machineInterface *types.NetworkInterface, err error) {
+	res, err := c.InterfaceFind(vmID, intf.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	if res == nil {
-		return c.InterfaceCreate(vm, interfaceName, vlan)
+		return c.InterfaceCreate(vmID, intf)
 	}
 
 	return res, nil

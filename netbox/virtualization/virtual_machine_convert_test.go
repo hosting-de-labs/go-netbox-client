@@ -13,9 +13,7 @@ import (
 )
 
 func mockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bool, addCustomFields bool) (out models.VirtualMachine) {
-	out = models.VirtualMachine{
-		Name: swag.String("VM1"),
-	}
+	out.Name = swag.String("VM1")
 
 	if addResources {
 		out.Vcpus = swag.Int64(1)

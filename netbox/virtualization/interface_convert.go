@@ -1,8 +1,12 @@
 package virtualization
 
 import (
+	"fmt"
 	"net"
+	"reflect"
 	"strings"
+
+	"github.com/go-openapi/swag"
 
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
@@ -77,4 +81,79 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 	}
 
 	return &netIf, nil
+}
+
+//InterfaceConvertToNetbox allows to convert a NetworkInterface to a netbox compatible device interface
+func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface) (out *models.WritableVirtualMachineInterface, err error) {
+	vm, err := c.VirtualMachineGet(vmID)
+	if err != nil {
+		return nil, err
+	}
+
+	var siteID int64
+	switch vm.Metadata.NetboxEntity.(type) {
+	case models.Device:
+		vm := vm.Metadata.NetboxEntity.(models.VirtualMachine)
+		if vm.Site == nil {
+			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)
+		}
+
+		siteID = vm.Site.ID
+	case models.DeviceWithConfigContext:
+		vm := vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
+		if vm.Site == nil {
+			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)
+		}
+
+		siteID = vm.Site.ID
+
+	default:
+		return nil, fmt.Errorf("Unsupported type for vm: %s", reflect.TypeOf(vm.Metadata.NetboxEntity))
+	}
+
+	out = &models.WritableVirtualMachineInterface{}
+
+	out.VirtualMachine = &vmID
+	out.Name = &intf.Name
+
+	if intf.FormFactor != nil {
+		out.FormFactor = int64(*intf.FormFactor)
+	}
+
+	out.MacAddress = swag.String(intf.MACAddress.String())
+
+	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
+		//Tagged mode
+		out.Mode = swag.Int64(200)
+	} else if intf.UntaggedVlan != nil {
+		//Access mode
+		out.Mode = swag.Int64(100)
+	} else if len(intf.TaggedVlans) > 0 {
+		//All Tagged mode
+		out.Mode = swag.Int64(300)
+	}
+
+	ipamClient := netboxIpam.NewClient(c.client)
+	if intf.UntaggedVlan != nil {
+		vlan, err := ipamClient.VLANGet(intf.UntaggedVlan.ID, &siteID)
+		if err != nil {
+			return nil, fmt.Errorf("an error occured when fetching vlan with tag %d: %s", intf.UntaggedVlan.ID, err)
+		}
+
+		out.UntaggedVlan = &vlan.ID
+	}
+
+	out.TaggedVlans = []int64{}
+	if len(intf.TaggedVlans) > 0 {
+		for _, vlanTag := range intf.TaggedVlans {
+			vlan, err := ipamClient.VLANGet(vlanTag.ID, &siteID)
+			if err != nil {
+				return nil, fmt.Errorf("an error occured when fetching vlan with tag %d: %s", vlanTag.ID, err)
+			}
+
+			out.TaggedVlans = append(out.TaggedVlans, vlan.ID)
+		}
+	}
+
+	return out, nil
 }
