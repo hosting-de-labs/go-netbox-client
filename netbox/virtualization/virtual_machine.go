@@ -73,9 +73,12 @@ func (c Client) VirtualMachineFind(hostname string) (out *types.VirtualServer, e
 	params.WithName(&hostname)
 
 	res, err := c.client.Virtualization.VirtualizationVirtualMachinesList(params, nil)
-
 	if err != nil {
 		return nil, err
+	}
+
+	if len(res.Payload.Results) == 0 {
+		return nil, nil
 	}
 
 	return c.VirtualMachineConvertFromNetbox(*res.Payload.Results[0], nil)
