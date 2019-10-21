@@ -37,6 +37,7 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 
 	out.Device = swag.Int64(deviceID)
 
+	out.PartID = i.PartNumber
 	out.Serial = i.SerialNumber
 	out.AssetTag = &i.AssetTag
 	out.Discovered = true
