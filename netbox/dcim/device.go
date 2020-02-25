@@ -106,7 +106,7 @@ func (c Client) HypervisorFindByHostname(hostname string) (*types.DedicatedServe
 		return nil, err
 	}
 
-	d := res.Metadata.NetboxEntity.(models.Device)
+	d := res.Metadata.NetboxEntity.(models.DeviceWithConfigContext)
 	if d.Cluster == nil {
 		return nil, fmt.Errorf("device %s not assigned to a Virtualization Cluster", hostname)
 	}
