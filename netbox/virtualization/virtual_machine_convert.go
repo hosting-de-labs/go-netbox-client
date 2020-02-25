@@ -3,7 +3,6 @@ package virtualization
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
@@ -27,7 +26,6 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 
 		out.Hostname = *vm.Name
 		out.Tags = vm.Tags
-		out.Comments = strings.Split(vm.Comments, "\n")
 
 		if vm.Vcpus != nil {
 			out.Resources.Cores = int(*vm.Vcpus)
