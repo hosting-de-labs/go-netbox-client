@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"reflect"
-	"strings"
 
 	"github.com/go-openapi/swag"
 
@@ -18,9 +17,9 @@ import (
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
 	netIf := types.NetworkInterface{}
 
-	if netboxInterface.FormFactor != nil {
-		ff := types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
-		netIf.FormFactor = &ff
+	if netboxInterface.Type != nil {
+		ff := types.InterfaceType(*netboxInterface.Type.Value)
+		netIf.Type = &ff
 	}
 
 	if netboxInterface.Name != nil {
@@ -71,11 +70,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 
 		addr.Address = ip
 		addr.CIDR = cidr
-
-		addr.Family = types.IPAddressFamilyIPv4
-		if strings.Contains(ip, ":") {
-			addr.Family = types.IPAddressFamilyIPv6
-		}
+		addr.Family = types.IPAddressFamily(*netboxAddress.Family.Label)
 
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)
 	}
@@ -93,7 +88,7 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 	var siteID int64
 	switch vm.Metadata.NetboxEntity.(type) {
 	case models.Device:
-		vm := vm.Metadata.NetboxEntity.(models.VirtualMachine)
+		vm := vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
 		if vm.Site == nil {
 			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)
 		}
@@ -116,21 +111,21 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 	out.VirtualMachine = &vmID
 	out.Name = &intf.Name
 
-	if intf.FormFactor != nil {
-		out.FormFactor = int64(*intf.FormFactor)
+	if intf.Type != nil {
+		out.Type = swag.String(string(*intf.Type))
 	}
 
 	out.MacAddress = swag.String(intf.MACAddress.String())
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
 		//Tagged mode
-		out.Mode = swag.Int64(200)
+		out.Mode = "tagged"
 	} else if intf.UntaggedVlan != nil {
 		//Access mode
-		out.Mode = swag.Int64(100)
+		out.Mode = "access"
 	} else if len(intf.TaggedVlans) > 0 {
 		//All Tagged mode
-		out.Mode = swag.Int64(300)
+		out.Mode = "tagged-all"
 	}
 
 	ipamClient := netboxIpam.NewClient(c.client)

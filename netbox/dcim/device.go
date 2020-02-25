@@ -86,7 +86,7 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 		host.OriginalEntity = res
 	}
 
-	data := new(models.WritableDevice)
+	data := new(models.WritableDeviceWithConfigContext)
 
 	//Go through every item and check if it must be updated
 

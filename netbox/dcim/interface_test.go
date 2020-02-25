@@ -27,7 +27,7 @@ func TestInterfaceGet(t *testing.T) {
 	assert.NotNil(t, netIf)
 
 	assert.Equal(t, "eth0", netIf.Name)
-	assert.Equal(t, types.InterfaceFormFactorEthernetFixed1000BaseT_1G, *netIf.FormFactor)
+	assert.Equal(t, types.InterfaceTypeEthernetFixed1000BaseT1G, *netIf.Type)
 
 	assert.Equal(t, net.HardwareAddr([]byte{0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}), netIf.MACAddress)
 

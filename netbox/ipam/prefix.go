@@ -6,10 +6,10 @@ import (
 )
 
 func (c Client) PrefixGet(prefix string) (*models.Prefix, error) {
-	params := ipam.NewIPAMPrefixesListParams()
+	params := ipam.NewIpamPrefixesListParams()
 	params.WithQ(&prefix)
 
-	res, err := c.client.IPAM.IPAMPrefixesList(params, nil)
+	res, err := c.client.Ipam.IpamPrefixesList(params, nil)
 	if err != nil {
 		return nil, err
 	}

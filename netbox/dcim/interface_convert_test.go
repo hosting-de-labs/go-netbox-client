@@ -46,13 +46,13 @@ func mockNetboxDeviceInterface() models.DeviceInterface {
 }
 
 func mockNetworkInterface() types.NetworkInterface {
-	ff := types.InterfaceFormFactorEthernetFixed1000BaseT_1G
+	ff := types.InterfaceTypeEthernetFixed1000BaseT1G
 
 	return types.NetworkInterface{
 		Name:         "eth0",
 		MACAddress:   net.HardwareAddr([]byte{0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}),
 		IsManagement: false,
-		FormFactor:   &ff,
+		Type:         &ff,
 	}
 }
 
@@ -94,5 +94,5 @@ func TestInterfaceConvertToNetboxDeviceInterface(t *testing.T) {
 	assert.Equal(t, "eth0", *intf.Name)
 	assert.Equal(t, "aa:bb:cc:dd:ee:ff", *intf.MacAddress)
 	assert.False(t, intf.MgmtOnly)
-	assert.Equal(t, int64(1000), intf.FormFactor)
+	assert.Equal(t, types.InterfaceTypeEthernetFixed1000BaseT1G, types.InterfaceType(*intf.Type))
 }

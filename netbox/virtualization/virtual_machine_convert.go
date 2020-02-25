@@ -17,37 +17,8 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 	var cf interface{}
 	primaryIPv4 := &models.NestedIPAddress{}
 	primaryIPv6 := &models.NestedIPAddress{}
+
 	switch netboxVM.(type) {
-	case models.VirtualMachine:
-		vm := netboxVM.(models.VirtualMachine)
-
-		out.Metadata.ID = vm.ID
-		out.Metadata.NetboxEntity = netboxVM
-
-		out.Hostname = *vm.Name
-		out.Tags = vm.Tags
-		out.Comments = strings.Split(vm.Comments, "\n")
-
-		if vm.Vcpus != nil {
-			out.Resources.Cores = int(*vm.Vcpus)
-		}
-
-		if vm.Memory != nil {
-			out.Resources.Memory = *vm.Memory
-		}
-
-		if vm.Disk != nil {
-			out.Resources.Disks = append(out.Resources.Disks, types.VirtualServerDisk{
-				Size: *vm.Disk * 1024,
-			})
-		}
-
-		primaryIPv4 = vm.PrimaryIp4
-		primaryIPv6 = vm.PrimaryIp6
-		cf = vm.CustomFields
-
-		//read comments
-		utils.ParseVMComment(vm.Comments, out)
 	case models.VirtualMachineWithConfigContext:
 		vm := netboxVM.(models.VirtualMachineWithConfigContext)
 

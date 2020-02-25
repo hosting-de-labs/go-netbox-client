@@ -9,7 +9,7 @@ import (
 
 func VlanConvertFromNetbox(netboxVlan interface{}) (*types.VLAN, error) {
 	vlan := types.VLAN{}
-	var vlanStatus int64
+	var vlanStatus string
 
 	switch v := netboxVlan.(type) {
 	case models.VLAN:
@@ -17,7 +17,6 @@ func VlanConvertFromNetbox(netboxVlan interface{}) (*types.VLAN, error) {
 		vlan.Name = *v.Name
 		vlan.Description = v.Description
 		vlan.Tags = v.Tags
-
 		vlanStatus = *v.Status.Value
 	case models.NestedVLAN:
 		vlan.ID = uint16(*v.Vid)
@@ -27,17 +26,19 @@ func VlanConvertFromNetbox(netboxVlan interface{}) (*types.VLAN, error) {
 	}
 
 	switch vlanStatus {
-	case 0:
+	case "":
+		fallthrough
+	case "unknown":
 		vlan.Status = types.VLANStatusUnknown
-	case 1:
+	case "active":
 		vlan.Status = types.VLANStatusActive
-	case 2:
+	case "reserved":
 		vlan.Status = types.VLANStatusReserved
-	case 3:
+	case "deprecated":
 		vlan.Status = types.VLANStatusDeprecated
 
 	default:
-		return nil, fmt.Errorf("unknown vlan status %d", vlanStatus)
+		return nil, fmt.Errorf("unknown vlan status %s", vlanStatus)
 	}
 
 	return &vlan, nil

@@ -20,9 +20,10 @@ func InterfaceGetResponder() (string, string, httpmock.Responder) {
         "display_name": "Device 20"
     },
     "name": "eth0",
-    "form_factor": {
-        "value": 1000,
-        "label": "1000BASE-T (1GE)"
+    "type": {
+        "value": "1000base-t",
+        "label": "1000BASE-T (1GE)",
+		"id": 1000
     },
     "enabled": true,
     "lag": null,

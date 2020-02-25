@@ -54,8 +54,9 @@ func DeviceGetResponder() (string, string, httpmock.Responder) {
     "face": null,
     "parent_device": null,
     "status": {
-        "value": 1,
-        "label": "Active"
+        "value": "active",
+        "label": "Active",
+		"id": 1
     },
     "primary_ip": null,
     "primary_ip4": null,

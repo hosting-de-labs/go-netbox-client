@@ -8,14 +8,14 @@ import (
 
 //VlanGet returns a vlan-object based on the given vlanID and an optional siteID
 func (c Client) VLANGet(vlanID uint16, siteID *int64) (*models.VLAN, error) {
-	params := ipam.NewIPAMVlansListParams()
+	params := ipam.NewIpamVlansListParams()
 	params.SetVid(swag.Int64(int64(vlanID)))
 
 	if siteID != nil {
 		params.SetSiteID(siteID)
 	}
 
-	res, err := c.client.IPAM.IPAMVlansList(params, nil)
+	res, err := c.client.Ipam.IpamVlansList(params, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -18,7 +18,7 @@ func mockNetboxVlan() models.VLAN {
 		Vid:  swag.Int64(400),
 		Name: swag.String("Public VLAN"),
 		Status: &models.VLANStatus{
-			Value: swag.Int64(1),
+			Value: swag.String("active"),
 			Label: swag.String("Active"),
 		},
 		Description: "This is Public VLAN description",

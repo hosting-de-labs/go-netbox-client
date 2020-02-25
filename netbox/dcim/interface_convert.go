@@ -22,9 +22,9 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 	//pass reference as original entity
 	netIf.OriginalEntity = interface{}(&netboxInterface)
 
-	if netboxInterface.FormFactor != nil {
-		ff := types.InterfaceFormFactor(*netboxInterface.FormFactor.Value)
-		netIf.FormFactor = &ff
+	if netboxInterface.Type != nil {
+		ff := types.InterfaceType(*netboxInterface.Type.Value)
+		netIf.Type = &ff
 	}
 
 	if netboxInterface.Name != nil {
@@ -124,8 +124,8 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 	out.Device = &deviceID
 	out.Name = &intf.Name
 
-	if intf.FormFactor != nil {
-		out.FormFactor = int64(*intf.FormFactor)
+	if intf.Type != nil {
+		out.Type = swag.String(string(*intf.Type))
 	}
 
 	out.MgmtOnly = intf.IsManagement
@@ -133,13 +133,13 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
 		//Tagged mode
-		out.Mode = swag.Int64(200)
+		out.Mode = "tagged"
 	} else if intf.UntaggedVlan != nil {
 		//Access mode
-		out.Mode = swag.Int64(100)
+		out.Mode = "access"
 	} else if len(intf.TaggedVlans) > 0 {
 		//All Tagged mode
-		out.Mode = swag.Int64(300)
+		out.Mode = "tagged-all"
 	}
 
 	ipamClient := netboxIpam.NewClient(c.client)

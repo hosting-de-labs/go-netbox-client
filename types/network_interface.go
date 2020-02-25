@@ -7,75 +7,86 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/utils"
 )
 
-type InterfaceFormFactor int64
+type InterfaceType string
 
 const (
-	InterfaceFormFactorVirtualInterfacesVirtual         InterfaceFormFactor = 0
-	InterfaceFormFactorVirtualInterfacesLinkAggregation InterfaceFormFactor = 200
-	InterfaceFormFactorEthernetFixed100BaseTx_100M      InterfaceFormFactor = 800
-	InterfaceFormFactorEthernetFixed1000BaseT_1G        InterfaceFormFactor = 1000
-	InterfaceFormFactorEthernetFixedGbic_1G             InterfaceFormFactor = 1050
-	InterfaceFormFactorEthernetFixedSfp_1G              InterfaceFormFactor = 1100
-	InterfaceFormFactorEthernetFixed10GbaseT_10G        InterfaceFormFactor = 1150
-	InterfaceFormFactorEthernetFixed10GbaseCx4_10G      InterfaceFormFactor = 1170
-	InterfaceFormFactorEthernetModularSfpPlus_10G       InterfaceFormFactor = 1200
-	InterfaceFormFactorEthernetModularXfp_10G           InterfaceFormFactor = 1300
-	InterfaceFormFactorEthernetModularXenpak_10G        InterfaceFormFactor = 1310
-	InterfaceFormFactorEthernetModularX2_10G            InterfaceFormFactor = 1320
-	InterfaceFormFactorEthernetModularSfp28_25G         InterfaceFormFactor = 1350
-	InterfaceFormFactorEthernetModularQsfpPlus_40G      InterfaceFormFactor = 1400
-	InterfaceFormFactorEthernetModularQsfp28_50G        InterfaceFormFactor = 1420
-	InterfaceFormFactorEthernetModularCfp_100G          InterfaceFormFactor = 1500
-	InterfaceFormFactorEthernetModularCfp2_100G         InterfaceFormFactor = 1510
-	InterfaceFormFactorEthernetModularCfp4_100G         InterfaceFormFactor = 1520
-	InterfaceFormFactorEthernetModularCiscoCpak_100G    InterfaceFormFactor = 1550
-	InterfaceFormFactorEthernetModularCfp2_200G         InterfaceFormFactor = 1650
-	InterfaceFormFactorEthernetModularQsfp28_100G       InterfaceFormFactor = 1600
-	InterfaceFormFactorEthernetModularQsfp56_200G       InterfaceFormFactor = 1700
-	InterfaceFormFactorEthernetModularQsfpDD_400G       InterfaceFormFactor = 1750
-	InterfaceFormFactorWirelessIEEE80211a               InterfaceFormFactor = 2600
-	InterfaceFormFactorWirelessIEEE80211bg              InterfaceFormFactor = 2610
-	InterfaceFormFactorWirelessIEEE80211n               InterfaceFormFactor = 2620
-	InterfaceFormFactorWirelessIEEE80211ac              InterfaceFormFactor = 2630
-	InterfaceFormFactorWirelessIEEE80211ad              InterfaceFormFactor = 2640
-	InterfaceFormFactorCellularGsm                      InterfaceFormFactor = 2810
-	InterfaceFormFactorCellularCdma                     InterfaceFormFactor = 2820
-	InterfaceFormFactorCellularLte                      InterfaceFormFactor = 2830
-	InterfaceFormFactorSonetOc3Stm1                     InterfaceFormFactor = 6100
-	InterfaceFormFactorSonetOc12Stm4                    InterfaceFormFactor = 6200
-	InterfaceFormFactorSonetOc48Stm16                   InterfaceFormFactor = 6300
-	InterfaceFormFactorSonetOc192Stm64                  InterfaceFormFactor = 6400
-	InterfaceFormFactorSonetOc768Stm256                 InterfaceFormFactor = 6500
-	InterfaceFormFactorSonetOc1920Stm640                InterfaceFormFactor = 6600
-	InterfaceFormFactorSonetOc3840Stm1234               InterfaceFormFactor = 6700
-	InterfaceFormFactorFibreChannelSfp_1G               InterfaceFormFactor = 3010
-	InterfaceFormFactorFibreChannelSfp_2G               InterfaceFormFactor = 3020
-	InterfaceFormFactorFibreChannelSfp_4G               InterfaceFormFactor = 3040
-	InterfaceFormFactorFibreChannelSfpPlus_8G           InterfaceFormFactor = 3080
-	InterfaceFormFactorFibreChannelSfpPlus_16G          InterfaceFormFactor = 3160
-	InterfaceFormFactorFibreChannelSfp28_32G            InterfaceFormFactor = 3320
-	InterfaceFormFactorFibreChannelQsfp28_128G          InterfaceFormFactor = 3400
-	InterfaceFormFactorSerialT1_1_5M                    InterfaceFormFactor = 4000
-	InterfaceFormFactorSerialE1_2M                      InterfaceFormFactor = 4010
-	InterfaceFormFactorSerialT3_455M                    InterfaceFormFactor = 4040
-	InterfaceFormFactorSerialE3_34M                     InterfaceFormFactor = 4050
-	InterfaceFormFactorStackingCiscoStackWise           InterfaceFormFactor = 5000
-	InterfaceFormFactorStackingCiscoStackWisePlus       InterfaceFormFactor = 5050
-	InterfaceFormFactorStackingCiscoFlexStack           InterfaceFormFactor = 5100
-	InterfaceFormFactorStackingCiscoFlexStackPlus       InterfaceFormFactor = 5150
-	InterfaceFormFactorStackingJuniperVcp               InterfaceFormFactor = 5200
-	InterfaceFormFactorStackingExtremeSummitStack       InterfaceFormFactor = 5300
-	InterfaceFormFactorStackingExtremeSummitStack_128   InterfaceFormFactor = 5310
-	InterfaceFormFactorStackingExtremeSummitStack_256   InterfaceFormFactor = 5320
-	InterfaceFormFactorStackingExtremeSummitStack_512   InterfaceFormFactor = 5330
-	InterfaceFormFactorOther                            InterfaceFormFactor = 32767
+	InterfaceTypeVirtualInterfacesVirtual         InterfaceType = "virtual"
+	InterfaceTypeVirtualInterfacesLinkAggregation InterfaceType = "lag"
+	InterfaceTypeEthernetFixed100BaseTx100M       InterfaceType = "100base-tx"
+	InterfaceTypeEthernetFixed1000BaseT1G         InterfaceType = "1000base-t"
+	InterfaceTypeEthernetFixedGbic1G              InterfaceType = "2.5gbase-t"
+	InterfaceTypeEthernetFixedSfp1G               InterfaceType = "5gbase-t"
+	InterfaceTypeEthernetFixed10GbaseT10G         InterfaceType = "10gbase-t"
+	InterfaceTypeEthernetFixed10GbaseCx410G       InterfaceType = "10gbase-cx4"
+	InterfaceTypeEthernetModularSfpPlus10G        InterfaceType = "10gbase-x-sfpp"
+	InterfaceTypeEthernetModularXfp10G            InterfaceType = "10gbase-x-xfp"
+	InterfaceTypeEthernetModularXenpak10G         InterfaceType = "10gbase-x-xenpak"
+	InterfaceTypeEthernetModularX210G             InterfaceType = "10gbase-x-x2"
+	InterfaceTypeEthernetModularSfp2825G          InterfaceType = "25gbase-x-sfp28"
+	InterfaceTypeEthernetModularQsfpPlus40G       InterfaceType = "40gbase-x-qsfpp"
+	InterfaceTypeEthernetModularQsfp2850G         InterfaceType = "50gbase-x-sfp28"
+	InterfaceTypeEthernetModularCfp100G           InterfaceType = "100gbase-x-cfp"
+	InterfaceTypeEthernetModularCfp2100G          InterfaceType = "100gbase-x-cfp2"
+	InterfaceTypeEthernetModularCfp2200G          InterfaceType = "200gbase-x-cfp2"
+	InterfaceTypeEthernetModularCfp4100G          InterfaceType = "100gbase-x-cfp4"
+	InterfaceTypeEthernetModularCiscoCpak100G     InterfaceType = "100gbase-x-cpak"
+	InterfaceTypeEthernetModularQsfp28100G        InterfaceType = "100gbase-x-qsfp28"
+	InterfaceTypeEthernetModularQsfp56200G        InterfaceType = "200gbase-x-qsfp56"
+	InterfaceTypeEthernetModularQsfpDD400G        InterfaceType = "400gbase-x-qsfpdd"
+	InterfaceTypeEthernetModularOsfp400G          InterfaceType = "400gbase-x-osfp"
+	InterfaceTypeWirelessIEEE80211a               InterfaceType = "ieee802.11a"
+	InterfaceTypeWirelessIEEE80211bg              InterfaceType = "ieee802.11g"
+	InterfaceTypeWirelessIEEE80211n               InterfaceType = "ieee802.11n"
+	InterfaceTypeWirelessIEEE80211ac              InterfaceType = "ieee802.11ac"
+	InterfaceTypeWirelessIEEE80211ad              InterfaceType = "ieee802.11ad"
+	InterfaceTypeWirelessIEEE80211ax              InterfaceType = "ieee802.11ax"
+	InterfaceTypeCellularGsm                      InterfaceType = "gsm"
+	InterfaceTypeCellularCdma                     InterfaceType = "cdma"
+	InterfaceTypeCellularLte                      InterfaceType = "lte"
+	InterfaceTypeSonetOc3Stm1                     InterfaceType = "sonet-oc3"
+	InterfaceTypeSonetOc12Stm4                    InterfaceType = "sonet-oc12"
+	InterfaceTypeSonetOc48Stm16                   InterfaceType = "sonet-oc48"
+	InterfaceTypeSonetOc192Stm64                  InterfaceType = "sonet-oc192"
+	InterfaceTypeSonetOc768Stm256                 InterfaceType = "sonet-oc768"
+	InterfaceTypeSonetOc1920Stm640                InterfaceType = "sonet-oc1920"
+	InterfaceTypeSonetOc3840Stm1234               InterfaceType = "sonet-oc3840"
+	InterfaceTypeFibreChannelSfp1G                InterfaceType = "1gfc-sfp"
+	InterfaceTypeFibreChannelSfp2G                InterfaceType = "2gfc-sfp"
+	InterfaceTypeFibreChannelSfp4G                InterfaceType = "4gfc-sfp"
+	InterfaceTypeFibreChannelSfpPlus8G            InterfaceType = "8gfc-sfpp"
+	InterfaceTypeFibreChannelSfpPlus16G           InterfaceType = "16gfc-sfpp"
+	InterfaceTypeFibreChannelSfp2832G             InterfaceType = "32gfc-sfp28"
+	InterfaceTypeFibreChannelQsfp28128G           InterfaceType = "128gfc-sfp28"
+	InterfaceTypeInifinibandSdr2G                 InterfaceType = "inifiband-sdr"
+	InterfaceTypeInifinibandDdr4G                 InterfaceType = "inifiband-ddr"
+	InterfaceTypeInifinibandQdr8G                 InterfaceType = "inifiband-qdr"
+	InterfaceTypeInifinibandFdr1010G              InterfaceType = "inifiband-fdr10"
+	InterfaceTypeInifinibandFdr10135G             InterfaceType = "inifiband-fdr"
+	InterfaceTypeInifinibandEdr25G                InterfaceType = "inifiband-edr"
+	InterfaceTypeInifinibandHdr50G                InterfaceType = "inifiband-hdr"
+	InterfaceTypeInifinibandNdr100G               InterfaceType = "inifiband-ndr"
+	InterfaceTypeInifinibandXdr250G               InterfaceType = "inifiband-xdr"
+	InterfaceTypeSerialT115M                      InterfaceType = "t1"
+	InterfaceTypeSerialE12M                       InterfaceType = "e1"
+	InterfaceTypeSerialT3455M                     InterfaceType = "t3"
+	InterfaceTypeSerialE334M                      InterfaceType = "e3"
+	InterfaceTypeStackingCiscoStackWise           InterfaceType = "cisco-stackwise"
+	InterfaceTypeStackingCiscoStackWisePlus       InterfaceType = "cisco-stackwise-plus"
+	InterfaceTypeStackingCiscoFlexStack           InterfaceType = "cisco-flexstack"
+	InterfaceTypeStackingCiscoFlexStackPlus       InterfaceType = "cisco-flexstack-plus"
+	InterfaceTypeStackingJuniperVcp               InterfaceType = "juniper-vcp"
+	InterfaceTypeStackingExtremeSummitStack       InterfaceType = "extreme-summitstack"
+	InterfaceTypeStackingExtremeSummitStack128    InterfaceType = "extreme-summitstack-128"
+	InterfaceTypeStackingExtremeSummitStack256    InterfaceType = "extreme-summitstack-256"
+	InterfaceTypeStackingExtremeSummitStack512    InterfaceType = "extreme-summitstack-512"
+	InterfaceTypeOther                            InterfaceType = "other"
 )
 
 //NetworkInterface represents a network interface assigned to a host
 type NetworkInterface struct {
 	CommonEntity
 
-	FormFactor   *InterfaceFormFactor
+	Type         *InterfaceType
 	IPAddresses  []IPAddress
 	IsManagement bool
 	MACAddress   net.HardwareAddr

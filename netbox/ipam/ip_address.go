@@ -11,10 +11,10 @@ import (
 
 //IPAddressGet returns an existing ip-address based on the given ip/cidr string.
 func (c Client) IPAddressFind(ipAddress types.IPAddress) (*models.IPAddress, error) {
-	params := ipam.NewIPAMIPAddressesListParams()
+	params := ipam.NewIpamIPAddressesListParams()
 	params.WithAddress(swag.String(ipAddress.String()))
 
-	res, err := c.client.IPAM.IPAMIPAddressesList(params, nil)
+	res, err := c.client.Ipam.IpamIPAddressesList(params, nil)
 
 	if err != nil {
 		return nil, err
@@ -33,12 +33,13 @@ func (c Client) IPAddressFind(ipAddress types.IPAddress) (*models.IPAddress, err
 
 //IPAddressGetByInterfaceID returns all ip addresses assigned to an interface identified by it's ID
 func (c Client) IPAddressFindByInterfaceID(interfaceID int64) ([]*models.IPAddress, error) {
-	params := ipam.NewIPAMIPAddressesListParams()
+	params := ipam.NewIpamIPAddressesListParams()
 	params.WithInterfaceID(swag.Int64(interfaceID))
 
-	res, err := c.client.IPAM.IPAMIPAddressesList(params, nil)
+	res, err := c.client.Ipam.IpamIPAddressesList(params, nil)
 
 	if err != nil {
+		panic(err)
 		return nil, err
 	}
 
@@ -51,10 +52,10 @@ func (c Client) IPAddressCreate(ipAddress types.IPAddress) (*models.IPAddress, e
 	data.Address = swag.String(ipAddress.String())
 	data.Tags = []string{}
 
-	params := ipam.NewIPAMIPAddressesCreateParams()
+	params := ipam.NewIpamIPAddressesCreateParams()
 	params.WithData(data)
 
-	_, err := c.client.IPAM.IPAMIPAddressesCreate(params, nil)
+	_, err := c.client.Ipam.IpamIPAddressesCreate(params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -93,11 +94,11 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	data.Tags = []string{}
 	data.Interface = &interfaceID
 
-	params := ipam.NewIPAMIPAddressesPartialUpdateParams()
+	params := ipam.NewIpamIPAddressesPartialUpdateParams()
 	params.WithID(ipAddress2.ID)
 	params.WithData(data)
 
-	_, err = c.client.IPAM.IPAMIPAddressesPartialUpdate(params, nil)
+	_, err = c.client.Ipam.IpamIPAddressesPartialUpdate(params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -106,10 +107,10 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 }
 
 func (c Client) IPAddressDelete(ipAddressID int64) error {
-	p := ipam.NewIPAMIPAddressesDeleteParams()
+	p := ipam.NewIpamIPAddressesDeleteParams()
 	p.WithID(ipAddressID)
 
-	_, err := c.client.IPAM.IPAMIPAddressesDelete(p, nil)
+	_, err := c.client.Ipam.IpamIPAddressesDelete(p, nil)
 
 	return err
 }

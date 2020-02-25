@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func mockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bool, addCustomFields bool) (out models.VirtualMachine) {
+func mockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bool, addCustomFields bool) (out models.VirtualMachineWithConfigContext) {
 	out.Name = swag.String("VM1")
 
 	if addResources {

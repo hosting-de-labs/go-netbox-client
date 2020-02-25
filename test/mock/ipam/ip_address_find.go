@@ -26,17 +26,15 @@ func IpAddressFindResponder() (string, string, httpmock.Responder) {
 			"vrf": null,
 			"tenant": null,
 			"status": {
-				"value": 1,
-				"label": "Active"
+				"value": "active",
+				"label": "Active",
+				"id": 1
 			},
 			"role": null,
 			"interface": {
 				"id": 10,
                 "url": "http://localhost:8000/api/virtualization/interfaces/10/",
                 "device": null,
-				"form_factor": {
-					"value": 1000
-				},
                 "virtual_machine": {
                     "id": 5651,
                     "url": "http://localhost:8000/api/virtualization/virtual-machines/15/",
@@ -62,8 +60,9 @@ func IpAddressFindResponder() (string, string, httpmock.Responder) {
 			"vrf": null,
 			"tenant": null,
 			"status": {
-				"value": 1,
-				"label": "Active"
+				"value": "active",
+				"label": "Active",
+				"id": 1
 			},
 			"role": null,
 			"interface": {

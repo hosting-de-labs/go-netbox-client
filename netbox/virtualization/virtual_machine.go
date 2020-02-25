@@ -12,7 +12,7 @@ import (
 
 //VirtualMachineCreate creates a new VM object in Netbox.
 func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
-	var netboxVM models.WritableVirtualMachine
+	var netboxVM models.WritableVirtualMachineWithConfigContext
 	netboxVM.Name = &vm.Hostname
 	netboxVM.Tags = []string{}
 
@@ -47,7 +47,7 @@ func (c Client) VirtualMachineDelete(vmID int64) (err error) {
 }
 
 //VirtualMachineFindAll returns all found virtual machines
-func (c Client) VirtualMachineFindAll(limit int64, offset int64) (int64, []*models.VirtualMachine, error) {
+func (c Client) VirtualMachineFindAll(limit int64, offset int64) (int64, []*models.VirtualMachineWithConfigContext, error) {
 	params := virtualization.NewVirtualizationVirtualMachinesListParams()
 
 	if limit > 0 {
@@ -129,7 +129,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		return false, err
 	}
 
-	nbVm := res.Metadata.NetboxEntity.(models.VirtualMachine)
+	nbVm := res.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
 
 	dcimClient := netboxDcim.NewClient(c.client)
 
@@ -146,7 +146,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		}
 	}
 
-	data := new(models.WritableVirtualMachine)
+	data := new(models.WritableVirtualMachineWithConfigContext)
 
 	data.Name = swag.String(vm.Hostname)
 	data.Tags = vm.Tags
@@ -198,7 +198,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.Metadata.NetboxEntity.(models.VirtualMachine).ID)
+	params.WithID(vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
