@@ -53,6 +53,12 @@ func (h Host) Copy() Host {
 		PrimaryIPv6: h.PrimaryIPv6,
 	}
 
+	//copy comments
+	if len(h.Comments) > 0 {
+		out.Comments = make([]string, len(h.Comments))
+		copy(out.Comments, h.Comments)
+	}
+
 	//copy interfaces
 	if len(h.NetworkInterfaces) > 0 {
 		out.NetworkInterfaces = make([]NetworkInterface, len(h.NetworkInterfaces))
