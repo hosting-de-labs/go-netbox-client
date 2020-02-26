@@ -78,7 +78,7 @@ func (h Host) IsEqual(h2 Host, deep bool) bool {
 	h.OriginalEntity = nil
 	h2.OriginalEntity = nil
 
-	if !utils.CompareStruct(h, h2, []string{}, []string{"OriginalEntity", "Tags", "NetworkInterfaces"}) {
+	if !utils.CompareStruct(h, h2, []string{}, []string{"Metadata", "NetworkInterfaces", "OriginalEntity", "Tags"}) {
 		return false
 	}
 
