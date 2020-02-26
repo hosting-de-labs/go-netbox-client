@@ -24,7 +24,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
-		out.Comments = strings.Split(d.Comments, "\n")
+		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
 		primaryIPv4 = d.PrimaryIp4
 		primaryIPv6 = d.PrimaryIp6
@@ -36,7 +36,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
-		out.Comments = strings.Split(d.Comments, "\n")
+		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
 		primaryIPv4 = d.PrimaryIp4
 		primaryIPv6 = d.PrimaryIp6
