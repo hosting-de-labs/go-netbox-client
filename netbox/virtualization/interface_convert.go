@@ -17,6 +17,9 @@ import (
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
 	netIf := types.NetworkInterface{}
 
+	netIf.Metadata.ID = netboxInterface.ID
+	netIf.Metadata.SetEntity(netboxInterface)
+
 	if netboxInterface.Type != nil {
 		ff := types.InterfaceType(*netboxInterface.Type.Value)
 		netIf.Type = &ff
