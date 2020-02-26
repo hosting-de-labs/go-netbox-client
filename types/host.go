@@ -34,13 +34,17 @@ func (h *Host) HasTag(tag string) bool {
 //AddTag is a helper method to allow adding a number of tags to a host.
 func (h *Host) AddTag(tags ...string) {
 	for _, newTag := range tags {
+		tagFound := false
 		for _, existingTag := range h.Tags {
 			if existingTag == newTag {
+				tagFound = true
 				break
 			}
 		}
 
-		h.Tags = append(h.Tags, newTag)
+		if !tagFound {
+			h.Tags = append(h.Tags, newTag)
+		}
 	}
 }
 
