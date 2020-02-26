@@ -5,29 +5,15 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
+
 	"github.com/hosting-de-labs/go-netbox-client/types"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func mockHost() types.Host {
-	return types.Host{
-		Hostname: "host1",
-		PrimaryIPv4: types.IPAddress{
-			Address: "192.168.1.1",
-			CIDR:    24,
-			Family:  types.IPAddressFamilyIPv4,
-		},
-		PrimaryIPv6: types.IPAddress{
-			Address: "::1",
-			CIDR:    64,
-			Family:  types.IPAddressFamilyIPv6,
-		},
-	}
-}
-
 func TestHost_HasTag(t *testing.T) {
-	host := mockHost()
+	host := client_types.MockHost()
 	assert.False(t, host.HasTag("tag1"))
 
 	host.AddTag("tag2")
@@ -35,7 +21,7 @@ func TestHost_HasTag(t *testing.T) {
 }
 
 func TestHost_AddTag(t *testing.T) {
-	host := mockHost()
+	host := client_types.MockHost()
 
 	host.AddTag("tag1")
 	assert.True(t, host.HasTag("tag1"))
@@ -51,14 +37,14 @@ func TestHost_AddTag(t *testing.T) {
 }
 
 func TestHost_Copy(t *testing.T) {
-	host1 := mockHost()
+	host1 := client_types.MockHost()
 	host2 := host1.Copy()
 	assert.Equal(t, host1, host2)
 
 	host2.Hostname = "host2"
 	assert.NotEqual(t, host1, host2)
 
-	host3 := mockHost()
+	host3 := client_types.MockHost()
 
 	mac, err := net.ParseMAC("aa:bb:cc:dd:ee:ff")
 	assert.Nil(t, err)
@@ -81,7 +67,7 @@ func TestHost_Copy(t *testing.T) {
 	host4.NetworkInterfaces[0].Name = "vlan.2"
 	assert.NotEqual(t, host3, host4)
 
-	host5 := mockHost()
+	host5 := client_types.MockHost()
 	host5.AddTag("tag1")
 	host6 := host5.Copy()
 	assert.Equal(t, host5, host6)
@@ -91,7 +77,7 @@ func TestHost_Copy(t *testing.T) {
 }
 
 func TestHost_IsChanged(t *testing.T) {
-	host := mockHost()
+	host := client_types.MockHost()
 	host.CommonEntity.OriginalEntity = host.Copy()
 	assert.False(t, host.IsChanged())
 

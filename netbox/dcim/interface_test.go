@@ -4,7 +4,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock"
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_api"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
 
@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	mock.RunServer()
+	netbox_api.RunServer()
 }
 
 func TestInterfaceGet(t *testing.T) {
@@ -27,7 +27,7 @@ func TestInterfaceGet(t *testing.T) {
 	assert.NotNil(t, netIf)
 
 	assert.Equal(t, "eth0", netIf.Name)
-	assert.Equal(t, types.InterfaceTypeEthernetFixed1000BaseT1G, *netIf.Type)
+	assert.Equal(t, types.InterfaceTypeEthernetFixed1000BaseT1G, netIf.Type)
 
 	assert.Equal(t, net.HardwareAddr([]byte{0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}), netIf.MACAddress)
 

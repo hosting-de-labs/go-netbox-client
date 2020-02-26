@@ -23,8 +23,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 	netIf.OriginalEntity = interface{}(&netboxInterface)
 
 	if netboxInterface.Type != nil {
-		ff := types.InterfaceType(*netboxInterface.Type.Value)
-		netIf.Type = &ff
+		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
 	}
 
 	if netboxInterface.Name != nil {
@@ -123,11 +122,7 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 
 	out.Device = &deviceID
 	out.Name = &intf.Name
-
-	if intf.Type != nil {
-		out.Type = swag.String(string(*intf.Type))
-	}
-
+	out.Type = swag.String(string(intf.Type))
 	out.MgmtOnly = intf.IsManagement
 	out.MacAddress = swag.String(intf.MACAddress.String())
 

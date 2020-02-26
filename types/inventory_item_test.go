@@ -3,24 +3,13 @@ package types_test
 import (
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/types"
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func mockInventoryItem() types.InventoryItem {
-	return types.InventoryItem{
-		Type:         types.InventoryItemTypeProcessor,
-		Manufacturer: "Intel",
-		Model:        "Xeon X5670",
-		AssetTag:     "Asset Tag",
-		PartNumber:   "Part Number",
-		SerialNumber: "Serial Number",
-	}
-}
-
 func TestInventoryItem_GetHashableString(t *testing.T) {
-	item := mockInventoryItem()
+	item := client_types.MockInventoryItem()
 	assert.Equal(t, item.GetHashableString(), "Intel:XeonX5670:PartNumber:AssetTag:SerialNumber")
 
 	item.AddDetail("Cores", "2")
@@ -31,7 +20,7 @@ func TestInventoryItem_GetHashableString(t *testing.T) {
 }
 
 func TestInventoryItem_AddDetail(t *testing.T) {
-	item := mockInventoryItem()
+	item := client_types.MockInventoryItem()
 
 	assert.Nil(t, item.Details)
 
@@ -47,7 +36,7 @@ func TestInventoryItem_AddDetail(t *testing.T) {
 }
 
 func TestInventoryItem_Copy(t *testing.T) {
-	item := mockInventoryItem()
+	item := client_types.MockInventoryItem()
 	item2 := item.Copy()
 
 	assert.Equal(t, item, item2)
@@ -55,7 +44,7 @@ func TestInventoryItem_Copy(t *testing.T) {
 }
 
 func TestInventoryItem_IsEqual(t *testing.T) {
-	item := mockInventoryItem()
+	item := client_types.MockInventoryItem()
 	item.AddDetail("Cores", "2")
 	item.AddDetail("Threads", "4")
 

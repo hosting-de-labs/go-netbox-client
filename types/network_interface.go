@@ -7,6 +7,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/utils"
 )
 
+//InterfaceType represents the type of an interface
 type InterfaceType string
 
 const (
@@ -86,7 +87,7 @@ const (
 type NetworkInterface struct {
 	CommonEntity
 
-	Type         *InterfaceType
+	Type         InterfaceType
 	IPAddresses  []IPAddress
 	IsManagement bool
 	MACAddress   net.HardwareAddr

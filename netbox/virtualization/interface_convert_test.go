@@ -4,7 +4,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock"
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_api"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/virtualization"
 
@@ -19,7 +19,7 @@ import (
 )
 
 func init() {
-	mock.RunServer()
+	netbox_api.RunServer()
 }
 
 func mockNetboxVirtualMachineInterface() models.VirtualMachineInterface {

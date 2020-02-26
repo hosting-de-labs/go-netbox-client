@@ -21,8 +21,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 	netIf.Metadata.SetEntity(netboxInterface)
 
 	if netboxInterface.Type != nil {
-		ff := types.InterfaceType(*netboxInterface.Type.Value)
-		netIf.Type = &ff
+		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
 	}
 
 	if netboxInterface.Name != nil {
@@ -113,11 +112,7 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 
 	out.VirtualMachine = &vmID
 	out.Name = &intf.Name
-
-	if intf.Type != nil {
-		out.Type = swag.String(string(*intf.Type))
-	}
-
+	out.Type = swag.String(string(intf.Type))
 	out.MacAddress = swag.String(intf.MACAddress.String())
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
