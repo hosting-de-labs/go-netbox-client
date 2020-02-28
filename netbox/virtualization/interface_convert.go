@@ -15,8 +15,7 @@ import (
 )
 
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
-	netIf := types.NetworkInterface{}
-
+	netIf := types.NewNetworkInterface()
 	netIf.Metadata.ID = netboxInterface.ID
 	netIf.Metadata.SetEntity(netboxInterface)
 
@@ -77,7 +76,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)
 	}
 
-	return &netIf, nil
+	return netIf, nil
 }
 
 //InterfaceConvertToNetbox allows to convert a NetworkInterface to a netbox compatible device interface

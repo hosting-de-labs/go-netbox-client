@@ -9,6 +9,17 @@ type DedicatedServer struct {
 	Inventory []*InventoryItem
 }
 
+func NewDedicatedServer() *DedicatedServer {
+	return &DedicatedServer{
+		Host: Host{
+			CommonEntity: CommonEntity{
+				Metadata: &Metadata{},
+			},
+		},
+		Inventory: nil,
+	}
+}
+
 //Copy creates a deep copy of the given host
 func (d DedicatedServer) Copy() DedicatedServer {
 	out := DedicatedServer{}

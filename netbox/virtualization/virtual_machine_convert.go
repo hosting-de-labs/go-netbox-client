@@ -11,7 +11,7 @@ import (
 
 //VirtualMachineConvertFromNetbox converts a netbox virtual machine entity to a VirtualServer entity
 func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces []*models.VirtualMachineInterface) (out *types.VirtualServer, err error) {
-	out = &types.VirtualServer{}
+	out = types.NewVirtualServer()
 
 	var cf interface{}
 	primaryIPv4 := &models.NestedIPAddress{}
@@ -108,6 +108,5 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 		}
 	}
 
-	out.OriginalEntity = out.Copy()
 	return out, nil
 }

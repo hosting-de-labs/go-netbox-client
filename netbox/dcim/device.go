@@ -72,7 +72,7 @@ func (c Client) DeviceGet(deviceID int64) (*types.DedicatedServer, error) {
 
 //TODO: Don't forget to cache
 func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
-	if host.OriginalEntity == nil {
+	if host.Metadata.NetboxEntity == nil {
 		oh, err := c.DeviceFind(host.Hostname)
 		if err != nil {
 			return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", host.Hostname)
@@ -83,7 +83,8 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 			return fmt.Errorf("cannot convert to DedicatedServer")
 		}
 
-		host.OriginalEntity = res
+		host.Metadata.ID = res.Metadata.ID
+		host.Metadata.NetboxEntity = res.Metadata.NetboxEntity
 	}
 
 	data := new(models.WritableDeviceWithConfigContext)

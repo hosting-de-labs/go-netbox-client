@@ -11,7 +11,7 @@ import (
 )
 
 func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.DedicatedServer, err error) {
-	out = &types.DedicatedServer{}
+	out = types.NewDedicatedServer()
 
 	primaryIPv4 := &models.NestedIPAddress{}
 	primaryIPv6 := &models.NestedIPAddress{}
@@ -21,6 +21,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 
 		out.Metadata.ID = d.ID
 		out.Metadata.NetboxEntity = device
+		out.Metadata.EntityType = reflect.TypeOf(device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
@@ -33,6 +34,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 
 		out.Metadata.ID = d.ID
 		out.Metadata.NetboxEntity = device
+		out.Metadata.EntityType = reflect.TypeOf(device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
@@ -78,8 +80,6 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 			Family:  types.IPAddressFamilyIPv6,
 		}
 	}
-
-	out.OriginalEntity = out.Copy()
 
 	return out, nil
 }

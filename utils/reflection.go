@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -49,9 +48,6 @@ LOOP:
 
 		field1 := item1Val.Field(i)
 		field2 := item2Val.Field(i)
-
-		fmt.Printf("Field1: %s\n", field1.String())
-		fmt.Printf("Field2: %s\n", field2.String())
 
 		if !reflect.DeepEqual(field1.Interface(), field2.Interface()) {
 			return false

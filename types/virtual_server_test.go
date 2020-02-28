@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
+
 	"github.com/hosting-de-labs/go-netbox-client/types"
 
 	"github.com/stretchr/testify/assert"
@@ -26,17 +28,8 @@ func TestVirtualServer_Copy(t *testing.T) {
 }
 
 func TestVirtualServer_IsChanged(t *testing.T) {
-	vm := types.VirtualServer{
-		Hypervisor: "hypervisor1",
-		Resources: types.VirtualServerResources{
-			Cores: 4,
-			Disks: []types.VirtualServerDisk{
-				{Size: 10},
-			},
-		},
-	}
+	vm := client_types.MockVirtualServer()
 
-	vm.OriginalEntity = vm.Copy()
 	vm.Hypervisor = "hypervisor2"
 
 	assert.True(t, vm.IsChanged())

@@ -14,8 +14,7 @@ type HashableEntity interface {
 
 //CommonEntity is a general object that should be extended by every Entity that interfaces with Netbox
 type CommonEntity struct {
-	OriginalEntity interface{} //Deprecated
-	Metadata       Metadata
+	Metadata *Metadata
 }
 
 //Metadata contain information that are relevant to communicate with Netbox

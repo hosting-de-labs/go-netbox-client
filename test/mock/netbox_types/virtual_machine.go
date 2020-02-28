@@ -6,6 +6,7 @@ import (
 )
 
 func MockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bool, addCustomFields bool) (out models.VirtualMachineWithConfigContext) {
+	out.ID = 10
 	out.Name = swag.String("VM1")
 
 	if addResources {

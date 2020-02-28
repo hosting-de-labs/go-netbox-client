@@ -12,6 +12,18 @@ type VirtualServer struct {
 	Resources  VirtualServerResources
 }
 
+func NewVirtualServer() *VirtualServer {
+	return &VirtualServer{
+		Host: Host{
+			CommonEntity: CommonEntity{
+				Metadata: &Metadata{},
+			},
+		},
+		Hypervisor: "",
+		Resources:  VirtualServerResources{},
+	}
+}
+
 //Copy creates a deep copy of a VirtualServer object
 func (vm VirtualServer) Copy() (out VirtualServer) {
 	out.Host = vm.Host.Copy()
@@ -31,13 +43,13 @@ func (vm VirtualServer) Copy() (out VirtualServer) {
 
 //IsChanged compares the current object against the original object
 func (vm VirtualServer) IsChanged() bool {
-	return !vm.IsEqual(vm.OriginalEntity.(VirtualServer), true)
+	return !vm.IsEqual(vm.Metadata.NetboxEntity.(VirtualServer), true)
 }
 
 //IsEqual compares the current object with another VirtualServer object
 func (vm VirtualServer) IsEqual(vm2 VirtualServer, deep bool) bool {
-	vm.OriginalEntity = nil
-	vm2.OriginalEntity = nil
+	vm.Metadata = nil
+	vm2.Metadata = nil
 
 	//compare Host struct
 	if !vm.Host.IsEqual(vm2.Host, deep) {

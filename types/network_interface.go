@@ -98,6 +98,23 @@ type NetworkInterface struct {
 	Children     []NetworkInterface
 }
 
+func NewNetworkInterface() *NetworkInterface {
+	return &NetworkInterface{
+		CommonEntity: CommonEntity{
+			Metadata: &Metadata{},
+		},
+		Type:         "",
+		IPAddresses:  nil,
+		IsManagement: false,
+		MACAddress:   nil,
+		Name:         "",
+		TaggedVlans:  nil,
+		UntaggedVlan: nil,
+		Tags:         nil,
+		Children:     nil,
+	}
+}
+
 //IsEqual compares the current NetworkInterface object against another NetworkInterface
 func (netIf NetworkInterface) IsEqual(netIf2 NetworkInterface) bool {
 	if !utils.CompareStruct(netIf, netIf2, []string{}, []string{"IPAddresses"}) {

@@ -17,10 +17,12 @@ import (
 
 //InterfaceConvertFromNetbox allows to convert a DeviceInterface to a NetworkInterface
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterface) (*types.NetworkInterface, error) {
-	netIf := types.NetworkInterface{}
+	netIf := types.NewNetworkInterface()
 
-	//pass reference as original entity
-	netIf.OriginalEntity = interface{}(&netboxInterface)
+	//pass reference as netbox entity
+	netIf.Metadata.ID = netboxInterface.ID
+	netIf.Metadata.NetboxEntity = interface{}(netboxInterface)
+	netIf.Metadata.EntityType = reflect.TypeOf(netboxInterface)
 
 	if netboxInterface.Type != nil {
 		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
@@ -85,7 +87,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)
 	}
 
-	return &netIf, nil
+	return netIf, nil
 }
 
 //InterfaceConvertToNetbox allows to convert a NetworkInterface to a netbox compatible device interface

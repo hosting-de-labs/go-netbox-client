@@ -78,7 +78,7 @@ func TestHost_Copy(t *testing.T) {
 
 func TestHost_IsChanged(t *testing.T) {
 	host := client_types.MockHost()
-	host.CommonEntity.OriginalEntity = host.Copy()
+
 	assert.False(t, host.IsChanged())
 
 	host.Hostname = "host2"

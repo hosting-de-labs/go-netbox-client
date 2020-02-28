@@ -20,6 +20,21 @@ type Host struct {
 	NetworkInterfaces []NetworkInterface
 }
 
+func NewHost() *Host {
+	return &Host{
+		CommonEntity: CommonEntity{
+			Metadata: &Metadata{},
+		},
+		Hostname:          "",
+		PrimaryIPv4:       IPAddress{},
+		PrimaryIPv6:       IPAddress{},
+		IsManaged:         false,
+		Tags:              nil,
+		Comments:          nil,
+		NetworkInterfaces: nil,
+	}
+}
+
 //HasTag checks for a specific tag being assigned to this host
 func (h *Host) HasTag(tag string) bool {
 	for _, existingTag := range h.Tags {
@@ -57,6 +72,14 @@ func (h Host) Copy() Host {
 		PrimaryIPv6: h.PrimaryIPv6,
 	}
 
+	if h.Metadata != nil {
+		out.Metadata = &Metadata{
+			ID:           h.Metadata.ID,
+			NetboxEntity: h.Metadata.NetboxEntity,
+			EntityType:   h.Metadata.EntityType,
+		}
+	}
+
 	//copy comments
 	if len(h.Comments) > 0 {
 		out.Comments = make([]string, len(h.Comments))
@@ -80,15 +103,15 @@ func (h Host) Copy() Host {
 
 //IsChanged returns true if the current and the original object differ
 func (h Host) IsChanged() bool {
-	return !h.IsEqual(h.OriginalEntity.(Host), true)
+	return !h.IsEqual(h.Metadata.NetboxEntity.(Host), true)
 }
 
 //IsEqual compares the current object against another Host object
 func (h Host) IsEqual(h2 Host, deep bool) bool {
-	h.OriginalEntity = nil
-	h2.OriginalEntity = nil
+	h.Metadata = nil
+	h2.Metadata = nil
 
-	if !utils.CompareStruct(h, h2, []string{}, []string{"Metadata", "NetworkInterfaces", "OriginalEntity", "Tags"}) {
+	if !utils.CompareStruct(h, h2, []string{}, []string{"Metadata", "NetworkInterfaces", "Tags"}) {
 		return false
 	}
 
