@@ -11,7 +11,10 @@ func CompareStruct(item1 interface{}, item2 interface{}, fieldsToCompare []strin
 	item1Type := reflect.TypeOf(item1)
 	item2Type := reflect.TypeOf(item2)
 
-	if item1Type.Name() != item2Type.Name() {
+	item1TypeName := item1Type.Name()
+	item2TypeName := item2Type.Name()
+
+	if item1TypeName != item2TypeName {
 		return false
 	}
 

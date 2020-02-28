@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/go-openapi/runtime"
-
 	"github.com/hosting-de-labs/go-netbox-client/types"
 )
 
