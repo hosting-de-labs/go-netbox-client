@@ -19,9 +19,9 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	case models.Device:
 		d := device.(models.Device)
 
-		out.Metadata.ID = d.ID
-		out.Metadata.NetboxEntity = device
-		out.Metadata.EntityType = reflect.TypeOf(device)
+		out.Meta.ID = d.ID
+		out.Meta.NetboxEntity = device
+		out.Meta.EntityType = reflect.TypeOf(device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
@@ -32,9 +32,9 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	case models.DeviceWithConfigContext:
 		d := device.(models.DeviceWithConfigContext)
 
-		out.Metadata.ID = d.ID
-		out.Metadata.NetboxEntity = device
-		out.Metadata.EntityType = reflect.TypeOf(device)
+		out.Meta.ID = d.ID
+		out.Meta.NetboxEntity = device
+		out.Meta.EntityType = reflect.TypeOf(device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags

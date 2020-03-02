@@ -12,14 +12,14 @@ import (
 
 func TestCompareStruct(t *testing.T) {
 	item1 := types.CommonEntity{
-		Metadata: &types.Metadata{
+		Meta: &types.Metadata{
 			ID:           1,
 			NetboxEntity: interface{}(10),
 		},
 	}
 
 	item2 := types.CommonEntity{
-		Metadata: &types.Metadata{
+		Meta: &types.Metadata{
 			ID:           1,
 			NetboxEntity: interface{}(10),
 		},

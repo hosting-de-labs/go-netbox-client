@@ -130,7 +130,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		return false, err
 	}
 
-	nbVM := res.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
+	nbVM := res.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 
 	dcimClient := netboxDcim.NewClient(c.client)
 
@@ -140,8 +140,8 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//check if base data is equal
-	if vm.IsEqual(vm.Metadata.NetboxEntity.(types.VirtualServer), false) {
-		_, err = c.updateInterfaces(vm, hyp.Metadata.ID)
+	if vm.IsEqual(vm.Meta.NetboxEntity.(types.VirtualServer), false) {
+		_, err = c.updateInterfaces(vm, hyp.Meta.ID)
 		if err != nil {
 			return false, err
 		}
@@ -169,7 +169,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//Primary IPs
-	if len(vm.PrimaryIPv4.Address) > 0 && vm.Metadata.NetboxEntity.(types.VirtualServer).PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
+	if len(vm.PrimaryIPv4.Address) > 0 && vm.Meta.NetboxEntity.(types.VirtualServer).PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
 		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv4)
 		if err != nil {
 			return false, err
@@ -178,7 +178,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		data.PrimaryIp4 = &IPID
 	}
 
-	if len(vm.PrimaryIPv6.Address) > 0 && vm.Metadata.NetboxEntity.(types.VirtualServer).PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
+	if len(vm.PrimaryIPv6.Address) > 0 && vm.Meta.NetboxEntity.(types.VirtualServer).PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
 		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv6)
 		if err != nil {
 			return false, err
@@ -199,7 +199,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
+	params.WithID(vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
@@ -240,13 +240,13 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 
 	//process network interfaces
 	for _, netIf := range vm.NetworkInterfaces {
-		vmInterface, err := c.InterfaceGetCreate(vm.Metadata.ID, netIf)
+		vmInterface, err := c.InterfaceGetCreate(vm.Meta.ID, netIf)
 		if err != nil {
 			return false, err
 		}
 
 		for _, network := range netIf.IPAddresses {
-			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.Metadata.ID)
+			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.Meta.ID)
 			if err != nil {
 				return false, err
 			}

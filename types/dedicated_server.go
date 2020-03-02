@@ -13,7 +13,7 @@ func NewDedicatedServer() *DedicatedServer {
 	return &DedicatedServer{
 		Host: Host{
 			CommonEntity: CommonEntity{
-				Metadata: &Metadata{},
+				Meta: &Metadata{},
 			},
 		},
 		Inventory: nil,

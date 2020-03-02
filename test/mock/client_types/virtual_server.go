@@ -8,6 +8,6 @@ func MockVirtualServer() types.VirtualServer {
 	vm.Resources.Cores = 4
 	vm.Resources.Disks = []types.VirtualServerDisk{{Size: 10}}
 
-	vm.Metadata.NetboxEntity = vm.Copy()
+	vm.Meta.OriginalEntity = vm.Copy()
 	return *vm
 }

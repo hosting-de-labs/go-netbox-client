@@ -23,7 +23,7 @@ type Host struct {
 func NewHost() *Host {
 	return &Host{
 		CommonEntity: CommonEntity{
-			Metadata: &Metadata{},
+			Meta: &Metadata{},
 		},
 		Hostname:          "",
 		PrimaryIPv4:       IPAddress{},
@@ -65,18 +65,18 @@ func (h *Host) AddTag(tags ...string) {
 
 //Copy creates a deep copy of the given host
 func (h Host) Copy() Host {
-	out := Host{
-		Hostname:    h.Hostname,
-		IsManaged:   h.IsManaged,
-		PrimaryIPv4: h.PrimaryIPv4,
-		PrimaryIPv6: h.PrimaryIPv6,
-	}
+	out := NewHost()
+	out.Hostname = h.Hostname
+	out.IsManaged = h.IsManaged
+	out.PrimaryIPv4 = h.PrimaryIPv4
+	out.PrimaryIPv6 = h.PrimaryIPv6
 
-	if h.Metadata != nil {
-		out.Metadata = &Metadata{
-			ID:           h.Metadata.ID,
-			NetboxEntity: h.Metadata.NetboxEntity,
-			EntityType:   h.Metadata.EntityType,
+	if h.Meta != nil {
+		out.Meta = &Metadata{
+			ID:             h.Meta.ID,
+			OriginalEntity: h.Meta.OriginalEntity,
+			NetboxEntity:   h.Meta.NetboxEntity,
+			EntityType:     h.Meta.EntityType,
 		}
 	}
 
@@ -98,20 +98,24 @@ func (h Host) Copy() Host {
 		copy(out.Tags, h.Tags)
 	}
 
-	return out
+	return *out
 }
 
 //IsChanged returns true if the current and the original object differ
 func (h Host) IsChanged() bool {
-	return !h.IsEqual(h.Metadata.NetboxEntity.(Host), true)
+	if h.Meta == nil || h.Meta.OriginalEntity == nil {
+		return true
+	}
+
+	return !h.IsEqual(h.Meta.OriginalEntity.(Host), true)
 }
 
 //IsEqual compares the current object against another Host object
 func (h Host) IsEqual(h2 Host, deep bool) bool {
-	h.Metadata = nil
-	h2.Metadata = nil
+	h.Meta = nil
+	h2.Meta = nil
 
-	if !utils.CompareStruct(h, h2, []string{}, []string{"Metadata", "NetworkInterfaces", "Tags"}) {
+	if !utils.CompareStruct(h, h2, []string{}, []string{"Meta", "NetworkInterfaces", "Tags"}) {
 		return false
 	}
 

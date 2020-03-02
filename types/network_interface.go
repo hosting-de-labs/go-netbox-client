@@ -101,7 +101,7 @@ type NetworkInterface struct {
 func NewNetworkInterface() *NetworkInterface {
 	return &NetworkInterface{
 		CommonEntity: CommonEntity{
-			Metadata: &Metadata{},
+			Meta: &Metadata{},
 		},
 		Type:         "",
 		IPAddresses:  nil,

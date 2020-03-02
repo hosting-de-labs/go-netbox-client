@@ -136,6 +136,20 @@ func TestDedicatedServer_IsEqual(t *testing.T) {
 			},
 			isEqual: true,
 		},
+		{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
+					{Manufacturer: "Intel"},
+					{Manufacturer: "AMD"},
+				},
+			},
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
+					{Manufacturer: "AMD"},
+				},
+			},
+			isEqual: false,
+		},
 		//TODO: Details
 	}
 

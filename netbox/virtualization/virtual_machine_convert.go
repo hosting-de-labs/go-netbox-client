@@ -21,8 +21,8 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 	case models.VirtualMachineWithConfigContext:
 		vm := netboxVM.(models.VirtualMachineWithConfigContext)
 
-		out.Metadata.ID = vm.ID
-		out.Metadata.NetboxEntity = netboxVM
+		out.Meta.ID = vm.ID
+		out.Meta.NetboxEntity = netboxVM
 
 		out.Hostname = *vm.Name
 		out.Tags = vm.Tags

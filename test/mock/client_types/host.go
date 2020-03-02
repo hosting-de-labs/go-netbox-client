@@ -17,7 +17,7 @@ func MockHost() types.Host {
 		Family:  types.IPAddressFamilyIPv6,
 	}
 
-	h.Metadata.NetboxEntity = interface{}(h.Copy())
+	h.Meta.OriginalEntity = h.Copy()
 
 	return *h
 }

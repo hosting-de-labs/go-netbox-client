@@ -16,8 +16,8 @@ import (
 
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
 	netIf := types.NewNetworkInterface()
-	netIf.Metadata.ID = netboxInterface.ID
-	netIf.Metadata.SetEntity(netboxInterface)
+	netIf.Meta.ID = netboxInterface.ID
+	netIf.Meta.SetNetboxEntity(netboxInterface)
 
 	if netboxInterface.Type != nil {
 		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
@@ -87,16 +87,16 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 	}
 
 	var siteID int64
-	switch vm.Metadata.NetboxEntity.(type) {
+	switch vm.Meta.NetboxEntity.(type) {
 	case models.Device:
-		vm := vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
+		vm := vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 		if vm.Site == nil {
 			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)
 		}
 
 		siteID = vm.Site.ID
 	case models.DeviceWithConfigContext:
-		vm := vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
+		vm := vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 		if vm.Site == nil {
 			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)
 		}
@@ -104,7 +104,7 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 		siteID = vm.Site.ID
 
 	default:
-		return nil, fmt.Errorf("Unsupported type for vm: %s", reflect.TypeOf(vm.Metadata.NetboxEntity))
+		return nil, fmt.Errorf("Unsupported type for vm: %s", reflect.TypeOf(vm.Meta.NetboxEntity))
 	}
 
 	out = &models.WritableVirtualMachineInterface{}

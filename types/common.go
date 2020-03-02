@@ -14,23 +14,33 @@ type HashableEntity interface {
 
 //CommonEntity is a general object that should be extended by every Entity that interfaces with Netbox
 type CommonEntity struct {
-	Metadata *Metadata
+	entity interface{}
+	Meta   *Metadata
 }
 
-//Metadata contain information that are relevant to communicate with Netbox
+func (c CommonEntity) GetEntity() interface{} {
+	return c.entity
+}
+
+func (c *CommonEntity) SetEntity(entity interface{}) {
+	c.entity = entity
+}
+
+//Meta contain information that are relevant to communicate with Netbox
 type Metadata struct {
-	ID           int64
-	NetboxEntity interface{}
-	EntityType   reflect.Type
+	ID             int64
+	OriginalEntity interface{}
+	NetboxEntity   interface{}
+	EntityType     reflect.Type
 }
 
-//GetEntity returns the entity and
-func (m Metadata) GetEntity() (entity interface{}, entityType reflect.Type) {
+//GetNetboxEntity returns the entity and
+func (m Metadata) GetNetboxEntity() (entity interface{}, entityType reflect.Type) {
 	return m.NetboxEntity, m.EntityType
 }
 
-//SetEntity stores a netbox entity with its type
-func (m *Metadata) SetEntity(entity interface{}) {
+//SetNetboxEntity stores a netbox entity with its type
+func (m *Metadata) SetNetboxEntity(entity interface{}) {
 	m.NetboxEntity = entity
 	m.EntityType = reflect.TypeOf(entity)
 }

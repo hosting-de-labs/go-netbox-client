@@ -49,6 +49,10 @@ LOOP:
 		field1 := item1Val.Field(i)
 		field2 := item2Val.Field(i)
 
+		if !field1.CanInterface() || !field2.CanInterface() {
+			continue LOOP
+		}
+
 		if !reflect.DeepEqual(field1.Interface(), field2.Interface()) {
 			return false
 		}

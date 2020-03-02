@@ -20,9 +20,9 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 	netIf := types.NewNetworkInterface()
 
 	//pass reference as netbox entity
-	netIf.Metadata.ID = netboxInterface.ID
-	netIf.Metadata.NetboxEntity = interface{}(netboxInterface)
-	netIf.Metadata.EntityType = reflect.TypeOf(netboxInterface)
+	netIf.Meta.ID = netboxInterface.ID
+	netIf.Meta.NetboxEntity = interface{}(netboxInterface)
+	netIf.Meta.EntityType = reflect.TypeOf(netboxInterface)
 
 	if netboxInterface.Type != nil {
 		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
@@ -97,19 +97,19 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 		return nil, err
 	}
 
-	//d := device.Metadata.GetEntity().DcimDeviceWithConfigContext()
+	//d := device.Meta.GetNetboxEntity().DcimDeviceWithConfigContext()
 
 	var siteID int64
-	switch device.Metadata.NetboxEntity.(type) {
+	switch device.Meta.NetboxEntity.(type) {
 	case models.Device:
-		d := device.Metadata.NetboxEntity.(models.Device)
+		d := device.Meta.NetboxEntity.(models.Device)
 		if d.Site == nil {
 			return nil, fmt.Errorf("device with ID %d is not assigned to any site", deviceID)
 		}
 
 		siteID = d.Site.ID
 	case models.DeviceWithConfigContext:
-		d := device.Metadata.NetboxEntity.(models.DeviceWithConfigContext)
+		d := device.Meta.NetboxEntity.(models.DeviceWithConfigContext)
 		if d.Site == nil {
 			return nil, fmt.Errorf("device with ID %d is not assigned to any site", deviceID)
 		}
@@ -117,7 +117,7 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 		siteID = d.Site.ID
 
 	default:
-		return nil, fmt.Errorf("Unsupported type for device: %s", reflect.TypeOf(device.Metadata.NetboxEntity))
+		return nil, fmt.Errorf("Unsupported type for device: %s", reflect.TypeOf(device.Meta.NetboxEntity))
 	}
 
 	out = &models.WritableDeviceInterface{}

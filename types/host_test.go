@@ -85,6 +85,16 @@ func TestHost_IsChanged(t *testing.T) {
 	assert.True(t, host.IsChanged())
 }
 
+func TestHost_IsChangedWithEmptyMetadata(t *testing.T) {
+	host := client_types.MockHost()
+	host.Meta = nil
+
+	assert.True(t, host.IsChanged())
+
+	host.Hostname = "host2"
+	assert.True(t, host.IsChanged())
+}
+
 func TestHost_IsEqual(t *testing.T) {
 	cases := []struct {
 		host1   types.Host
@@ -206,6 +216,15 @@ func TestHost_IsEqual(t *testing.T) {
 		},
 		{
 			host1: types.Host{
+				Tags: []string{"Tag1", "Tag2"},
+			},
+			host2: types.Host{
+				Tags: []string{"Tag1"},
+			},
+			isEqual: false,
+		},
+		{
+			host1: types.Host{
 				Comments: []string{"Comment1"},
 			},
 			host2: types.Host{
@@ -227,6 +246,20 @@ func TestHost_IsEqual(t *testing.T) {
 				},
 			},
 			isEqual: true,
+		},
+		{
+			host1: types.Host{
+				NetworkInterfaces: []types.NetworkInterface{
+					{Name: "eth0"},
+					{Name: "eth1"},
+				},
+			},
+			host2: types.Host{
+				NetworkInterfaces: []types.NetworkInterface{
+					{Name: "eth0"},
+				},
+			},
+			isEqual: false,
 		},
 	}
 
