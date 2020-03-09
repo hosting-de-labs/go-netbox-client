@@ -140,10 +140,12 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//check if base data is equal
-	if vm.IsEqual(vm.Meta.OriginalEntity.(types.VirtualServer), false) {
-		_, err = c.updateInterfaces(vm, hyp.Meta.ID)
-		if err != nil {
-			return false, err
+	if origVm, ok := vm.Meta.OriginalEntity.(types.VirtualServer); ok {
+		if vm.IsEqual(origVm, false) {
+			_, err = c.updateInterfaces(vm, hyp.Meta.ID)
+			if err != nil {
+				return false, err
+			}
 		}
 	}
 
@@ -199,7 +201,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.Meta.OriginalEntity.(models.VirtualMachineWithConfigContext).ID)
+	params.WithID(vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
