@@ -140,8 +140,9 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//check if base data is equal
-	if origVm, ok := vm.Meta.OriginalEntity.(types.VirtualServer); ok {
-		if vm.IsEqual(origVm, false) {
+	origVirtualServer, ok := vm.Meta.OriginalEntity.(types.VirtualServer)
+	if ok {
+		if vm.IsEqual(origVirtualServer, false) {
 			_, err = c.updateInterfaces(vm, hyp.Meta.ID)
 			if err != nil {
 				return false, err
@@ -171,7 +172,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//Primary IPs
-	if len(vm.PrimaryIPv4.Address) > 0 && vm.Meta.OriginalEntity.(types.VirtualServer).PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
+	if len(vm.PrimaryIPv4.Address) > 0 && origVirtualServer.PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
 		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv4)
 		if err != nil {
 			return false, err
@@ -180,7 +181,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		data.PrimaryIp4 = &IPID
 	}
 
-	if len(vm.PrimaryIPv6.Address) > 0 && vm.Meta.OriginalEntity.(types.VirtualServer).PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
+	if len(vm.PrimaryIPv6.Address) > 0 && origVirtualServer.PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
 		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv6)
 		if err != nil {
 			return false, err
