@@ -171,24 +171,8 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 	}
 
-	//Primary IPs
-	if len(vm.PrimaryIPv4.Address) > 0 && origVirtualServer.PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
-		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv4)
-		if err != nil {
-			return false, err
-		}
-
-		data.PrimaryIp4 = &IPID
-	}
-
-	if len(vm.PrimaryIPv6.Address) > 0 && origVirtualServer.PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
-		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv6)
-		if err != nil {
-			return false, err
-		}
-
-		data.PrimaryIp6 = &IPID
-	}
+	//compare ipv4 / v6 addresses and sets ids of writable object if not nil
+	updated, err = c.compareIPAddresses(vm, origVirtualServer, data)
 
 	//we need to update interfaces before we possibly assign new primary ip addresses
 	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
@@ -257,4 +241,33 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 	}
 
 	return true, nil
+}
+
+func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualServer, updateObject *models.WritableVirtualMachineWithConfigContext) (updated bool, err error) {
+	//Primary IPs
+	if len(vm1.PrimaryIPv4.Address) > 0 && vm1.PrimaryIPv4.Address != vm2.PrimaryIPv4.Address {
+		ipv4Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv4)
+		if err != nil {
+			return updated, err
+		}
+
+		if updateObject != nil {
+			updateObject.PrimaryIp4 = &ipv4Id
+			updated = true
+		}
+	}
+
+	if len(vm1.PrimaryIPv6.Address) > 0 && vm1.PrimaryIPv6.Address != vm2.PrimaryIPv6.Address {
+		ipv6Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv6)
+		if err != nil {
+			return updated, err
+		}
+
+		if updateObject != nil {
+			updateObject.PrimaryIp6 = &ipv6Id
+			updated = true
+		}
+	}
+
+	return updated, nil
 }
