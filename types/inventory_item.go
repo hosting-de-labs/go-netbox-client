@@ -23,6 +23,22 @@ type InventoryItem struct {
 	Tags         []string
 }
 
+func NewInventoryItem() *InventoryItem {
+	return &InventoryItem{
+		CommonEntity: CommonEntity{
+			Meta: &Metadata{},
+		},
+		Type:         InventoryItemTypeOther,
+		Manufacturer: "",
+		Model:        "",
+		PartNumber:   "",
+		SerialNumber: "",
+		AssetTag:     "",
+		Details:      nil,
+		Tags:         nil,
+	}
+}
+
 func (i *InventoryItem) AddDetail(key string, val string) {
 	if i.Details == nil {
 		i.Details = make(map[string]string)
