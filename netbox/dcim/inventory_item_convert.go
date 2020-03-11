@@ -63,6 +63,8 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 }
 
 func (c *Client) InventoryItemConvertFromNetbox(i models.InventoryItem) (out types.InventoryItem) {
+	out = *types.NewInventoryItem()
+
 	out.Meta.NetboxEntity = &i
 	out.Manufacturer = *i.Manufacturer.Name
 	out.PartNumber = i.PartID
