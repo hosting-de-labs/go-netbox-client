@@ -1,15 +1,24 @@
 package types
 
-import (
-	"sort"
-)
-
 //VirtualServer represents a virtual server
 type VirtualServer struct {
 	Host
 
 	Hypervisor string
 	Resources  VirtualServerResources
+}
+
+//NewVirtualServer returns a new instance of VirtualServer
+func NewVirtualServer() *VirtualServer {
+	return &VirtualServer{
+		Host: Host{
+			CommonEntity: CommonEntity{
+				Meta: &Metadata{},
+			},
+		},
+		Hypervisor: "",
+		Resources:  VirtualServerResources{},
+	}
 }
 
 //Copy creates a deep copy of a VirtualServer object
@@ -31,13 +40,17 @@ func (vm VirtualServer) Copy() (out VirtualServer) {
 
 //IsChanged compares the current object against the original object
 func (vm VirtualServer) IsChanged() bool {
-	return !vm.IsEqual(vm.OriginalEntity.(VirtualServer), true)
+	if vm.Meta == nil || vm.Meta.OriginalEntity == nil {
+		return true
+	}
+
+	return !vm.IsEqual(vm.Meta.OriginalEntity.(VirtualServer), true)
 }
 
 //IsEqual compares the current object with another VirtualServer object
 func (vm VirtualServer) IsEqual(vm2 VirtualServer, deep bool) bool {
-	vm.OriginalEntity = nil
-	vm2.OriginalEntity = nil
+	vm.Meta = nil
+	vm2.Meta = nil
 
 	//compare Host struct
 	if !vm.Host.IsEqual(vm2.Host, deep) {
@@ -60,10 +73,6 @@ func (vm VirtualServer) IsEqual(vm2 VirtualServer, deep bool) bool {
 	if len(vm.Resources.Disks) != len(vm2.Resources.Disks) {
 		return false
 	}
-
-	sort.Slice(vm.Resources.Disks, func(i int, j int) bool {
-		return vm.Resources.Disks[i].Size < vm.Resources.Disks[j].Size
-	})
 
 	for key, disk := range vm.Resources.Disks {
 		if !disk.IsEqual(vm2.Resources.Disks[key]) {

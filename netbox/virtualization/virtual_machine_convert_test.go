@@ -3,48 +3,30 @@ package virtualization_test
 import (
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
+
 	"github.com/hosting-de-labs/go-netbox-client/netbox/virtualization"
 
-	"github.com/go-openapi/swag"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 	"github.com/stretchr/testify/assert"
 )
 
-func mockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bool, addCustomFields bool) (out models.VirtualMachineWithConfigContext) {
-	out.Name = swag.String("VM1")
+func TestVirtualMachineConvertFromNetbox_WithUnknownType(t *testing.T) {
+	c := virtualization.NewClient(client.NetBox{})
 
-	if addResources {
-		out.Vcpus = swag.Int64(1)
-		out.Memory = swag.Int64(4096)
-		out.Disk = swag.Int64(10240)
-	}
+	type UnknownVMType interface{}
+	var vm UnknownVMType
 
-	if addIPAddresses {
-		out.PrimaryIp4 = &models.NestedIPAddress{Address: swag.String("127.0.0.1/32")}
-		out.PrimaryIp6 = &models.NestedIPAddress{Address: swag.String("::1/128")}
-	}
-
-	if addTags {
-		out.Tags = append(out.Tags, "Tag1")
-		out.Tags = append(out.Tags, "managed")
-	}
-
-	if addCustomFields {
-		customFields := make(map[string]interface{})
-		customFields["hypervisor_label"] = "Hypervisor1"
-
-		out.CustomFields = customFields
-	}
-
-	return out
+	_, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
+	assert.Error(t, err)
 }
 
 func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
-	vm := mockNetboxVirtualMachine(false, false, false, false)
+	vm := netbox_types.MockNetboxVirtualMachine(false, false, false, false)
 
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
@@ -66,7 +48,7 @@ func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 func TestVirtualMachineConvertFromNetbox_WithResources(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
-	vm := mockNetboxVirtualMachine(true, false, false, false)
+	vm := netbox_types.MockNetboxVirtualMachine(true, false, false, false)
 
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
@@ -80,7 +62,7 @@ func TestVirtualMachineConvertFromNetbox_WithResources(t *testing.T) {
 func TestVirtualMachineConvertFromNetbox_WithIPAddresses(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
-	vm := mockNetboxVirtualMachine(false, true, false, false)
+	vm := netbox_types.MockNetboxVirtualMachine(false, true, false, false)
 
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
@@ -92,7 +74,7 @@ func TestVirtualMachineConvertFromNetbox_WithIPAddresses(t *testing.T) {
 func TestVirtualMachineConvertFromNetbox_WithTags(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
-	vm := mockNetboxVirtualMachine(false, false, true, false)
+	vm := netbox_types.MockNetboxVirtualMachine(false, false, true, false)
 
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.NotNil(t, res)
@@ -107,7 +89,7 @@ func TestVirtualMachineConvertFromNetbox_WithTags(t *testing.T) {
 func TestVirtualMachineConvertFromNetbox_WithCustomFields(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
-	vm := mockNetboxVirtualMachine(false, false, false, true)
+	vm := netbox_types.MockNetboxVirtualMachine(false, false, false, true)
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.NotNil(t, res)
 	assert.Nil(t, err)

@@ -11,7 +11,10 @@ func CompareStruct(item1 interface{}, item2 interface{}, fieldsToCompare []strin
 	item1Type := reflect.TypeOf(item1)
 	item2Type := reflect.TypeOf(item2)
 
-	if item1Type.Name() != item2Type.Name() {
+	item1TypeName := item1Type.Name()
+	item2TypeName := item2Type.Name()
+
+	if item1TypeName != item2TypeName {
 		return false
 	}
 
@@ -43,7 +46,14 @@ LOOP:
 			}
 		}
 
-		if !reflect.DeepEqual(item1Val.Field(i).Interface(), item2Val.Field(i).Interface()) {
+		field1 := item1Val.Field(i)
+		field2 := item2Val.Field(i)
+
+		if !field1.CanInterface() || !field2.CanInterface() {
+			continue LOOP
+		}
+
+		if !reflect.DeepEqual(field1.Interface(), field2.Interface()) {
 			return false
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/utils"
 )
 
+//InterfaceType represents the type of an interface
 type InterfaceType string
 
 const (
@@ -86,7 +87,7 @@ const (
 type NetworkInterface struct {
 	CommonEntity
 
-	Type         *InterfaceType
+	Type         InterfaceType
 	IPAddresses  []IPAddress
 	IsManagement bool
 	MACAddress   net.HardwareAddr
@@ -95,6 +96,23 @@ type NetworkInterface struct {
 	UntaggedVlan *VLAN
 	Tags         []string
 	Children     []NetworkInterface
+}
+
+func NewNetworkInterface() *NetworkInterface {
+	return &NetworkInterface{
+		CommonEntity: CommonEntity{
+			Meta: &Metadata{},
+		},
+		Type:         "",
+		IPAddresses:  nil,
+		IsManagement: false,
+		MACAddress:   nil,
+		Name:         "",
+		TaggedVlans:  nil,
+		UntaggedVlan: nil,
+		Tags:         nil,
+		Children:     nil,
+	}
 }
 
 //IsEqual compares the current NetworkInterface object against another NetworkInterface

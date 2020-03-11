@@ -3,7 +3,6 @@ package virtualization
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
@@ -12,7 +11,7 @@ import (
 
 //VirtualMachineConvertFromNetbox converts a netbox virtual machine entity to a VirtualServer entity
 func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces []*models.VirtualMachineInterface) (out *types.VirtualServer, err error) {
-	out = &types.VirtualServer{}
+	out = types.NewVirtualServer()
 
 	var cf interface{}
 	primaryIPv4 := &models.NestedIPAddress{}
@@ -22,12 +21,11 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 	case models.VirtualMachineWithConfigContext:
 		vm := netboxVM.(models.VirtualMachineWithConfigContext)
 
-		out.Metadata.ID = vm.ID
-		out.Metadata.NetboxEntity = netboxVM
+		out.Meta.ID = vm.ID
+		out.Meta.NetboxEntity = netboxVM
 
 		out.Hostname = *vm.Name
 		out.Tags = vm.Tags
-		out.Comments = strings.Split(vm.Comments, "\n")
 
 		if vm.Vcpus != nil {
 			out.Resources.Cores = int(*vm.Vcpus)
@@ -110,6 +108,5 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 		}
 	}
 
-	out.OriginalEntity = out.Copy()
 	return out, nil
 }

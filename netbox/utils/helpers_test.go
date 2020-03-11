@@ -211,7 +211,40 @@ Size: 10 MBytes
 	}
 }
 
-func TestParseVMComment(t *testing.T) {
+func TestParseVMCommentWithoutDisk(t *testing.T) {
+	cases := []struct {
+		comment string
+		host    types.VirtualServer
+	}{
+		{
+			`--- NETBOX SYNC: DO NOT MODIFY ---
+Comments:
+Line1
+Line2
+Line3
+--- NETBOX SYNC: DO NOT MODIFY ---`,
+			types.VirtualServer{
+				Host: types.Host{
+					Comments: []string{
+						"Line1",
+						"Line2",
+						"Line3",
+					},
+				},
+			},
+		},
+	}
+
+	for _, testcase := range cases {
+		vm := types.VirtualServer{}
+
+		ParseVMComment(testcase.comment, &vm)
+
+		assert.Equal(t, testcase.host, vm)
+	}
+}
+
+func TestParseVMCommentWithDisk(t *testing.T) {
 	cases := []struct {
 		comment string
 		host    types.VirtualServer

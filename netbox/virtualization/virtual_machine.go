@@ -2,12 +2,13 @@ package virtualization
 
 import (
 	"github.com/go-openapi/swag"
-	netboxDcim "github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
-	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
+
+	netboxDcim "github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
+	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
 //VirtualMachineCreate creates a new VM object in Netbox.
@@ -103,7 +104,7 @@ func (c Client) VirtualMachineGet(vmID int64) (out *types.VirtualServer, err err
 	return c.VirtualMachineConvertFromNetbox(*res.Payload, interfaces)
 }
 
-//VMGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
+//VirtualMachineGetCreate is a convenience wrapper for retrieving an existing VM object or creating it instead.
 func (c Client) VirtualMachineGetCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
 	vmOut, err := c.VirtualMachineFind(vm.Hostname)
 
@@ -129,7 +130,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		return false, err
 	}
 
-	nbVm := res.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext)
+	nbVM := res.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 
 	dcimClient := netboxDcim.NewClient(c.client)
 
@@ -139,10 +140,13 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//check if base data is equal
-	if vm.IsEqual(vm.OriginalEntity.(types.VirtualServer), false) {
-		_, err = c.updateInterfaces(vm, hyp.Metadata.ID)
-		if err != nil {
-			return false, err
+	origVirtualServer, ok := vm.Meta.OriginalEntity.(types.VirtualServer)
+	if ok {
+		if vm.IsEqual(origVirtualServer, false) {
+			_, err = c.updateInterfaces(vm, hyp.Meta.ID)
+			if err != nil {
+				return false, err
+			}
 		}
 	}
 
@@ -150,7 +154,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 
 	data.Name = swag.String(vm.Hostname)
 	data.Tags = vm.Tags
-	data.Cluster = &nbVm.Cluster.ID
+	data.Cluster = &nbVM.Cluster.ID
 	data.Comments = utils.GenerateVMComment(vm)
 
 	//custom fields
@@ -167,28 +171,12 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 	}
 
-	//Primary IPs
-	if len(vm.PrimaryIPv4.Address) > 0 && vm.OriginalEntity.(types.VirtualServer).PrimaryIPv4.Address != vm.PrimaryIPv4.Address {
-		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv4)
-		if err != nil {
-			return false, err
-		}
-
-		data.PrimaryIp4 = &IPID
-	}
-
-	if len(vm.PrimaryIPv6.Address) > 0 && vm.OriginalEntity.(types.VirtualServer).PrimaryIPv6.Address != vm.PrimaryIPv6.Address {
-		IPID, err := c.preparePrimaryIPAddress(vm.PrimaryIPv6)
-		if err != nil {
-			return false, err
-		}
-
-		data.PrimaryIp6 = &IPID
-	}
+	//compare ipv4 / v6 addresses and sets ids of writable object if not nil
+	updated, err = c.compareIPAddresses(vm, origVirtualServer, data)
 
 	//we need to update interfaces before we possibly assign new primary ip addresses
 	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
-	u, err := c.updateInterfaces(vm, nbVm.Site.ID)
+	u, err := c.updateInterfaces(vm, nbVM.Site.ID)
 	if err != nil {
 		return false, err
 	}
@@ -198,7 +186,7 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.Metadata.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
+	params.WithID(vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
@@ -239,13 +227,13 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 
 	//process network interfaces
 	for _, netIf := range vm.NetworkInterfaces {
-		vmInterface, err := c.InterfaceGetCreate(vm.Metadata.ID, netIf)
+		vmInterface, err := c.InterfaceGetCreate(vm.Meta.ID, netIf)
 		if err != nil {
 			return false, err
 		}
 
 		for _, network := range netIf.IPAddresses {
-			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.Metadata.ID)
+			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.Meta.ID)
 			if err != nil {
 				return false, err
 			}
@@ -253,4 +241,33 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 	}
 
 	return true, nil
+}
+
+func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualServer, updateObject *models.WritableVirtualMachineWithConfigContext) (updated bool, err error) {
+	//Primary IPs
+	if len(vm1.PrimaryIPv4.Address) > 0 && vm1.PrimaryIPv4.Address != vm2.PrimaryIPv4.Address {
+		ipv4Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv4)
+		if err != nil {
+			return updated, err
+		}
+
+		if updateObject != nil {
+			updateObject.PrimaryIp4 = &ipv4Id
+			updated = true
+		}
+	}
+
+	if len(vm1.PrimaryIPv6.Address) > 0 && vm1.PrimaryIPv6.Address != vm2.PrimaryIPv6.Address {
+		ipv6Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv6)
+		if err != nil {
+			return updated, err
+		}
+
+		if updateObject != nil {
+			updateObject.PrimaryIp6 = &ipv6Id
+			updated = true
+		}
+	}
+
+	return updated, nil
 }

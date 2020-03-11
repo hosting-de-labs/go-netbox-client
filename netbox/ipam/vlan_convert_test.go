@@ -3,39 +3,15 @@ package ipam
 import (
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
+
 	"github.com/hosting-de-labs/go-netbox-client/types"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/go-openapi/swag"
-
-	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func mockNetboxVlan() models.VLAN {
-	return models.VLAN{
-		ID:   10,
-		Vid:  swag.Int64(400),
-		Name: swag.String("Public VLAN"),
-		Status: &models.VLANStatus{
-			Value: swag.String("active"),
-			Label: swag.String("Active"),
-		},
-		Description: "This is Public VLAN description",
-		Tags:        []string{"public"},
-	}
-}
-
-func mockNetboxNestedVlan() models.NestedVLAN {
-	return models.NestedVLAN{
-		ID:   20,
-		Vid:  swag.Int64(600),
-		Name: swag.String("Private VLAN"),
-	}
-}
-
 func TestVlanConvertFromNetbox(t *testing.T) {
-	vlan400, err := VlanConvertFromNetbox(mockNetboxVlan())
+	vlan400, err := VlanConvertFromNetbox(netbox_types.MockNetboxVlan())
 	assert.Nil(t, err)
 
 	assert.Equal(t, uint16(400), vlan400.ID)
@@ -48,7 +24,7 @@ func TestVlanConvertFromNetbox(t *testing.T) {
 }
 
 func TestVlanConvertFromNetboxWithNestedVlan(t *testing.T) {
-	vlan600, err := VlanConvertFromNetbox(mockNetboxNestedVlan())
+	vlan600, err := VlanConvertFromNetbox(netbox_types.MockNetboxNestedVlan())
 	assert.Nil(t, err)
 
 	assert.Equal(t, uint16(600), vlan600.ID)

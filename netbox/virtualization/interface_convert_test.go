@@ -4,7 +4,9 @@ import (
 	"net"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock"
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
+
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_api"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/virtualization"
 
@@ -12,38 +14,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/go-openapi/swag"
 	"github.com/hosting-de-labs/go-netbox/netbox"
-	"github.com/hosting-de-labs/go-netbox/netbox/models"
 	"github.com/jarcoal/httpmock"
 )
 
 func init() {
-	mock.RunServer()
-}
-
-func mockNetboxVirtualMachineInterface() models.VirtualMachineInterface {
-	o := models.VirtualMachineInterface{}
-
-	o.ID = 10
-	o.Name = swag.String("eth0")
-	o.MacAddress = swag.String("aa:bb:cc:dd:ee:ff")
-
-	o.UntaggedVlan = &models.NestedVLAN{
-		ID:   10,
-		Vid:  swag.Int64(400),
-		Name: swag.String("Public VLAN"),
-	}
-
-	o.TaggedVlans = []*models.NestedVLAN{
-		{
-			ID:   20,
-			Vid:  swag.Int64(600),
-			Name: swag.String("Private VLAN"),
-		},
-	}
-
-	return o
+	netbox_api.RunServer()
 }
 
 func TestConvertVirtualMachineInterface(t *testing.T) {
@@ -53,7 +29,8 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 	netboxClient := netbox.NewNetboxAt("localhost:8000")
 	virtualizationClient := virtualization.NewClient(*netboxClient)
 
-	netIf, err := virtualizationClient.InterfaceConvertFromNetbox(mockNetboxVirtualMachineInterface())
+	netboxIf := netbox_types.MockNetboxVirtualMachineInterface()
+	netIf, err := virtualizationClient.InterfaceConvertFromNetbox(netboxIf)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, netIf)

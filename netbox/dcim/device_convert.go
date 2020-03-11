@@ -11,7 +11,7 @@ import (
 )
 
 func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.DedicatedServer, err error) {
-	out = &types.DedicatedServer{}
+	out = types.NewDedicatedServer()
 
 	primaryIPv4 := &models.NestedIPAddress{}
 	primaryIPv6 := &models.NestedIPAddress{}
@@ -19,24 +19,26 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	case models.Device:
 		d := device.(models.Device)
 
-		out.Metadata.ID = d.ID
-		out.Metadata.NetboxEntity = device
+		out.Meta.ID = d.ID
+		out.Meta.NetboxEntity = device
+		out.Meta.EntityType = reflect.TypeOf(device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
-		out.Comments = strings.Split(d.Comments, "\n")
+		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
 		primaryIPv4 = d.PrimaryIp4
 		primaryIPv6 = d.PrimaryIp6
 	case models.DeviceWithConfigContext:
 		d := device.(models.DeviceWithConfigContext)
 
-		out.Metadata.ID = d.ID
-		out.Metadata.NetboxEntity = device
+		out.Meta.ID = d.ID
+		out.Meta.NetboxEntity = device
+		out.Meta.EntityType = reflect.TypeOf(device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
-		out.Comments = strings.Split(d.Comments, "\n")
+		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
 		primaryIPv4 = d.PrimaryIp4
 		primaryIPv6 = d.PrimaryIp6
@@ -78,8 +80,6 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 			Family:  types.IPAddressFamilyIPv6,
 		}
 	}
-
-	out.OriginalEntity = out.Copy()
 
 	return out, nil
 }

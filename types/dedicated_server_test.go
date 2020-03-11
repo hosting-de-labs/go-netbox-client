@@ -4,29 +4,15 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
+
 	"github.com/hosting-de-labs/go-netbox-client/types"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func mockDedicatedServer() types.DedicatedServer {
-	return types.DedicatedServer{
-		Host: types.Host{
-			Hostname:  "host1",
-			IsManaged: false,
-		},
-		Inventory: []*types.InventoryItem{
-			{
-				Type:         types.InventoryItemTypeProcessor,
-				Manufacturer: "Intel",
-				Model:        "Xeon X5660",
-			},
-		},
-	}
-}
-
 func TestDedicatedServer_Copy(t *testing.T) {
-	host1 := mockDedicatedServer()
+	host1 := client_types.MockDedicatedServer()
 	host2 := host1.Copy()
 	assert.Equal(t, host1, host2)
 
@@ -149,6 +135,20 @@ func TestDedicatedServer_IsEqual(t *testing.T) {
 				},
 			},
 			isEqual: true,
+		},
+		{
+			host1: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
+					{Manufacturer: "Intel"},
+					{Manufacturer: "AMD"},
+				},
+			},
+			host2: types.DedicatedServer{
+				Inventory: []*types.InventoryItem{
+					{Manufacturer: "AMD"},
+				},
+			},
+			isEqual: false,
 		},
 		//TODO: Details
 	}

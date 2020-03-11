@@ -72,7 +72,7 @@ func (c Client) DeviceGet(deviceID int64) (*types.DedicatedServer, error) {
 
 //TODO: Don't forget to cache
 func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
-	if host.OriginalEntity == nil {
+	if host.Meta.NetboxEntity == nil {
 		oh, err := c.DeviceFind(host.Hostname)
 		if err != nil {
 			return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", host.Hostname)
@@ -83,7 +83,8 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 			return fmt.Errorf("cannot convert to DedicatedServer")
 		}
 
-		host.OriginalEntity = res
+		host.Meta.ID = res.Meta.ID
+		host.Meta.NetboxEntity = res.Meta.NetboxEntity
 	}
 
 	data := new(models.WritableDeviceWithConfigContext)
@@ -91,7 +92,7 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 	//Go through every item and check if it must be updated
 
 	params := dcim.NewDcimDevicesUpdateParams()
-	params.WithID(host.Metadata.ID).WithData(data)
+	params.WithID(host.Meta.ID).WithData(data)
 
 	//TODO: Iterate over Inventory Items
 
@@ -106,7 +107,7 @@ func (c Client) HypervisorFindByHostname(hostname string) (*types.DedicatedServe
 		return nil, err
 	}
 
-	d := res.Metadata.NetboxEntity.(models.DeviceWithConfigContext)
+	d := res.Meta.NetboxEntity.(models.DeviceWithConfigContext)
 	if d.Cluster == nil {
 		return nil, fmt.Errorf("device %s not assigned to a Virtualization Cluster", hostname)
 	}

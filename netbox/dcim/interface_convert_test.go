@@ -4,7 +4,10 @@ import (
 	"net"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock"
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
+
+	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_api"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
 
@@ -12,55 +15,18 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/go-openapi/swag"
 	"github.com/hosting-de-labs/go-netbox/netbox"
-	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
 func init() {
-	mock.RunServer()
-}
-
-func mockNetboxDeviceInterface() models.DeviceInterface {
-	o := models.DeviceInterface{}
-
-	o.ID = 10
-	o.Name = swag.String("eth0")
-	o.MacAddress = swag.String("aa:bb:cc:dd:ee:ff")
-
-	o.UntaggedVlan = &models.NestedVLAN{
-		ID:   10,
-		Vid:  swag.Int64(400),
-		Name: swag.String("Public VLAN"),
-	}
-
-	o.TaggedVlans = []*models.NestedVLAN{
-		{
-			ID:   20,
-			Vid:  swag.Int64(600),
-			Name: swag.String("Private VLAN"),
-		},
-	}
-
-	return o
-}
-
-func mockNetworkInterface() types.NetworkInterface {
-	ff := types.InterfaceTypeEthernetFixed1000BaseT1G
-
-	return types.NetworkInterface{
-		Name:         "eth0",
-		MACAddress:   net.HardwareAddr([]byte{0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}),
-		IsManagement: false,
-		Type:         &ff,
-	}
+	netbox_api.RunServer()
 }
 
 func TestInterfaceConvertFromNetboxDeviceInterface(t *testing.T) {
 	netboxClient := netbox.NewNetboxAt("localhost:8000")
 	dcimClient := dcim.NewClient(*netboxClient)
 
-	netIf, err := dcimClient.InterfaceConvertFromNetbox(mockNetboxDeviceInterface())
+	netIf, err := dcimClient.InterfaceConvertFromNetbox(netbox_types.MockNetboxDeviceInterface())
 
 	assert.Nil(t, err)
 	assert.NotNil(t, netIf)
@@ -87,7 +53,7 @@ func TestInterfaceConvertToNetboxDeviceInterface(t *testing.T) {
 	netboxClient := netbox.NewNetboxAt("localhost:8000")
 	dcimClient := dcim.NewClient(*netboxClient)
 
-	intf, err := dcimClient.InterfaceConvertToNetbox(10, mockNetworkInterface())
+	intf, err := dcimClient.InterfaceConvertToNetbox(10, client_types.MockNetworkInterface())
 	assert.NotNil(t, intf)
 	assert.Nil(t, err)
 

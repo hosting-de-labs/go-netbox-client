@@ -4,8 +4,6 @@ import (
 	"encoding/hex"
 	"reflect"
 
-	"github.com/hosting-de-labs/go-netbox/netbox/models"
-
 	"golang.org/x/crypto/sha3"
 )
 
@@ -14,44 +12,37 @@ type HashableEntity interface {
 	GetHashableString() string
 }
 
-//Metadata contain information that are relevant to communicate with Netbox
-type Metadata struct {
-	ID           int64
-	NetboxEntity interface{}
-	EntityType   reflect.Type
-}
-
-type NetboxEntity struct {
-	entity     interface{}
-	entityType reflect.Type
-}
-
-func (n NetboxEntity) DcimDevice() models.Device {
-	return n.entity.(models.Device)
-}
-
-func (n NetboxEntity) DcimDeviceWithConfigContext() models.DeviceWithConfigContext {
-	return n.entity.(models.DeviceWithConfigContext)
-}
-
-//GetEntity returns the entity and
-func (m Metadata) GetEntity() NetboxEntity {
-	return NetboxEntity{
-		entity:     m.NetboxEntity,
-		entityType: m.EntityType,
-	}
-}
-
-//SetEntity stores a netbox entity with its type
-func (m *Metadata) SetEntity(entity interface{}) {
-	m.NetboxEntity = entity
-	m.EntityType = reflect.TypeOf(entity)
-}
-
 //CommonEntity is a general object that should be extended by every Entity that interfaces with Netbox
 type CommonEntity struct {
+	entity interface{}
+	Meta   *Metadata
+}
+
+func (c CommonEntity) GetEntity() interface{} {
+	return c.entity
+}
+
+func (c *CommonEntity) SetEntity(entity interface{}) {
+	c.entity = entity
+}
+
+//Meta contain information that are relevant to communicate with Netbox
+type Metadata struct {
+	ID             int64
 	OriginalEntity interface{}
-	Metadata       Metadata
+	NetboxEntity   interface{}
+	EntityType     reflect.Type
+}
+
+//GetNetboxEntity returns the entity and
+func (m Metadata) GetNetboxEntity() (entity interface{}, entityType reflect.Type) {
+	return m.NetboxEntity, m.EntityType
+}
+
+//SetNetboxEntity stores a netbox entity with its type
+func (m *Metadata) SetNetboxEntity(entity interface{}) {
+	m.NetboxEntity = entity
+	m.EntityType = reflect.TypeOf(entity)
 }
 
 //GetIdentifier returns a hash value made from the hashable string
