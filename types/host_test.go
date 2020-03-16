@@ -110,12 +110,12 @@ func TestHost_IsEqual(t *testing.T) {
 			host1: types.Host{
 				Hostname:  "Server",
 				IsManaged: true,
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
 				},
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,
@@ -132,12 +132,12 @@ func TestHost_IsEqual(t *testing.T) {
 			host2: types.Host{
 				Hostname:  "Server",
 				IsManaged: true,
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
 				},
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,

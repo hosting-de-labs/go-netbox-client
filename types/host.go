@@ -10,12 +10,13 @@ import (
 type Host struct {
 	CommonEntity
 
-	Hostname    string
-	PrimaryIPv4 IPAddress
-	PrimaryIPv6 IPAddress
-	IsManaged   bool
-	Tags        []string
-	Comments    []string
+	Hostname  string
+	IsManaged bool
+	Tags      []string
+	Comments  []string
+
+	PrimaryIPv4 *IPAddress
+	PrimaryIPv6 *IPAddress
 
 	NetworkInterfaces []NetworkInterface
 }

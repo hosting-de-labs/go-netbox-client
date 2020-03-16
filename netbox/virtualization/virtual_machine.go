@@ -7,7 +7,6 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
-	netboxDcim "github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
@@ -132,21 +131,11 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 
 	nbVM := res.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 
-	dcimClient := netboxDcim.NewClient(c.client)
-
-	hyp, err := dcimClient.HypervisorFindByHostname(vm.Hypervisor)
-	if err != nil {
-		return false, err
-	}
-
-	//check if base data is equal
+	//check if base data is equal and only update interfaces
 	origVirtualServer, ok := vm.Meta.OriginalEntity.(types.VirtualServer)
 	if ok {
 		if vm.IsEqual(origVirtualServer, false) {
-			_, err = c.updateInterfaces(vm, hyp.Meta.ID)
-			if err != nil {
-				return false, err
-			}
+			return c.updateInterfaces(vm)
 		}
 	}
 
@@ -172,11 +161,18 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 	}
 
 	//compare ipv4 / v6 addresses and sets ids of writable object if not nil
-	updated, err = c.compareIPAddresses(vm, origVirtualServer, data)
+	u, err := c.compareIPAddresses(vm, origVirtualServer, data)
+	if err != nil {
+		return false, err
+	}
+
+	if u != false {
+		updated = true
+	}
 
 	//we need to update interfaces before we possibly assign new primary ip addresses
 	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
-	u, err := c.updateInterfaces(vm, nbVM.Site.ID)
+	u, err = c.updateInterfaces(vm)
 	if err != nil {
 		return false, err
 	}
@@ -222,7 +218,7 @@ func (c Client) preparePrimaryIPAddress(primaryIP types.IPAddress) (int64, error
 	return ip.ID, nil
 }
 
-func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated bool, err error) {
+func (c Client) updateInterfaces(vm types.VirtualServer) (updated bool, err error) {
 	ipamClient := netboxIpam.NewClient(c.client)
 
 	//process network interfaces
@@ -245,8 +241,8 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 
 func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualServer, updateObject *models.WritableVirtualMachineWithConfigContext) (updated bool, err error) {
 	//Primary IPs
-	if len(vm1.PrimaryIPv4.Address) > 0 && vm1.PrimaryIPv4.Address != vm2.PrimaryIPv4.Address {
-		ipv4Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv4)
+	if vm1.PrimaryIPv4 != nil && vm1.PrimaryIPv4.Address != vm2.PrimaryIPv4.Address {
+		ipv4Id, err := c.preparePrimaryIPAddress(*vm1.PrimaryIPv4)
 		if err != nil {
 			return updated, err
 		}
@@ -257,8 +253,8 @@ func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualSer
 		}
 	}
 
-	if len(vm1.PrimaryIPv6.Address) > 0 && vm1.PrimaryIPv6.Address != vm2.PrimaryIPv6.Address {
-		ipv6Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv6)
+	if vm1.PrimaryIPv6 != nil && vm1.PrimaryIPv6.Address != vm2.PrimaryIPv6.Address {
+		ipv6Id, err := c.preparePrimaryIPAddress(*vm1.PrimaryIPv6)
 		if err != nil {
 			return updated, err
 		}

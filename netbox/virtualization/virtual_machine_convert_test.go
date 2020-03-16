@@ -13,16 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVirtualMachineConvertFromNetbox_WithUnknownType(t *testing.T) {
-	c := virtualization.NewClient(client.NetBox{})
-
-	type UnknownVMType interface{}
-	var vm UnknownVMType
-
-	_, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
-	assert.Error(t, err)
-}
-
 func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
@@ -43,6 +33,16 @@ func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 	assert.Equal(t, res.IsManaged, false)
 
 	assert.Equal(t, res.Hypervisor, "")
+}
+
+func TestVirtualMachineConvertFromNetbox_WithUnknownType(t *testing.T) {
+	c := virtualization.NewClient(client.NetBox{})
+
+	type UnknownVMType interface{}
+	var vm UnknownVMType
+
+	_, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
+	assert.Error(t, err)
 }
 
 func TestVirtualMachineConvertFromNetbox_WithResources(t *testing.T) {

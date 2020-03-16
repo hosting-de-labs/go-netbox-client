@@ -26,6 +26,8 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 		out.SetNetboxEntity(d.ID, device)
 
 		out.Hostname = *d.Name
+		out.AssetTag = *d.AssetTag
+		out.SerialNumber = d.Serial
 		out.Tags = d.Tags
 		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
@@ -36,6 +38,8 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 		out.SetNetboxEntity(d.ID, device)
 
 		out.Hostname = *d.Name
+		out.AssetTag = *d.AssetTag
+		out.SerialNumber = d.Serial
 		out.Tags = d.Tags
 		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
@@ -59,7 +63,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 			return nil, err
 		}
 
-		out.PrimaryIPv4 = types.IPAddress{
+		out.PrimaryIPv4 = &types.IPAddress{
 			Address: address,
 			CIDR:    cidr,
 			Family:  types.IPAddressFamilyIPv4,
@@ -73,12 +77,14 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 			return nil, err
 		}
 
-		out.PrimaryIPv6 = types.IPAddress{
+		out.PrimaryIPv6 = &types.IPAddress{
 			Address: address,
 			CIDR:    cidr,
 			Family:  types.IPAddressFamilyIPv6,
 		}
 	}
+
+	out.SetOriginalEntity(out.Copy())
 
 	return out, nil
 }
@@ -87,6 +93,8 @@ func (c Client) DeviceConvertToNetbox(server types.DedicatedServer) (out *models
 	out = &models.WritableDeviceWithConfigContext{
 		Name:        &server.Hostname,
 		Tags:        server.Tags,
+		AssetTag:    &server.AssetTag,
+		Serial:      server.SerialNumber,
 		LastUpdated: strfmt.DateTime(time.Now()),
 	}
 
@@ -115,22 +123,22 @@ func (c Client) DeviceConvertToNetbox(server types.DedicatedServer) (out *models
 
 	//Primary IPs
 	ipamClient := netboxIpam.NewClient(c.client)
-	if len(server.PrimaryIPv4.Address) > 0 {
-		netbipv4, err := ipamClient.IPAddressFind(server.PrimaryIPv4)
+	if server.PrimaryIPv4 != nil {
+		res, err := ipamClient.IPAddressFind(*server.PrimaryIPv4)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		out.PrimaryIp4 = &netbipv4.ID
+		out.PrimaryIp4 = &res.ID
 	}
 
-	if len(server.PrimaryIPv6.Address) > 0 {
-		netbipv6, err := ipamClient.IPAddressFind(server.PrimaryIPv6)
+	if server.PrimaryIPv6 != nil {
+		res, err := ipamClient.IPAddressFind(*server.PrimaryIPv6)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		out.PrimaryIp4 = &netbipv6.ID
+		out.PrimaryIp4 = &res.ID
 	}
 
 	return out, intf, nil
