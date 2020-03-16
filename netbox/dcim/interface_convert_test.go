@@ -57,8 +57,8 @@ func TestInterfaceConvertToNetboxDeviceInterface(t *testing.T) {
 	assert.NotNil(t, intf)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "eth0", *intf.Name)
+	assert.Equal(t, "eth0", intf.Name)
 	assert.Equal(t, "aa:bb:cc:dd:ee:ff", *intf.MacAddress)
 	assert.False(t, intf.MgmtOnly)
-	assert.Equal(t, types.InterfaceTypeEthernetFixed1000BaseT1G, types.InterfaceType(*intf.Type))
+	assert.Equal(t, types.InterfaceTypeEthernetFixed1000BaseT1G, types.InterfaceType(intf.Type))
 }

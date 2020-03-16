@@ -10,7 +10,7 @@ require (
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/swag v0.19.8
 	github.com/go-openapi/validate v0.19.7 // indirect
-	github.com/hosting-de-labs/go-netbox v1.1.4-api2.7.6
+	github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6
 	github.com/jarcoal/httpmock v1.0.4
 	github.com/stretchr/testify v1.4.0
 	go.mongodb.org/mongo-driver v1.3.1 // indirect

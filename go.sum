@@ -127,8 +127,8 @@ github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/hosting-de-labs/go-netbox v1.1.4-api2.7.6 h1:AkGWGtALfQs+qmEAYmQo0hlU10I7kpd8JIS+MNT73nA=
-github.com/hosting-de-labs/go-netbox v1.1.4-api2.7.6/go.mod h1:SZGPe0kHX1xzLe6bcIEgfvN64fkRzUkamZjaANoH4j0=
+github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6 h1:77NffZvUVbDFLKVpwdraBUOkGaRV3UwxV1cZdQj061k=
+github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6/go.mod h1:SZGPe0kHX1xzLe6bcIEgfvN64fkRzUkamZjaANoH4j0=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jarcoal/httpmock v1.0.4 h1:jp+dy/+nonJE4g4xbVtl9QdrUNbn6/3hDT5R4nDIZnA=
 github.com/jarcoal/httpmock v1.0.4/go.mod h1:ATjnClrvW/3tijVmpL/va5Z3aAyGvqU3gCT8nX0Txik=

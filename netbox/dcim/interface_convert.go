@@ -118,9 +118,9 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 
 	out = &models.WritableDeviceInterface{}
 
-	out.Device = &deviceID
-	out.Name = &intf.Name
-	out.Type = swag.String(string(intf.Type))
+	out.Device = deviceID
+	out.Name = intf.Name
+	out.Type = string(intf.Type)
 	out.MgmtOnly = intf.IsManagement
 
 	if intf.MACAddress != nil && intf.MACAddress.String() != "" {
