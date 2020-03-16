@@ -14,10 +14,10 @@ import (
 //VirtualMachineCreate creates a new VM object in Netbox.
 func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
 	var netboxVM models.WritableVirtualMachineWithConfigContext
-	netboxVM.Name = &vm.Hostname
+	netboxVM.Name = vm.Hostname
 	netboxVM.Tags = []string{}
 
-	netboxVM.Cluster = &clusterID
+	netboxVM.Cluster = clusterID
 
 	netboxVM.Vcpus = swag.Int64(int64(vm.Resources.Cores))
 	netboxVM.Memory = swag.Int64(vm.Resources.Memory)
@@ -152,9 +152,9 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 
 	data := new(models.WritableVirtualMachineWithConfigContext)
 
-	data.Name = swag.String(vm.Hostname)
+	data.Name = vm.Hostname
 	data.Tags = vm.Tags
-	data.Cluster = &nbVM.Cluster.ID
+	data.Cluster = nbVM.Cluster.ID
 	data.Comments = utils.GenerateVMComment(vm)
 
 	//custom fields

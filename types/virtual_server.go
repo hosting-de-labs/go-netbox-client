@@ -1,5 +1,10 @@
 package types
 
+import (
+	"errors"
+	"reflect"
+)
+
 //VirtualServer represents a virtual server
 type VirtualServer struct {
 	Host
@@ -44,7 +49,15 @@ func (vm VirtualServer) IsChanged() bool {
 		return true
 	}
 
-	return !vm.IsEqual(*vm.Meta.OriginalEntity.(*VirtualServer), true)
+	switch vm.Meta.OriginalEntity.(type) {
+	case *VirtualServer:
+		return !vm.IsEqual(*vm.Meta.OriginalEntity.(*VirtualServer), true)
+	case VirtualServer:
+		return !vm.IsEqual(vm.Meta.OriginalEntity.(VirtualServer), true)
+
+	default:
+		panic(errors.New("Cannot handle type %q of OriginalEntity: " + reflect.TypeOf(vm.Meta.OriginalEntity).String()))
+	}
 }
 
 //IsEqual compares the current object with another VirtualServer object
