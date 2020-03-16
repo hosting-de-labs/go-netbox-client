@@ -11,12 +11,8 @@ type DedicatedServer struct {
 
 func NewDedicatedServer() *DedicatedServer {
 	return &DedicatedServer{
-		Host: Host{
-			CommonEntity: CommonEntity{
-				Meta: &Metadata{},
-			},
-		},
-		Inventory: nil,
+		Host:      *NewHost(),
+		Inventory: []*InventoryItem{},
 	}
 }
 

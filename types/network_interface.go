@@ -104,14 +104,14 @@ func NewNetworkInterface() *NetworkInterface {
 			Meta: &Metadata{},
 		},
 		Type:         "",
-		IPAddresses:  nil,
+		IPAddresses:  []IPAddress{},
 		IsManagement: false,
-		MACAddress:   nil,
+		MACAddress:   net.HardwareAddr{},
 		Name:         "",
-		TaggedVlans:  nil,
+		TaggedVlans:  []VLAN{},
 		UntaggedVlan: nil,
-		Tags:         nil,
-		Children:     nil,
+		Tags:         []string{},
+		Children:     []NetworkInterface{},
 	}
 }
 

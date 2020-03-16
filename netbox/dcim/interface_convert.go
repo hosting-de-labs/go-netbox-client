@@ -122,7 +122,12 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 	out.Name = &intf.Name
 	out.Type = swag.String(string(intf.Type))
 	out.MgmtOnly = intf.IsManagement
-	out.MacAddress = swag.String(intf.MACAddress.String())
+
+	if intf.MACAddress != nil && intf.MACAddress.String() != "" {
+		out.MacAddress = swag.String(intf.MACAddress.String())
+	}
+
+	out.Tags = intf.Tags
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
 		//Tagged mode

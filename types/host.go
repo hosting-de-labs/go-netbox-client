@@ -25,13 +25,7 @@ func NewHost() *Host {
 		CommonEntity: CommonEntity{
 			Meta: &Metadata{},
 		},
-		Hostname:          "",
-		PrimaryIPv4:       IPAddress{},
-		PrimaryIPv6:       IPAddress{},
-		IsManaged:         false,
-		Tags:              nil,
-		Comments:          nil,
-		NetworkInterfaces: nil,
+		Hostname: "",
 	}
 }
 
