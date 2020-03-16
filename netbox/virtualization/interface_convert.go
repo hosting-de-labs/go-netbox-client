@@ -104,7 +104,12 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 	out.VirtualMachine = &vmID
 	out.Name = intf.Name
 	out.Type = string(intf.Type)
-	out.MacAddress = swag.String(intf.MACAddress.String())
+
+	if intf.MACAddress != nil && intf.MACAddress.String() != "" {
+		out.MacAddress = swag.String(intf.MACAddress.String())
+	}
+
+	out.Tags = intf.Tags
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
 		//Tagged mode
