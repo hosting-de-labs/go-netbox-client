@@ -44,7 +44,7 @@ func (vm VirtualServer) IsChanged() bool {
 		return true
 	}
 
-	return !vm.IsEqual(vm.Meta.OriginalEntity.(VirtualServer), true)
+	return !vm.IsEqual(*vm.Meta.OriginalEntity.(*VirtualServer), true)
 }
 
 //IsEqual compares the current object with another VirtualServer object
