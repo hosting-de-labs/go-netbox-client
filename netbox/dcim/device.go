@@ -72,27 +72,24 @@ func (c Client) DeviceGet(deviceID int64) (*types.DedicatedServer, error) {
 
 //TODO: Don't forget to cache
 func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
-	if host.Meta.NetboxEntity == nil {
-		oh, err := c.DeviceFind(host.Hostname)
-		if err != nil {
-			return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", host.Hostname)
-		}
+	if !host.HasNetboxEntity() {
+		err := c.PopulateDevice(host)
 
-		res, err := c.DeviceConvertFromNetbox(oh)
 		if err != nil {
-			return fmt.Errorf("cannot convert to DedicatedServer")
+			return err
 		}
+	}
 
-		host.Meta.ID = res.Meta.ID
-		host.Meta.NetboxEntity = res.Meta.NetboxEntity
+	if !host.IsChanged() {
+		return nil
 	}
 
 	data := new(models.WritableDeviceWithConfigContext)
 
-	//Go through every item and check if it must be updated
-
 	params := dcim.NewDcimDevicesUpdateParams()
 	params.WithID(host.Meta.ID).WithData(data)
+
+	//TODO: Go through every item and check if it must be updated
 
 	//TODO: Iterate over Inventory Items
 
@@ -113,4 +110,24 @@ func (c Client) HypervisorFindByHostname(hostname string) (*types.DedicatedServe
 	}
 
 	return res, nil
+}
+
+func (c Client) PopulateDevice(device *types.DedicatedServer) (err error) {
+	if device.HasNetboxEntity() {
+		return nil
+	}
+
+	oh, err := c.DeviceFind(device.Hostname)
+	if err != nil {
+		return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", device.Hostname)
+	}
+
+	res, err := c.DeviceConvertFromNetbox(oh)
+	if err != nil {
+		return fmt.Errorf("cannot convert to DedicatedServer")
+	}
+
+	device.SetNetboxEntity(res.Meta.ID, res.Meta.NetboxEntity)
+
+	return nil
 }

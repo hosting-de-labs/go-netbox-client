@@ -76,7 +76,6 @@ func (h Host) Copy() Host {
 			ID:             h.Meta.ID,
 			OriginalEntity: h.Meta.OriginalEntity,
 			NetboxEntity:   h.Meta.NetboxEntity,
-			EntityType:     h.Meta.EntityType,
 		}
 	}
 

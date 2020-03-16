@@ -16,8 +16,7 @@ import (
 
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
 	netIf := types.NewNetworkInterface()
-	netIf.Meta.ID = netboxInterface.ID
-	netIf.Meta.SetNetboxEntity(netboxInterface)
+	netIf.SetNetboxEntity(netboxInterface.ID, netboxInterface)
 
 	if netboxInterface.Type != nil {
 		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
@@ -88,14 +87,7 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 
 	var siteID int64
 	switch vm.Meta.NetboxEntity.(type) {
-	case models.Device:
-		vm := vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
-		if vm.Site == nil {
-			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)
-		}
-
-		siteID = vm.Site.ID
-	case models.DeviceWithConfigContext:
+	case models.VirtualMachineWithConfigContext:
 		vm := vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 		if vm.Site == nil {
 			return nil, fmt.Errorf("vm with ID %d is not assigned to any site", vmID)

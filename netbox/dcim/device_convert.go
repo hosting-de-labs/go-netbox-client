@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
+
+	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
+
+	"github.com/go-openapi/strfmt"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/utils"
 	"github.com/hosting-de-labs/go-netbox-client/types"
@@ -18,10 +23,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	switch device.(type) {
 	case models.Device:
 		d := device.(models.Device)
-
-		out.Meta.ID = d.ID
-		out.Meta.NetboxEntity = device
-		out.Meta.EntityType = reflect.TypeOf(device)
+		out.SetNetboxEntity(d.ID, device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
@@ -31,10 +33,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 		primaryIPv6 = d.PrimaryIp6
 	case models.DeviceWithConfigContext:
 		d := device.(models.DeviceWithConfigContext)
-
-		out.Meta.ID = d.ID
-		out.Meta.NetboxEntity = device
-		out.Meta.EntityType = reflect.TypeOf(device)
+		out.SetNetboxEntity(d.ID, device)
 
 		out.Hostname = *d.Name
 		out.Tags = d.Tags
@@ -82,4 +81,57 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	}
 
 	return out, nil
+}
+
+func (c Client) DeviceConvertToNetbox(server types.DedicatedServer) (out *models.WritableDeviceWithConfigContext, intf []*models.WritableDeviceInterface, err error) {
+	out = &models.WritableDeviceWithConfigContext{
+		Name:        &server.Hostname,
+		Tags:        server.Tags,
+		LastUpdated: strfmt.DateTime(time.Now()),
+	}
+
+	if server.Created != nil {
+		out.Created = *server.Created
+	}
+
+	if !server.HasNetboxEntity() {
+		err = c.PopulateDevice(&server)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	out.ID = server.Meta.ID
+
+	//Interfaces
+	for _, objIntf := range server.NetworkInterfaces {
+		netIntf, err := c.InterfaceConvertToNetbox(out.ID, objIntf)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		intf = append(intf, netIntf)
+	}
+
+	//Primary IPs
+	ipamClient := netboxIpam.NewClient(c.client)
+	if len(server.PrimaryIPv4.Address) > 0 {
+		netbipv4, err := ipamClient.IPAddressFind(server.PrimaryIPv4)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		out.PrimaryIp4 = &netbipv4.ID
+	}
+
+	if len(server.PrimaryIPv6.Address) > 0 {
+		netbipv6, err := ipamClient.IPAddressFind(server.PrimaryIPv6)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		out.PrimaryIp4 = &netbipv6.ID
+	}
+
+	return out, intf, nil
 }

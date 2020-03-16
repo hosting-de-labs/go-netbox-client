@@ -18,11 +18,7 @@ import (
 //InterfaceConvertFromNetbox allows to convert a DeviceInterface to a NetworkInterface
 func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterface) (*types.NetworkInterface, error) {
 	netIf := types.NewNetworkInterface()
-
-	//pass reference as netbox entity
-	netIf.Meta.ID = netboxInterface.ID
-	netIf.Meta.NetboxEntity = interface{}(netboxInterface)
-	netIf.Meta.EntityType = reflect.TypeOf(netboxInterface)
+	netIf.SetNetboxEntity(netboxInterface.ID, netboxInterface)
 
 	if netboxInterface.Type != nil {
 		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)

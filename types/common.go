@@ -1,11 +1,6 @@
 package types
 
-import (
-	"encoding/hex"
-	"reflect"
-
-	"golang.org/x/crypto/sha3"
-)
+import "github.com/go-openapi/strfmt"
 
 //HashableEntity has a method to return a string that stays the same when the entity wasn't changed
 type HashableEntity interface {
@@ -14,16 +9,9 @@ type HashableEntity interface {
 
 //CommonEntity is a general object that should be extended by every Entity that interfaces with Netbox
 type CommonEntity struct {
-	entity interface{}
-	Meta   *Metadata
-}
-
-func (c CommonEntity) GetEntity() interface{} {
-	return c.entity
-}
-
-func (c *CommonEntity) SetEntity(entity interface{}) {
-	c.entity = entity
+	Meta        *Metadata
+	Created     *strfmt.Date
+	LastUpdated *strfmt.DateTime
 }
 
 //Meta contain information that are relevant to communicate with Netbox
@@ -31,24 +19,53 @@ type Metadata struct {
 	ID             int64
 	OriginalEntity interface{}
 	NetboxEntity   interface{}
-	EntityType     reflect.Type
 }
 
-//GetNetboxEntity returns the entity and
-func (m Metadata) GetNetboxEntity() (entity interface{}, entityType reflect.Type) {
-	return m.NetboxEntity, m.EntityType
+func (c *CommonEntity) SetNetboxEntity(id int64, netboxObj interface{}) {
+	if c.Meta == nil {
+		c.Meta = &Metadata{}
+	}
+
+	c.Meta.ID = id
+	c.Meta.NetboxEntity = netboxObj
 }
 
-//SetNetboxEntity stores a netbox entity with its type
-func (m *Metadata) SetNetboxEntity(entity interface{}) {
-	m.NetboxEntity = entity
-	m.EntityType = reflect.TypeOf(entity)
+func (c *CommonEntity) SetOriginalEntity(originalObj interface{}) {
+	if c.Meta == nil {
+		c.Meta = &Metadata{}
+	}
+
+	c.Meta.OriginalEntity = originalObj
 }
 
-//GetIdentifier returns a hash value made from the hashable string
-func GetIdentifier(i interface{}) string {
-	hashableString := i.(HashableEntity).GetHashableString()
+func (c *CommonEntity) HasNetboxEntity() bool {
+	return c.Meta != nil && c.Meta.NetboxEntity != nil
+}
 
-	hash := sha3.Sum512([]byte(hashableString))
-	return hex.EncodeToString(hash[:8])
+func (c *CommonEntity) HasOriginalEntity() bool {
+	return c.Meta != nil && c.Meta.OriginalEntity != nil
+}
+
+func (c *CommonEntity) GetMetaID() int64 {
+	if c.Meta == nil {
+		return -1
+	}
+
+	return c.Meta.ID
+}
+
+func (c *CommonEntity) GetMetaOriginalEntity() (out interface{}, ok bool) {
+	if c.Meta == nil || c.Meta.OriginalEntity == nil {
+		return nil, false
+	}
+
+	return c.Meta.OriginalEntity, true
+}
+
+func (c *CommonEntity) GetMetaNetboxEntity() (out interface{}, ok bool) {
+	if c.Meta == nil || c.Meta.NetboxEntity == nil {
+		return nil, false
+	}
+
+	return c.Meta.NetboxEntity, true
 }
