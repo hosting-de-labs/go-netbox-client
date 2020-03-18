@@ -246,7 +246,7 @@ func (c Client) updateInterfaces(vm types.VirtualServer) (updated bool, err erro
 
 func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualServer, updateObject *models.WritableVirtualMachineWithConfigContext) (updated bool, err error) {
 	//Primary IPs
-	if vm1.PrimaryIPv4 != nil && vm1.PrimaryIPv4.Address != vm2.PrimaryIPv4.Address {
+	if vm1.PrimaryIPv4 != nil {
 		ipv4Id, err := c.preparePrimaryIPAddress(*vm1.PrimaryIPv4)
 		if err != nil {
 			return updated, err
@@ -258,7 +258,7 @@ func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualSer
 		}
 	}
 
-	if vm1.PrimaryIPv6 != nil && vm1.PrimaryIPv6.Address != vm2.PrimaryIPv6.Address {
+	if vm1.PrimaryIPv6 != nil {
 		ipv6Id, err := c.preparePrimaryIPAddress(*vm1.PrimaryIPv6)
 		if err != nil {
 			return updated, err
