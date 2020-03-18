@@ -25,8 +25,14 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 		d := device.(models.Device)
 		out.SetNetboxEntity(d.ID, device)
 
-		out.Hostname = *d.Name
-		out.AssetTag = *d.AssetTag
+		if d.Name != nil {
+			out.Hostname = *d.Name
+		}
+
+		if d.AssetTag != nil {
+			out.AssetTag = *d.AssetTag
+		}
+
 		out.SerialNumber = d.Serial
 		out.Tags = d.Tags
 		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
@@ -37,8 +43,14 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 		d := device.(models.DeviceWithConfigContext)
 		out.SetNetboxEntity(d.ID, device)
 
-		out.Hostname = *d.Name
-		out.AssetTag = *d.AssetTag
+		if d.Name != nil {
+			out.Hostname = *d.Name
+		}
+
+		if d.AssetTag != nil {
+			out.AssetTag = *d.AssetTag
+		}
+
 		out.SerialNumber = d.Serial
 		out.Tags = d.Tags
 		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
