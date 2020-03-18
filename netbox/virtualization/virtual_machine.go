@@ -25,6 +25,11 @@ func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*
 		netboxVM.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 	}
 
+	//Custom fields
+	customFields := make(map[string]string)
+	customFields["hypervisor_label"] = vm.Hypervisor
+	netboxVM.CustomFields = customFields
+
 	params := virtualization.NewVirtualizationVirtualMachinesCreateParams()
 	params.WithData(&netboxVM)
 
