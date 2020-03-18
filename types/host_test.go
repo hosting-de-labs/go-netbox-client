@@ -173,14 +173,14 @@ func TestHost_IsEqual(t *testing.T) {
 		},
 		{
 			host1: types.Host{
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
 				},
 			},
 			host2: types.Host{
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.2",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
@@ -190,14 +190,14 @@ func TestHost_IsEqual(t *testing.T) {
 		},
 		{
 			host1: types.Host{
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,
 				},
 			},
 			host2: types.Host{
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::2",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,

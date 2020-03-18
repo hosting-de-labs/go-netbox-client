@@ -26,8 +26,8 @@ func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 	assert.Equal(t, res.Resources.Memory, int64(0))
 	assert.Equal(t, len(res.Resources.Disks), 0)
 
-	assert.Equal(t, res.PrimaryIPv4, types.IPAddress{})
-	assert.Equal(t, res.PrimaryIPv6, types.IPAddress{})
+	assert.Equal(t, &types.IPAddress{}, res.PrimaryIPv4)
+	assert.Equal(t, &types.IPAddress{}, res.PrimaryIPv6)
 
 	assert.Equal(t, len(res.Tags), 0)
 	assert.Equal(t, res.IsManaged, false)
@@ -67,8 +67,8 @@ func TestVirtualMachineConvertFromNetbox_WithIPAddresses(t *testing.T) {
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, res.PrimaryIPv4, types.IPAddress{Address: "127.0.0.1", CIDR: 32, Family: types.IPAddressFamilyIPv4})
-	assert.Equal(t, res.PrimaryIPv6, types.IPAddress{Address: "::1", CIDR: 128, Family: types.IPAddressFamilyIPv6})
+	assert.Equal(t, res.PrimaryIPv4, &types.IPAddress{Address: "127.0.0.1", CIDR: 32, Family: types.IPAddressFamilyIPv4})
+	assert.Equal(t, res.PrimaryIPv6, &types.IPAddress{Address: "::1", CIDR: 128, Family: types.IPAddressFamilyIPv6})
 }
 
 func TestVirtualMachineConvertFromNetbox_WithTags(t *testing.T) {

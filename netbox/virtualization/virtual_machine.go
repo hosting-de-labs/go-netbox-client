@@ -165,13 +165,13 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 	}
 
-	//compare ipv4 / v6 addresses and sets ids of writable object if not nil
-	u, err := c.compareIPAddresses(vm, origVirtualServer, data)
+	//delete old ip address assignments
+	u, err := c.deleteOldIPAddressAssignments(vm)
 	if err != nil {
 		return false, err
 	}
 
-	if u != false {
+	if u {
 		updated = true
 	}
 
@@ -182,45 +182,66 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		return false, err
 	}
 
-	if u != false {
+	if u {
 		updated = true
 	}
 
+	//get primary ids of primary ip addresses
+	ipamClient := netboxIpam.NewClient(c.client)
+	if vm.PrimaryIPv4 != nil {
+		netIP, err := ipamClient.IPAddressFind(*vm.PrimaryIPv4)
+		if err != nil {
+			return updated, err
+		}
+
+		data.PrimaryIp4 = &netIP.ID
+	}
+
+	if vm.PrimaryIPv6 != nil {
+		netIP, err := ipamClient.IPAddressFind(*vm.PrimaryIPv6)
+		if err != nil {
+			return updated, err
+		}
+
+		data.PrimaryIp6 = &netIP.ID
+	}
+
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
+	params.WithID(vm.GetMetaID())
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
 	if err != nil {
-		return false, err
+		return updated, err
 	}
 
-	return updated, nil
+	return true, nil
 }
 
-//preparePrimaryIPAddress is a helper method to clear a possible primary ip address assignment before assigning an ip
-//address to a different vm
-func (c Client) preparePrimaryIPAddress(primaryIP types.IPAddress) (int64, error) {
+func (c Client) deleteOldIPAddressAssignments(vm types.VirtualServer) (updated bool, err error) {
 	ipamClient := netboxIpam.NewClient(c.client)
 
-	ip, err := ipamClient.IPAddressFind(primaryIP)
-	if err != nil {
-		return -1, err
-	}
-
-	if ip != nil {
-		err = ipamClient.IPAddressDelete(ip.ID)
+	for _, ip := range vm.GetAllIPAddresses() {
+		netIP, err := ipamClient.IPAddressFind(ip)
 		if err != nil {
-			return -1, err
+			return updated, err
+		}
+
+		if netIP == nil {
+			continue
+		}
+
+		if netIP.Interface != nil && netIP.Interface.VirtualMachine != nil {
+			if netIP.Interface.VirtualMachine.ID != netIP.ID {
+				err = ipamClient.IPAddressDelete(netIP.ID)
+				if err != nil {
+					updated = true
+				}
+			}
 		}
 	}
 
-	ip, err = ipamClient.IPAddressFindCreate(primaryIP)
-	if err != nil {
-		return -1, err
-	}
-
-	return ip.ID, nil
+	return updated, nil
 }
 
 func (c Client) updateInterfaces(vm types.VirtualServer) (updated bool, err error) {
@@ -234,7 +255,7 @@ func (c Client) updateInterfaces(vm types.VirtualServer) (updated bool, err erro
 		}
 
 		for _, network := range netIf.IPAddresses {
-			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.Meta.ID)
+			_, err := ipamClient.IPAddressAssignInterface(network, vmInterface.Meta.ID)
 			if err != nil {
 				return false, err
 			}
@@ -242,33 +263,4 @@ func (c Client) updateInterfaces(vm types.VirtualServer) (updated bool, err erro
 	}
 
 	return true, nil
-}
-
-func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualServer, updateObject *models.WritableVirtualMachineWithConfigContext) (updated bool, err error) {
-	//Primary IPs
-	if vm1.PrimaryIPv4 != nil {
-		ipv4Id, err := c.preparePrimaryIPAddress(*vm1.PrimaryIPv4)
-		if err != nil {
-			return updated, err
-		}
-
-		if updateObject != nil {
-			updateObject.PrimaryIp4 = &ipv4Id
-			updated = true
-		}
-	}
-
-	if vm1.PrimaryIPv6 != nil {
-		ipv6Id, err := c.preparePrimaryIPAddress(*vm1.PrimaryIPv6)
-		if err != nil {
-			return updated, err
-		}
-
-		if updateObject != nil {
-			updateObject.PrimaryIp6 = &ipv6Id
-			updated = true
-		}
-	}
-
-	return updated, nil
 }
