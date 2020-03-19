@@ -21,13 +21,14 @@ func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, res.Hostname, "VM1")
-	assert.Equal(t, res.Resources.Cores, 0)
-	assert.Equal(t, res.Resources.Memory, int64(0))
-	assert.Equal(t, len(res.Resources.Disks), 0)
+	assert.Equal(t, "VM1", res.Hostname)
+	assert.Equal(t, 0, res.Resources.Cores)
+	assert.Equal(t, int64(0), res.Resources.Memory)
+	assert.Empty(t, res.Resources.Disks)
 
-	assert.Equal(t, &types.IPAddress{}, res.PrimaryIPv4)
-	assert.Equal(t, &types.IPAddress{}, res.PrimaryIPv6)
+	var emptyInterface interface{}
+	assert.Equal(t, emptyInterface.(*types.IPAddress), res.PrimaryIPv4)
+	assert.Equal(t, emptyInterface.(*types.IPAddress), res.PrimaryIPv6)
 
 	assert.Equal(t, len(res.Tags), 0)
 	assert.Equal(t, res.IsManaged, false)
