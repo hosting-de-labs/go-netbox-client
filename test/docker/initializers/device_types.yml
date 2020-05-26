@@ -1,0 +1,5 @@
+- model: Other
+  manufacturer: No Name
+  slug: other
+  custom_fields:
+    text_field: Description

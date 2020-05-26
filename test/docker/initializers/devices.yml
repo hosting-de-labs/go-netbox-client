@@ -1,0 +1,9 @@
+- name: host1
+  device_role: server
+  device_type: Other
+  site: AMS 1
+  rack: rack-01
+  face: front
+  position: 1
+  custom_fields:
+    text_field: Description
