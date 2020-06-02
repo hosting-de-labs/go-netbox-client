@@ -129,6 +129,10 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 			return nil, fmt.Errorf("an error occured when fetching vlan with tag %d: %s", intf.UntaggedVlan.ID, err)
 		}
 
+		if vlan == nil {
+			return nil, fmt.Errorf("vlan %s with ID %d not found", intf.UntaggedVlan.Name, intf.UntaggedVlan.ID)
+		}
+
 		out.UntaggedVlan = &vlan.ID
 	}
 
