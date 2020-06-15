@@ -11,7 +11,7 @@ import (
 )
 
 func TestInterfaceGet(t *testing.T) {
-	netboxClient := netbox.NewNetboxAt("localhost:8080")
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 
 	dcimClient := dcim.NewClient(*netboxClient)
 	netIf, err := dcimClient.InterfaceGet(10)

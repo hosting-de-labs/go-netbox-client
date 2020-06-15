@@ -17,7 +17,7 @@ import (
 )
 
 func TestInterfaceConvertFromNetboxDeviceInterface(t *testing.T) {
-	netboxClient := netbox.NewNetboxAt("localhost:8080")
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 	dcimClient := dcim.NewClient(*netboxClient)
 
 	netIf, err := dcimClient.InterfaceConvertFromNetbox(netbox_types.MockNetboxDeviceInterface())
@@ -44,7 +44,7 @@ func TestInterfaceConvertFromNetboxDeviceInterface(t *testing.T) {
 }
 
 func TestInterfaceConvertToNetboxDeviceInterface(t *testing.T) {
-	netboxClient := netbox.NewNetboxAt("localhost:8080")
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 	dcimClient := dcim.NewClient(*netboxClient)
 
 	intf, err := dcimClient.InterfaceConvertToNetbox(10, client_types.MockNetworkInterface())
