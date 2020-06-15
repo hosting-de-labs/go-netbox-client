@@ -8,8 +8,8 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 )
 
-func MockNetboxDevice() (out models.Device) {
-	return models.Device{
+func MockNetboxDevice(addIPAddresses bool, addTags bool) (out models.Device) {
+	out = models.Device{
 		AssetTag:    swag.String("123-456"),
 		Created:     strfmt.Date(time.Now()),
 		DisplayName: "",
@@ -21,9 +21,18 @@ func MockNetboxDevice() (out models.Device) {
 			Label: swag.String("Active"),
 			Value: swag.String("active"),
 		},
-		Tags: []string{
-			"Tag1",
-			"Tag2",
-		},
 	}
+
+	if addIPAddresses {
+		//TODO: add interfaces when adding ip addresses
+		out.PrimaryIp4 = &models.NestedIPAddress{Address: swag.String("127.0.0.1/32")}
+		out.PrimaryIp6 = &models.NestedIPAddress{Address: swag.String("::1/128")}
+	}
+
+	if addTags {
+		out.Tags = append(out.Tags, "Tag1")
+		out.Tags = append(out.Tags, "managed")
+	}
+
+	return out
 }

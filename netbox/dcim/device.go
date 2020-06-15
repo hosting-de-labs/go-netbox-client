@@ -10,7 +10,6 @@ import (
 
 func (c Client) DeviceFindAll(limit int64, offset int64) (out []types.DedicatedServer, err error) {
 	params := dcim.NewDcimDevicesListParams()
-
 	if limit > 0 {
 		params.WithLimit(&limit)
 	}
@@ -119,15 +118,10 @@ func (c Client) PopulateDevice(device *types.DedicatedServer) (err error) {
 
 	oh, err := c.DeviceFind(device.Hostname)
 	if err != nil {
-		return fmt.Errorf("cannot update DedicatedServer %s. No OriginalHost assigned and no way to find a matching one", device.Hostname)
+		return fmt.Errorf("cannot update DedicatedServer %s.: %s", device.Hostname, err)
 	}
 
-	res, err := c.DeviceConvertFromNetbox(oh)
-	if err != nil {
-		return fmt.Errorf("cannot convert to DedicatedServer")
-	}
-
-	device.SetNetboxEntity(res.Meta.ID, res.Meta.NetboxEntity)
+	device.SetNetboxEntity(oh.Meta.ID, oh.Meta.NetboxEntity)
 
 	return nil
 }

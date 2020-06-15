@@ -4,21 +4,14 @@ import (
 	"net"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_api"
-
 	"github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
-
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox"
 	"github.com/stretchr/testify/assert"
 )
 
-func init() {
-	netbox_api.RunServer()
-}
-
 func TestInterfaceGet(t *testing.T) {
-	netboxClient := netbox.NewNetboxAt("localhost:8000")
+	netboxClient := netbox.NewNetboxAt("localhost:8080")
 
 	dcimClient := dcim.NewClient(*netboxClient)
 	netIf, err := dcimClient.InterfaceGet(10)

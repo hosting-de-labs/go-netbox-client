@@ -7,8 +7,6 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
 	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_api"
-
 	"github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
 
 	"github.com/hosting-de-labs/go-netbox-client/types"
@@ -18,12 +16,8 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox"
 )
 
-func init() {
-	netbox_api.RunServer()
-}
-
 func TestInterfaceConvertFromNetboxDeviceInterface(t *testing.T) {
-	netboxClient := netbox.NewNetboxAt("localhost:8000")
+	netboxClient := netbox.NewNetboxAt("localhost:8080")
 	dcimClient := dcim.NewClient(*netboxClient)
 
 	netIf, err := dcimClient.InterfaceConvertFromNetbox(netbox_types.MockNetboxDeviceInterface())
@@ -50,7 +44,7 @@ func TestInterfaceConvertFromNetboxDeviceInterface(t *testing.T) {
 }
 
 func TestInterfaceConvertToNetboxDeviceInterface(t *testing.T) {
-	netboxClient := netbox.NewNetboxAt("localhost:8000")
+	netboxClient := netbox.NewNetboxAt("localhost:8080")
 	dcimClient := dcim.NewClient(*netboxClient)
 
 	intf, err := dcimClient.InterfaceConvertToNetbox(10, client_types.MockNetworkInterface())

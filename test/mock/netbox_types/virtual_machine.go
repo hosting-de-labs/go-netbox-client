@@ -16,6 +16,7 @@ func MockNetboxVirtualMachine(addResources bool, addIPAddresses bool, addTags bo
 	}
 
 	if addIPAddresses {
+		//TODO: add interfaces when adding ip addresses
 		out.PrimaryIp4 = &models.NestedIPAddress{Address: swag.String("127.0.0.1/32")}
 		out.PrimaryIp6 = &models.NestedIPAddress{Address: swag.String("::1/128")}
 	}

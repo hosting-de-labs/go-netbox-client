@@ -1,0 +1,4 @@
+- device: host1
+  enabled: true
+  type: virtual
+  name: eth0
