@@ -8,14 +8,10 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConvertVirtualMachineInterface(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
 	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 	virtualizationClient := virtualization.NewClient(*netboxClient)
 
