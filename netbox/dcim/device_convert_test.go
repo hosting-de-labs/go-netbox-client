@@ -14,27 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func mockDeviceWithInvalidIPAddress() (out models.Device) {
-	out = models.Device{
-		AssetTag:    swag.String("123-456"),
-		Created:     strfmt.Date(time.Now()),
-		DisplayName: "",
-		ID:          10,
-		LastUpdated: strfmt.DateTime(time.Now()),
-		Name:        swag.String("host1"),
-		Serial:      "1234567890",
-		Status: &models.DeviceStatus{
-			Label: swag.String("Active"),
-			Value: swag.String("active"),
-		},
-	}
-
-	out.PrimaryIp4 = &models.NestedIPAddress{Address: swag.String("123.456.789.101112")}
-	out.PrimaryIp6 = &models.NestedIPAddress{Address: swag.String("::827")}
-
-	return out
-}
-
 func TestDeviceConvertFromNetbox(t *testing.T) {
 	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 	c := dcim.NewClient(*netboxClient)
@@ -78,11 +57,25 @@ func TestDeviceConvertFromNetbox_WithIPAddresses(t *testing.T) {
 }
 
 func TestDeviceConvertFromNetbox_WithInvalidIPAddresses(t *testing.T) {
-	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
-	c := dcim.NewClient(*netboxClient)
+	device := (func() (device models.Device) {
+		return models.Device{
+			AssetTag:    swag.String("123-456"),
+			Created:     strfmt.Date(time.Now()),
+			DisplayName: "",
+			ID:          10,
+			LastUpdated: strfmt.DateTime(time.Now()),
+			Name:        swag.String("host1"),
+			Serial:      "1234567890",
+			Status: &models.DeviceStatus{
+				Label: swag.String("Active"),
+				Value: swag.String("active"),
+			},
+			PrimaryIp4: &models.NestedIPAddress{Address: swag.String("123.456.789.101112")},
+			PrimaryIp6: &models.NestedIPAddress{Address: swag.String("::827")},
+		}
+	})()
 
-	device := mockDeviceWithInvalidIPAddress()
-
+	c := dcim.NewClient(client.NetBox{})
 	res, err := c.DeviceConvertFromNetbox(device)
 
 	assert.NotNil(t, err)
