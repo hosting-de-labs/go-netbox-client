@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
-
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
@@ -101,10 +99,13 @@ func TestDeviceConvertToNetbox(t *testing.T) {
 	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 	c := dcim.NewClient(*netboxClient)
 
-	device := client_types.MockDedicatedServer()
-	nbDevice, nbInterfaces, err := c.DeviceConvertToNetbox(device)
+	device, err := c.DeviceFind("host1")
+	assert.Nil(t, err)
+	assert.NotNil(t, device)
 
+	nbDevice, nbInterfaces, err := c.DeviceConvertToNetbox(*device)
 	assert.Nil(t, err)
 	assert.NotNil(t, nbDevice)
+
 	assert.Nil(t, nbInterfaces)
 }
