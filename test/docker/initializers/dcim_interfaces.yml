@@ -1,4 +1,16 @@
 - device: host1
   enabled: true
-  type: virtual
+  type: 1000base-t
   name: eth0
+  mac_address: 'aa:bb:cc:dd:ee:ff'
+- device: host2
+  enabled: true
+  type: 1000base-t
+  name: eth0
+  mac_address: 'ab:bc:cd:de:ef:fa'
+- device: host3
+  enabled: true
+  type: 1000base-t
+  name: eth0
+  mac_address: 'bb:cc:dd:ee:ff:aa'
+  untagged_vlan: vlan1

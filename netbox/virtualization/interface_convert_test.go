@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/virtualization"
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
 	"github.com/hosting-de-labs/go-netbox-client/types"
 	"github.com/hosting-de-labs/go-netbox/netbox"
 	"github.com/stretchr/testify/assert"
@@ -15,8 +14,7 @@ func TestConvertVirtualMachineInterface(t *testing.T) {
 	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
 	virtualizationClient := virtualization.NewClient(*netboxClient)
 
-	netboxIf := netbox_types.MockNetboxVirtualMachineInterface()
-	netIf, err := virtualizationClient.InterfaceConvertFromNetbox(netboxIf)
+	netIf, err := virtualizationClient.InterfaceFind(1, "eth0")
 
 	assert.Nil(t, err)
 	assert.NotNil(t, netIf)

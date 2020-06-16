@@ -1,0 +1,16 @@
+- address: '10.123.123.123/24'
+  device: host2
+  interface: eth0
+  status: active
+- address: '2001:db8:fefe::123/64'
+  device: host2
+  interface: eth0
+  status: active
+- address: '123.123.123.123/24'
+  virtual_machine: virtual machine 1
+  interface: eth0
+  status: active
+- address: '2001:db8:a::123/64'
+  virtual_machine: virtual machine 1
+  interface: eth0
+  status: active

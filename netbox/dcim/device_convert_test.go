@@ -2,35 +2,54 @@ package dcim_test
 
 import (
 	"testing"
-
-	"github.com/hosting-de-labs/go-netbox/netbox"
+	"time"
 
 	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
 
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
 	"github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/netbox_types"
+	"github.com/hosting-de-labs/go-netbox/netbox"
 	"github.com/hosting-de-labs/go-netbox/netbox/client"
+	"github.com/hosting-de-labs/go-netbox/netbox/models"
 	"github.com/stretchr/testify/assert"
 )
 
+func mockDeviceWithInvalidIPAddress() (out models.Device) {
+	out = models.Device{
+		AssetTag:    swag.String("123-456"),
+		Created:     strfmt.Date(time.Now()),
+		DisplayName: "",
+		ID:          10,
+		LastUpdated: strfmt.DateTime(time.Now()),
+		Name:        swag.String("host1"),
+		Serial:      "1234567890",
+		Status: &models.DeviceStatus{
+			Label: swag.String("Active"),
+			Value: swag.String("active"),
+		},
+	}
+
+	out.PrimaryIp4 = &models.NestedIPAddress{Address: swag.String("123.456.789.101112")}
+	out.PrimaryIp6 = &models.NestedIPAddress{Address: swag.String("::827")}
+
+	return out
+}
+
 func TestDeviceConvertFromNetbox(t *testing.T) {
-	c := dcim.NewClient(client.NetBox{})
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
+	c := dcim.NewClient(*netboxClient)
 
-	device := netbox_types.MockNetboxDevice(false, false)
-
-	res, err := c.DeviceConvertFromNetbox(device)
-
+	device, err := c.DeviceFind("host1")
 	assert.Nil(t, err)
-	assert.NotNil(t, res)
+	assert.NotNil(t, device)
 
-	assert.False(t, res.IsChanged())
+	assert.False(t, device.IsChanged())
 
-	assert.Equal(t, "Host 10", res.Hostname)
-	assert.Equal(t, "123-456", res.AssetTag)
-	assert.Equal(t, "1234567890", res.SerialNumber)
+	assert.Equal(t, "host1", device.Hostname)
+	assert.Equal(t, "123456", device.AssetTag)
+	assert.Equal(t, "1234567890", device.SerialNumber)
 }
 
 func TestDeviceConvertFromNetbox_WithWrongType(t *testing.T) {
@@ -44,12 +63,13 @@ func TestDeviceConvertFromNetbox_WithWrongType(t *testing.T) {
 }
 
 func TestDeviceConvertFromNetbox_WithIPAddresses(t *testing.T) {
-	c := dcim.NewClient(client.NetBox{})
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
+	c := dcim.NewClient(*netboxClient)
 
-	device := netbox_types.MockNetboxDevice(true, false)
+	tmpDevice, _ := c.DeviceFind("host2")
+	tmpNbDevice, _ := tmpDevice.GetMetaNetboxEntity()
 
-	res, err := c.DeviceConvertFromNetbox(device)
-
+	res, err := c.DeviceConvertFromNetbox(tmpNbDevice)
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
 
@@ -60,39 +80,21 @@ func TestDeviceConvertFromNetbox_WithIPAddresses(t *testing.T) {
 }
 
 func TestDeviceConvertFromNetbox_WithInvalidIPAddresses(t *testing.T) {
-	c := dcim.NewClient(client.NetBox{})
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
+	c := dcim.NewClient(*netboxClient)
 
-	device := netbox_types.MockNetboxDevice(false, false)
-	device.PrimaryIp4 = &models.NestedIPAddress{Address: swag.String("123.456.789.101112")}
+	device := mockDeviceWithInvalidIPAddress()
+
 	res, err := c.DeviceConvertFromNetbox(device)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, res)
 
 	device.PrimaryIp4 = nil
-	device.PrimaryIp6 = &models.NestedIPAddress{Address: swag.String("::827")}
 	res, err = c.DeviceConvertFromNetbox(device)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, res)
-}
-
-func TestDeviceConvertFromNetbox_WithTags(t *testing.T) {
-	c := dcim.NewClient(client.NetBox{})
-
-	device := netbox_types.MockNetboxDevice(false, true)
-
-	res, err := c.DeviceConvertFromNetbox(device)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
-
-	assert.False(t, res.IsChanged())
-
-	assert.NotEmpty(t, res.Tags)
-	assert.True(t, res.IsManaged)
-	assert.Equal(t, "Tag1", res.Tags[0])
-	assert.Equal(t, "managed", res.Tags[1])
 }
 
 func TestDeviceConvertToNetbox(t *testing.T) {
