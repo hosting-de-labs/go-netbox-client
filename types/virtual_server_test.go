@@ -5,9 +5,7 @@ import (
 	"testing"
 
 	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
-
 	"github.com/hosting-de-labs/go-netbox-client/types"
-
 	"github.com/stretchr/testify/assert"
 )
 
