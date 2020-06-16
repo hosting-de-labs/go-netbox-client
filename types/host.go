@@ -10,22 +10,23 @@ import (
 type Host struct {
 	CommonEntity
 
-	Hostname    string
-	PrimaryIPv4 IPAddress
-	PrimaryIPv6 IPAddress
-	IsManaged   bool
-	Tags        []string
-	Comments    []string
+	Hostname  string
+	IsManaged bool
+	Tags      []string
+	Comments  []string
+
+	PrimaryIPv4 *IPAddress
+	PrimaryIPv6 *IPAddress
 
 	NetworkInterfaces []NetworkInterface
 }
 
+//NewHost returns a new instance of an Host with Metadata initialized
 func NewHost() *Host {
 	return &Host{
 		CommonEntity: CommonEntity{
 			Meta: &Metadata{},
 		},
-		Hostname: "",
 	}
 }
 
@@ -144,4 +145,13 @@ func (h Host) IsEqual(h2 Host, deep bool) bool {
 	}
 
 	return true
+}
+
+//GetAllIPAddresses returns all ip addresses that are assigned to any interface of this host
+func (h Host) GetAllIPAddresses() (addrs []IPAddress) {
+	for _, netIf := range h.NetworkInterfaces {
+		addrs = append(addrs, netIf.IPAddresses...)
+	}
+
+	return addrs
 }

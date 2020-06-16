@@ -1,6 +1,8 @@
 package types
 
-import "github.com/go-openapi/strfmt"
+import (
+	"github.com/go-openapi/strfmt"
+)
 
 //HashableEntity has a method to return a string that stays the same when the entity wasn't changed
 type HashableEntity interface {

@@ -78,12 +78,12 @@ func (c Client) InterfaceCreate(vmID int64, intf types.NetworkInterface) (machin
 	params := virtualization.NewVirtualizationInterfacesCreateParams()
 	params.WithData(data)
 
-	res, err := c.client.Virtualization.VirtualizationInterfacesCreate(params, nil)
+	_, err = c.client.Virtualization.VirtualizationInterfacesCreate(params, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create interface: %s", err)
 	}
 
-	return c.InterfaceFind(res.Payload.ID, intf.Name)
+	return c.InterfaceFind(vmID, intf.Name)
 }
 
 //InterfaceGetCreate is a convenience method to retrieve an existing VM interface or otherwise to create it.

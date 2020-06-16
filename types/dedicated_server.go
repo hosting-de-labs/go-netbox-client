@@ -6,7 +6,9 @@ import "sort"
 type DedicatedServer struct {
 	Host
 
-	Inventory []*InventoryItem
+	AssetTag     string
+	SerialNumber string
+	Inventory    []*InventoryItem
 }
 
 func NewDedicatedServer() *DedicatedServer {
@@ -23,6 +25,9 @@ func (d DedicatedServer) Copy() DedicatedServer {
 	//Copy Host
 	out.Host = d.Host.Copy()
 
+	out.AssetTag = d.AssetTag
+	out.SerialNumber = d.SerialNumber
+
 	//Copy Inventory
 	if len(d.Inventory) > 0 {
 		out.Inventory = make([]*InventoryItem, 0, len(d.Inventory))
@@ -35,6 +40,14 @@ func (d DedicatedServer) Copy() DedicatedServer {
 	return out
 }
 
+func (d DedicatedServer) IsChanged() bool {
+	if orig, ok := d.GetMetaOriginalEntity(); ok {
+		return !d.IsEqual(orig.(DedicatedServer), true)
+	}
+
+	return true
+}
+
 //IsEqual compares the current object with another VirtualServer object
 func (d DedicatedServer) IsEqual(d2 DedicatedServer, deep bool) bool {
 	//compare Host struct
@@ -42,17 +55,31 @@ func (d DedicatedServer) IsEqual(d2 DedicatedServer, deep bool) bool {
 		return false
 	}
 
+	//compare asset tag
+	if d.AssetTag != d2.AssetTag {
+		return false
+	}
+
+	//compare serial number
+	if d.SerialNumber != d2.SerialNumber {
+		return false
+	}
+
+	return compareInventoryItems(d, d2)
+}
+
+func compareInventoryItems(d1 DedicatedServer, d2 DedicatedServer) bool {
 	//compare length of inventory items
-	if len(d.Inventory) != len(d2.Inventory) {
+	if len(d1.Inventory) != len(d2.Inventory) {
 		return false
 	}
 
 	//sort inventory items
-	sort.Slice(d.Inventory, func(i, j int) bool { return d.Inventory[i].GetHashableString() < d.Inventory[j].GetHashableString() })
+	sort.Slice(d1.Inventory, func(i, j int) bool { return d1.Inventory[i].GetHashableString() < d1.Inventory[j].GetHashableString() })
 	sort.Slice(d2.Inventory, func(i, j int) bool { return d2.Inventory[i].GetHashableString() < d2.Inventory[j].GetHashableString() })
 
 	//iterate through inventory items and compare each item using IsEqual
-	for key, item1 := range d.Inventory {
+	for key, item1 := range d1.Inventory {
 		if !item1.IsEqual(*d2.Inventory[key]) {
 			return false
 		}

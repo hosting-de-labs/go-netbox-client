@@ -7,7 +7,6 @@ import (
 	"github.com/hosting-de-labs/go-netbox/netbox/client/virtualization"
 	"github.com/hosting-de-labs/go-netbox/netbox/models"
 
-	netboxDcim "github.com/hosting-de-labs/go-netbox-client/netbox/dcim"
 	netboxIpam "github.com/hosting-de-labs/go-netbox-client/netbox/ipam"
 )
 
@@ -25,6 +24,11 @@ func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*
 	if len(vm.Resources.Disks) > 0 {
 		netboxVM.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 	}
+
+	//Custom fields
+	customFields := make(map[string]string)
+	customFields["hypervisor_label"] = vm.Hypervisor
+	netboxVM.CustomFields = customFields
 
 	params := virtualization.NewVirtualizationVirtualMachinesCreateParams()
 	params.WithData(&netboxVM)
@@ -132,21 +136,11 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 
 	nbVM := res.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext)
 
-	dcimClient := netboxDcim.NewClient(c.client)
-
-	hyp, err := dcimClient.HypervisorFindByHostname(vm.Hypervisor)
-	if err != nil {
-		return false, err
-	}
-
-	//check if base data is equal
+	//check if base data is equal and only update interfaces
 	origVirtualServer, ok := vm.Meta.OriginalEntity.(types.VirtualServer)
 	if ok {
 		if vm.IsEqual(origVirtualServer, false) {
-			_, err = c.updateInterfaces(vm, hyp.Meta.ID)
-			if err != nil {
-				return false, err
-			}
+			return c.updateInterfaces(vm)
 		}
 	}
 
@@ -171,58 +165,86 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
 	}
 
-	//compare ipv4 / v6 addresses and sets ids of writable object if not nil
-	updated, err = c.compareIPAddresses(vm, origVirtualServer, data)
-
-	//we need to update interfaces before we possibly assign new primary ip addresses
-	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
-	u, err := c.updateInterfaces(vm, nbVM.Site.ID)
+	//delete old ip address assignments
+	u, err := c.deleteOldIPAddressAssignments(vm)
 	if err != nil {
 		return false, err
 	}
 
-	if u != false {
+	if u {
 		updated = true
 	}
 
+	//we need to update interfaces before we possibly assign new primary ip addresses
+	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
+	u, err = c.updateInterfaces(vm)
+	if err != nil {
+		return false, err
+	}
+
+	if u {
+		updated = true
+	}
+
+	//get primary ids of primary ip addresses
+	ipamClient := netboxIpam.NewClient(c.client)
+	if vm.PrimaryIPv4 != nil {
+		netIP, err := ipamClient.IPAddressFind(*vm.PrimaryIPv4)
+		if err != nil {
+			return updated, err
+		}
+
+		data.PrimaryIp4 = &netIP.ID
+	}
+
+	if vm.PrimaryIPv6 != nil {
+		netIP, err := ipamClient.IPAddressFind(*vm.PrimaryIPv6)
+		if err != nil {
+			return updated, err
+		}
+
+		data.PrimaryIp6 = &netIP.ID
+	}
+
 	params := virtualization.NewVirtualizationVirtualMachinesPartialUpdateParams()
-	params.WithID(vm.Meta.NetboxEntity.(models.VirtualMachineWithConfigContext).ID)
+	params.WithID(vm.GetMetaID())
 	params.WithData(data)
 
 	_, err = c.client.Virtualization.VirtualizationVirtualMachinesPartialUpdate(params, nil)
 	if err != nil {
-		return false, err
+		return updated, err
+	}
+
+	return true, nil
+}
+
+func (c Client) deleteOldIPAddressAssignments(vm types.VirtualServer) (updated bool, err error) {
+	ipamClient := netboxIpam.NewClient(c.client)
+
+	for _, ip := range vm.GetAllIPAddresses() {
+		netIP, err := ipamClient.IPAddressFind(ip)
+		if err != nil {
+			return updated, err
+		}
+
+		if netIP == nil {
+			continue
+		}
+
+		if netIP.Interface != nil && netIP.Interface.VirtualMachine != nil {
+			if netIP.Interface.VirtualMachine.ID != netIP.ID {
+				err = ipamClient.IPAddressDelete(netIP.ID)
+				if err != nil {
+					updated = true
+				}
+			}
+		}
 	}
 
 	return updated, nil
 }
 
-//preparePrimaryIPAddress is a helper method to clear a possible primary ip address assignment before assigning an ip
-//address to a different vm
-func (c Client) preparePrimaryIPAddress(primaryIP types.IPAddress) (int64, error) {
-	ipamClient := netboxIpam.NewClient(c.client)
-
-	ip, err := ipamClient.IPAddressFind(primaryIP)
-	if err != nil {
-		return -1, err
-	}
-
-	if ip != nil {
-		err = ipamClient.IPAddressDelete(ip.ID)
-		if err != nil {
-			return -1, err
-		}
-	}
-
-	ip, err = ipamClient.IPAddressFindCreate(primaryIP)
-	if err != nil {
-		return -1, err
-	}
-
-	return ip.ID, nil
-}
-
-func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated bool, err error) {
+func (c Client) updateInterfaces(vm types.VirtualServer) (updated bool, err error) {
 	ipamClient := netboxIpam.NewClient(c.client)
 
 	//process network interfaces
@@ -233,7 +255,7 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 		}
 
 		for _, network := range netIf.IPAddresses {
-			_, err = ipamClient.IPAddressAssignInterface(network, vmInterface.Meta.ID)
+			_, err := ipamClient.IPAddressAssignInterface(network, vmInterface.Meta.ID)
 			if err != nil {
 				return false, err
 			}
@@ -241,33 +263,4 @@ func (c Client) updateInterfaces(vm types.VirtualServer, siteID int64) (updated 
 	}
 
 	return true, nil
-}
-
-func (c Client) compareIPAddresses(vm1 types.VirtualServer, vm2 types.VirtualServer, updateObject *models.WritableVirtualMachineWithConfigContext) (updated bool, err error) {
-	//Primary IPs
-	if len(vm1.PrimaryIPv4.Address) > 0 && vm1.PrimaryIPv4.Address != vm2.PrimaryIPv4.Address {
-		ipv4Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv4)
-		if err != nil {
-			return updated, err
-		}
-
-		if updateObject != nil {
-			updateObject.PrimaryIp4 = &ipv4Id
-			updated = true
-		}
-	}
-
-	if len(vm1.PrimaryIPv6.Address) > 0 && vm1.PrimaryIPv6.Address != vm2.PrimaryIPv6.Address {
-		ipv6Id, err := c.preparePrimaryIPAddress(vm1.PrimaryIPv6)
-		if err != nil {
-			return updated, err
-		}
-
-		if updateObject != nil {
-			updateObject.PrimaryIp6 = &ipv6Id
-			updated = true
-		}
-	}
-
-	return updated, nil
 }

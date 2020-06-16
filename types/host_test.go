@@ -5,15 +5,33 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
-
 	"github.com/hosting-de-labs/go-netbox-client/types"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func MockHost() types.Host {
+	h := types.NewHost()
+	h.Hostname = "host1"
+
+	h.PrimaryIPv4 = &types.IPAddress{
+		Address: "192.168.1.1",
+		CIDR:    24,
+		Family:  types.IPAddressFamilyIPv4,
+	}
+	h.PrimaryIPv6 = &types.IPAddress{
+		Address: "::1",
+		CIDR:    64,
+		Family:  types.IPAddressFamilyIPv6,
+	}
+
+	h.Meta.OriginalEntity = h.Copy()
+
+	return *h
+}
+
 func TestHost_HasTag(t *testing.T) {
-	host := client_types.MockHost()
+	host := MockHost()
 	assert.False(t, host.HasTag("tag1"))
 
 	host.AddTag("tag2")
@@ -21,7 +39,7 @@ func TestHost_HasTag(t *testing.T) {
 }
 
 func TestHost_AddTag(t *testing.T) {
-	host := client_types.MockHost()
+	host := MockHost()
 
 	host.AddTag("tag1")
 	assert.True(t, host.HasTag("tag1"))
@@ -37,14 +55,14 @@ func TestHost_AddTag(t *testing.T) {
 }
 
 func TestHost_Copy(t *testing.T) {
-	host1 := client_types.MockHost()
+	host1 := MockHost()
 	host2 := host1.Copy()
 	assert.Equal(t, host1, host2)
 
 	host2.Hostname = "host2"
 	assert.NotEqual(t, host1, host2)
 
-	host3 := client_types.MockHost()
+	host3 := MockHost()
 
 	mac, err := net.ParseMAC("aa:bb:cc:dd:ee:ff")
 	assert.Nil(t, err)
@@ -67,7 +85,7 @@ func TestHost_Copy(t *testing.T) {
 	host4.NetworkInterfaces[0].Name = "vlan.2"
 	assert.NotEqual(t, host3, host4)
 
-	host5 := client_types.MockHost()
+	host5 := MockHost()
 	host5.AddTag("tag1")
 	host6 := host5.Copy()
 	assert.Equal(t, host5, host6)
@@ -77,7 +95,7 @@ func TestHost_Copy(t *testing.T) {
 }
 
 func TestHost_IsChanged(t *testing.T) {
-	host := client_types.MockHost()
+	host := MockHost()
 
 	assert.False(t, host.IsChanged())
 
@@ -86,7 +104,7 @@ func TestHost_IsChanged(t *testing.T) {
 }
 
 func TestHost_IsChangedWithEmptyMetadata(t *testing.T) {
-	host := client_types.MockHost()
+	host := MockHost()
 	host.Meta = nil
 
 	assert.True(t, host.IsChanged())
@@ -110,12 +128,12 @@ func TestHost_IsEqual(t *testing.T) {
 			host1: types.Host{
 				Hostname:  "Server",
 				IsManaged: true,
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
 				},
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,
@@ -132,12 +150,12 @@ func TestHost_IsEqual(t *testing.T) {
 			host2: types.Host{
 				Hostname:  "Server",
 				IsManaged: true,
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
 				},
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,
@@ -173,14 +191,14 @@ func TestHost_IsEqual(t *testing.T) {
 		},
 		{
 			host1: types.Host{
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.1",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
 				},
 			},
 			host2: types.Host{
-				PrimaryIPv4: types.IPAddress{
+				PrimaryIPv4: &types.IPAddress{
 					Address: "10.10.10.2",
 					CIDR:    24,
 					Family:  types.IPAddressFamilyIPv4,
@@ -190,14 +208,14 @@ func TestHost_IsEqual(t *testing.T) {
 		},
 		{
 			host1: types.Host{
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::1",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,
 				},
 			},
 			host2: types.Host{
-				PrimaryIPv6: types.IPAddress{
+				PrimaryIPv6: &types.IPAddress{
 					Address: "::2",
 					CIDR:    128,
 					Family:  types.IPAddressFamilyIPv6,

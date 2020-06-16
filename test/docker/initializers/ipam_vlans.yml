@@ -1,0 +1,12 @@
+- name: vlan1
+  site: AMS 1
+  status: active
+  vid: 5
+  role: Main Management
+  description: VLAN 5 for MGMT
+
+- name: vlan2
+  group: VLAN group 2
+  site: AMS 1
+  status: active
+  vid: 1300

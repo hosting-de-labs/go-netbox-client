@@ -65,7 +65,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 			return nil, err
 		}
 
-		out.PrimaryIPv4 = types.IPAddress{
+		out.PrimaryIPv4 = &types.IPAddress{
 			Address: address,
 			CIDR:    cidr,
 			Family:  types.IPAddressFamilyIPv4,
@@ -79,7 +79,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 			return nil, err
 		}
 
-		out.PrimaryIPv6 = types.IPAddress{
+		out.PrimaryIPv6 = &types.IPAddress{
 			Address: address,
 			CIDR:    cidr,
 			Family:  types.IPAddressFamilyIPv6,

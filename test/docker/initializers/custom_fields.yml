@@ -1,0 +1,15 @@
+text_field:
+  type: text
+  label: Custom Text
+  description: Enter text in a text field.
+  required: false
+  weight: 0
+  on_objects:
+  - dcim.models.Device
+  - dcim.models.Rack
+  - dcim.models.Site
+  - dcim.models.DeviceType
+  - ipam.models.IPAddress
+  - ipam.models.Prefix
+  - tenancy.models.Tenant
+  - virtualization.models.VirtualMachine

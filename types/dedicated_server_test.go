@@ -4,24 +4,36 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hosting-de-labs/go-netbox-client/test/mock/client_types"
-
 	"github.com/hosting-de-labs/go-netbox-client/types"
-
 	"github.com/stretchr/testify/assert"
 )
 
+func mockDedicatedServer() types.DedicatedServer {
+	d := types.NewDedicatedServer()
+	d.Hostname = "host1"
+	d.IsManaged = false
+	d.Inventory = []*types.InventoryItem{
+		{
+			Type:         types.InventoryItemTypeProcessor,
+			Manufacturer: "Intel",
+			Model:        "Xeon X5660",
+		},
+	}
+
+	return *d
+}
+
 func TestDedicatedServer_Copy(t *testing.T) {
-	host1 := client_types.MockDedicatedServer()
+	host1 := mockDedicatedServer()
 	host2 := host1.Copy()
-	assert.Equal(t, host1, host2)
+	assert.True(t, host1.IsEqual(host2, true))
 
 	host1.Inventory = append(host1.Inventory, &types.InventoryItem{
 		Type:         types.InventoryItemTypeMainboard,
 		Manufacturer: "Supermicro",
 		Model:        "X9SCL-F",
 	})
-	assert.NotEqual(t, host1, host2)
+	assert.False(t, host1.IsEqual(host2, true))
 }
 
 //TODO: move to inventory_item.go

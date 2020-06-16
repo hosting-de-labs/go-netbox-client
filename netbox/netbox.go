@@ -29,6 +29,8 @@ func NewAPIClient(url string, token string, defaultTimeout time.Duration) NetBox
 	// }
 
 	t := runtimeclient.New(url, "/api", []string{"https"})
+	//t.Context, _ = context.WithTimeout(t.Context, timeout)
+
 	t.DefaultAuthentication = runtimeclient.APIKeyAuth("Authorization", "header", "Token "+token)
 
 	c := netboxClient.New(t, strfmt.Default)

@@ -1,0 +1,6 @@
+- description: eth0
+  enabled: true
+  mac_address: aa:bb:cc:dd:ee:ff
+  mtu: 1500
+  name: eth0
+  virtual_machine: virtual machine 1
