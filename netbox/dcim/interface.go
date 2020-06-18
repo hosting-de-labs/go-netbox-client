@@ -115,10 +115,14 @@ func (c Client) InterfaceUpdate(deviceID int64, networkInterface types.NetworkIn
 		return fmt.Errorf("bla bla error")
 	}
 
+	fmt.Printf("%+v\n\n", networkInterface)
+
 	nbIf, err := c.InterfaceConvertToNetbox(deviceID, networkInterface)
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("%+v\n\n", nbIf)
 
 	params := dcim.NewDcimInterfacesUpdateParams().WithID(intfID).WithData(nbIf)
 	_, err = c.client.Dcim.DcimInterfacesUpdate(params, nil)
