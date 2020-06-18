@@ -120,11 +120,7 @@ func (c Client) InterfaceUpdate(deviceID int64, networkInterface types.NetworkIn
 		return err
 	}
 
-	params := &dcim.DcimInterfacesUpdateParams{
-		ID:   intfID,
-		Data: nbIf,
-	}
-
+	params := dcim.NewDcimInterfacesUpdateParams().WithID(intfID).WithData(nbIf)
 	_, err = c.client.Dcim.DcimInterfacesUpdate(params, nil)
 	if err != nil {
 		return err
