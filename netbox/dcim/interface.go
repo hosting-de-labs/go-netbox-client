@@ -120,8 +120,6 @@ func (c Client) InterfaceUpdate(deviceID int64, networkInterface types.NetworkIn
 		return err
 	}
 
-	fmt.Printf("%+v", nbIf)
-
 	params := dcim.NewDcimInterfacesUpdateParams().WithID(intfID).WithData(nbIf)
 	_, err = c.client.Dcim.DcimInterfacesUpdate(params, nil)
 	return err
