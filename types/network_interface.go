@@ -88,6 +88,7 @@ type NetworkInterface struct {
 	CommonEntity
 
 	Type         InterfaceType
+	Enabled      bool
 	IPAddresses  []IPAddress
 	IsManagement bool
 	MACAddress   net.HardwareAddr
@@ -104,6 +105,7 @@ func NewNetworkInterface() *NetworkInterface {
 			Meta: &Metadata{},
 		},
 		Type:         "",
+		Enabled:      true,
 		IPAddresses:  []IPAddress{},
 		IsManagement: false,
 		MACAddress:   net.HardwareAddr{},
