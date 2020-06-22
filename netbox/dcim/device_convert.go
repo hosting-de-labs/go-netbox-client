@@ -24,6 +24,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	case models.Device:
 		d := device.(models.Device)
 		out.SetNetboxEntity(d.ID, device)
+		out.SetCustomFields(d.CustomFields)
 
 		if d.Name != nil {
 			out.Hostname = *d.Name
@@ -42,6 +43,7 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	case models.DeviceWithConfigContext:
 		d := device.(models.DeviceWithConfigContext)
 		out.SetNetboxEntity(d.ID, device)
+		out.SetCustomFields(d.CustomFields)
 
 		if d.Name != nil {
 			out.Hostname = *d.Name

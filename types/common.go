@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/strfmt"
 )
 
@@ -19,8 +21,13 @@ type CommonEntity struct {
 //Meta contain information that are relevant to communicate with Netbox
 type Metadata struct {
 	ID             int64
+	CustomFields   CustomFields
 	OriginalEntity interface{}
 	NetboxEntity   interface{}
+}
+
+func (c *CommonEntity) SetCustomFields(customFields interface{}) {
+	fmt.Printf("%+v\n\n", customFields)
 }
 
 func (c *CommonEntity) SetNetboxEntity(id int64, netboxObj interface{}) {

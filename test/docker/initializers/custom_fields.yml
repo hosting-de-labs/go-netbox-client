@@ -1,3 +1,20 @@
+hypervisor_label:
+  type: text
+  label: Hypervisor Name
+  on_objects:
+    - virtualization.models.VirtualMachine
+
+selection:
+  type: select
+  label: Custom Selection
+  choices:
+    - value: item1
+    - value: item2
+    - value: item3
+  on_objects:
+    - dcim.models.Device
+    - virtualization.models.VirtualMachine
+
 text_field:
   type: text
   label: Custom Text
