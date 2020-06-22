@@ -55,9 +55,9 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 
 			netIf.TaggedVlans = append(netIf.TaggedVlans, *vlan)
 		}
-	} else {
-		netboxInterface.TaggedVlans = []*models.NestedVLAN{}
 	}
+
+	netIf.Tags = netboxInterface.Tags
 
 	ipamClient := netboxIpam.NewClient(c.client)
 	netboxAddresses, err := ipamClient.IPAddressFindByInterfaceID(netboxInterface.ID)

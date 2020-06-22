@@ -112,17 +112,13 @@ func (c Client) InterfaceGetCreate(deviceID int64, networkInterface types.Networ
 func (c Client) InterfaceUpdate(deviceID int64, networkInterface types.NetworkInterface) error {
 	intfID := networkInterface.GetMetaID()
 	if intfID == -1 {
-		return fmt.Errorf("bla bla error")
+		return fmt.Errorf("cannot get meta id of network interface")
 	}
-
-	fmt.Printf("%+v\n\n", networkInterface)
 
 	nbIf, err := c.InterfaceConvertToNetbox(deviceID, networkInterface)
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("%+v\n\n", nbIf)
 
 	params := dcim.NewDcimInterfacesUpdateParams().WithID(intfID).WithData(nbIf)
 	_, err = c.client.Dcim.DcimInterfacesUpdate(params, nil)
