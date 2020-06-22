@@ -16,7 +16,7 @@ func mockNetboxVlan() models.VLAN {
 		Name: swag.String("Public VLAN"),
 		Status: &models.VLANStatus{
 			Value: swag.String("active"),
-			Label: swag.String("Active"),
+			Label: swag.String("Enabled"),
 		},
 		Description: "This is Public VLAN description",
 		Tags:        []string{"public"},
