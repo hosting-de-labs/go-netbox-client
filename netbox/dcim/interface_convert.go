@@ -16,20 +16,22 @@ import (
 )
 
 //InterfaceConvertFromNetbox allows to convert a DeviceInterface to a NetworkInterface
-func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterface) (*types.NetworkInterface, error) {
+func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.NetworkInterface, error) {
 	netIf := types.NewNetworkInterface()
-	netIf.SetNetboxEntity(netboxInterface.ID, netboxInterface)
+	netIf.SetNetboxEntity(nbIf.ID, nbIf)
 
-	if netboxInterface.Type != nil {
-		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
+	if nbIf.Type != nil {
+		netIf.Type = types.InterfaceType(*nbIf.Type.Value)
 	}
 
-	if netboxInterface.Name != nil {
-		netIf.Name = *netboxInterface.Name
+	netIf.Enabled = nbIf.Enabled
+
+	if nbIf.Name != nil {
+		netIf.Name = *nbIf.Name
 	}
 
-	if netboxInterface.MacAddress != nil {
-		mac, err := net.ParseMAC(*netboxInterface.MacAddress)
+	if nbIf.MacAddress != nil {
+		mac, err := net.ParseMAC(*nbIf.MacAddress)
 		if err != nil {
 			return nil, err
 		}
@@ -37,8 +39,8 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 		netIf.MACAddress = mac
 	}
 
-	if netboxInterface.UntaggedVlan != nil {
-		vlan, err := netboxIpam.VlanConvertFromNetbox(*netboxInterface.UntaggedVlan)
+	if nbIf.UntaggedVlan != nil {
+		vlan, err := netboxIpam.VlanConvertFromNetbox(*nbIf.UntaggedVlan)
 		if err != nil {
 			return nil, err
 		}
@@ -46,8 +48,8 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 		netIf.UntaggedVlan = vlan
 	}
 
-	if len(netboxInterface.TaggedVlans) > 0 {
-		for _, taggedVlan := range netboxInterface.TaggedVlans {
+	if len(nbIf.TaggedVlans) > 0 {
+		for _, taggedVlan := range nbIf.TaggedVlans {
 			vlan, err := netboxIpam.VlanConvertFromNetbox(*taggedVlan)
 			if err != nil {
 				return nil, err
@@ -55,12 +57,12 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.DeviceInterfac
 
 			netIf.TaggedVlans = append(netIf.TaggedVlans, *vlan)
 		}
-	} else {
-		netboxInterface.TaggedVlans = []*models.NestedVLAN{}
 	}
 
+	netIf.Tags = nbIf.Tags
+
 	ipamClient := netboxIpam.NewClient(c.client)
-	netboxAddresses, err := ipamClient.IPAddressFindByInterfaceID(netboxInterface.ID)
+	netboxAddresses, err := ipamClient.IPAddressFindByInterfaceID(nbIf.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +123,7 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 	out.Device = deviceID
 	out.Name = intf.Name
 	out.Type = string(intf.Type)
+	out.Enabled = intf.Enabled
 	out.MgmtOnly = intf.IsManagement
 
 	if intf.MACAddress != nil && intf.MACAddress.String() != "" {
