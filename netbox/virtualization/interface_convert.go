@@ -75,6 +75,8 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)
 	}
 
+	netIf.SetOriginalEntity(netIf)
+
 	return netIf, nil
 }
 

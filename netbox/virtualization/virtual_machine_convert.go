@@ -20,9 +20,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 	switch netboxVM.(type) {
 	case models.VirtualMachineWithConfigContext:
 		vm := netboxVM.(models.VirtualMachineWithConfigContext)
-
-		out.Meta.ID = vm.ID
-		out.Meta.NetboxEntity = netboxVM
+		out.SetNetboxEntity(vm.ID, netboxVM)
 
 		out.Hostname = *vm.Name
 		out.Tags = vm.Tags
@@ -107,6 +105,8 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 			out.NetworkInterfaces = append(out.NetworkInterfaces, *netIf)
 		}
 	}
+
+	out.SetOriginalEntity(out)
 
 	return out, nil
 }
