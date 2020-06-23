@@ -85,6 +85,8 @@ func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)
 	}
 
+	netIf.SetOriginalEntity(netIf)
+
 	return netIf, nil
 }
 
