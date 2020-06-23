@@ -106,7 +106,7 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 		}
 	}
 
-	out.SetOriginalEntity(out)
+	out.SetOriginalEntity(*out)
 
 	return out, nil
 }
