@@ -31,18 +31,16 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 		model = "Unknown"
 	}
 
-	out := new(models.WritableInventoryItem)
-	out.Manufacturer = &manufacturer.ID
-	out.Name = swag.String(model)
+	out := &models.WritableInventoryItem{
+		Manufacturer: &manufacturer.ID,
+		Name:         swag.String(model),
+		Device:       swag.Int64(deviceID),
+		PartID:       i.PartNumber,
+		Serial:       i.SerialNumber,
+		AssetTag:     &i.AssetTag,
+		Discovered:   true,
+	}
 
-	out.Device = swag.Int64(deviceID)
-
-	out.PartID = i.PartNumber
-	out.Serial = i.SerialNumber
-	out.AssetTag = &i.AssetTag
-	out.Discovered = true
-
-	out.Tags = []string{}
 	if i.Tags != nil {
 		out.Tags = i.Tags
 	}
