@@ -35,7 +35,7 @@ func NewInventoryItem() *InventoryItem {
 		SerialNumber: "",
 		AssetTag:     "",
 		Details:      nil,
-		Tags:         nil,
+		Tags:         []string{},
 	}
 }
 
