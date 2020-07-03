@@ -12,8 +12,8 @@ func createNetboxCustomFields() interface{} {
 	fields := make(map[string]interface{}, 2)
 
 	extfield := make(map[string]interface{}, 2)
-	extfield["Val"] = 1
-	extfield["Label"] = "Val 1"
+	extfield["Value"] = 1
+	extfield["Label"] = "Value 1"
 
 	fields["ext_field"] = extfield
 	fields["string_field"] = "string"
@@ -37,7 +37,7 @@ func TestCustomFields_Val(t *testing.T) {
 
 	assert.NotNil(t, c.Val("string_field"))
 	assert.Equal(t, "string", *c.Val("string_field"))
-	assert.Equal(t, "Val 1", *c.Val("ext_field"))
+	assert.Equal(t, "Value 1", *c.Val("ext_field"))
 }
 
 func TestCustomFields_ValMap(t *testing.T) {
