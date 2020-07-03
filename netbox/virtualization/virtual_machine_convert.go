@@ -22,7 +22,10 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 		vm := netboxVM.(models.VirtualMachineWithConfigContext)
 
 		out.SetNetboxEntity(vm.ID, netboxVM)
-		out.SetCustomFields(vm.CustomFields)
+		err = out.SetCustomFields(vm.CustomFields)
+		if err != nil {
+			return nil, err
+		}
 
 		out.Hostname = *vm.Name
 		out.Tags = vm.Tags

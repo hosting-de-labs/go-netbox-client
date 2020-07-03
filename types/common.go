@@ -26,8 +26,13 @@ type Metadata struct {
 	NetboxEntity   interface{}
 }
 
-func (c *CommonEntity) SetCustomFields(customFields interface{}) {
-	fmt.Printf("%+v\n\n", customFields)
+func (c *CommonEntity) SetCustomFields(customFields interface{}) error {
+	err := c.Meta.CustomFields.Load(customFields)
+	if err != nil {
+		return fmt.Errorf("error setting custom fields: %s", err)
+	}
+
+	return nil
 }
 
 func (c *CommonEntity) SetNetboxEntity(id int64, netboxObj interface{}) {
