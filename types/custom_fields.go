@@ -7,7 +7,7 @@ import (
 
 type CustomFields struct {
 	ids    map[string]int
-	fields map[string]string
+	fields map[string]*string
 }
 
 //Load accepts and parses an interface representing go-netbox compatible custom fields
@@ -17,9 +17,11 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 	}
 
 	c.ids = make(map[string]int)
-	c.fields = make(map[string]string)
+	c.fields = make(map[string]*string)
 
 	for k, f := range cf.(map[string]interface{}) {
+		fmt.Printf("%s: %+v\n", k, f)
+
 		switch f.(type) {
 		case map[string]interface{}:
 			f := f.(map[string]interface{})
@@ -32,10 +34,13 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 			}
 
 			c.ids[k] = f["Val"].(int)
-			c.fields[k] = f["Label"].(string)
+			c.fields[k] = f["Label"].(*string)
 
 		case string:
-			c.fields[k] = f.(string)
+			c.fields[k] = f.(*string)
+
+		case nil:
+			c.fields[k] = nil
 
 		default:
 			return fmt.Errorf("invalid custom fields: field of type %s found", reflect.TypeOf(f))
@@ -51,7 +56,7 @@ func (c *CustomFields) Val(key string) (val *string) {
 		return nil
 	}
 
-	return &f
+	return f
 }
 
 func (c *CustomFields) ValMap() map[string]interface{} {
