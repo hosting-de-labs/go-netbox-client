@@ -6,12 +6,14 @@ import (
 	"reflect"
 )
 
+//CustomFields defines a type that can hold custom fields in a easy way (all string values) while keeping the ids for
+//complex types (eg. selects).
 type CustomFields struct {
 	ids    map[string]int64
 	fields map[string]*string
 }
 
-//Load accepts and parses an interface representing go-netbox compatible custom fields
+//Load accepts and parses an interface representing go-netbox compatible custom fields.
 func (c *CustomFields) Load(cf interface{}) (err error) {
 	if cf == nil {
 		return fmt.Errorf("customfields is nil")
@@ -34,8 +36,8 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 				return fmt.Errorf("invalid custom fields: no label field")
 			}
 
-			tmpId := f["value"].(json.Number)
-			id, err := tmpId.Int64()
+			tmpID := f["value"].(json.Number)
+			id, err := tmpID.Int64()
 			if err != nil {
 				return fmt.Errorf("invalid custom fields: id cannot be converted: %s", err)
 			}
@@ -60,6 +62,7 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 	return nil
 }
 
+//Val returns a custom field.
 func (c *CustomFields) Val(key string) (val *string) {
 	f, ok := c.fields[key]
 	if !ok {
@@ -69,6 +72,8 @@ func (c *CustomFields) Val(key string) (val *string) {
 	return f
 }
 
+//ValMap returns a string interface{} map that can be used to update netbox custom fields. Values are replaced with ids
+//when the original value was a select.
 func (c *CustomFields) ValMap() map[string]interface{} {
 	if c.fields == nil {
 		return nil

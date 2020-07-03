@@ -26,6 +26,7 @@ type Metadata struct {
 	NetboxEntity   interface{}
 }
 
+//SetCustomFields loads netbox compatible custom fields and stores them in the Meta
 func (c *CommonEntity) SetCustomFields(customFields interface{}) error {
 	err := c.Meta.CustomFields.Load(customFields)
 	if err != nil {
