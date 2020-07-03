@@ -25,17 +25,17 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 		switch f.(type) {
 		case map[string]interface{}:
 			f := f.(map[string]interface{})
-			if _, ok := f["Value"]; !ok {
-				return fmt.Errorf("invalid custom fields: no Val field")
+			if _, ok := f["value"]; !ok {
+				return fmt.Errorf("invalid custom fields: no Value field")
 			}
 
-			if _, ok := f["Label"]; !ok {
+			if _, ok := f["label"]; !ok {
 				return fmt.Errorf("invalid custom fields: no Label field")
 			}
 
-			c.ids[k] = f["Value"].(int)
+			c.ids[k] = f["value"].(int)
 
-			val := f["Label"].(string)
+			val := f["label"].(string)
 			c.fields[k] = &val
 
 		case string:
