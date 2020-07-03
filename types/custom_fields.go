@@ -55,6 +55,10 @@ func (c *CustomFields) Val(key string) (val *string) {
 }
 
 func (c *CustomFields) ValMap() map[string]interface{} {
+	if c.fields == nil {
+		return nil
+	}
+
 	out := make(map[string]interface{}, len(c.fields))
 
 	for k, v := range c.fields {
