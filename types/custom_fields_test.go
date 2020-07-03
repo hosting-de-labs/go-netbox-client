@@ -49,6 +49,6 @@ func TestCustomFields_ValMap(t *testing.T) {
 
 	m := c.ValMap()
 
-	assert.Equal(t, "string", m["string_field"].(string))
-	assert.Equal(t, 1, m["ext_field"].(json.Number))
+	assert.Equal(t, "string", *m["string_field"].(*string))
+	assert.Equal(t, int64(1), m["ext_field"])
 }
