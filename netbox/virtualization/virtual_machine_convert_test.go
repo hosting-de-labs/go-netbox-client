@@ -110,10 +110,10 @@ func TestVirtualMachineConvertFromNetbox_WithResources(t *testing.T) {
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, res.Resources.Cores, 1)
-	assert.Equal(t, res.Resources.Memory, int64(4096))
-	assert.Equal(t, len(res.Resources.Disks), 1)
-	assert.Equal(t, res.Resources.Disks[0].Size, int64(10240*1024))
+	assert.Equal(t, 1, res.Resources.Cores)
+	assert.Equal(t, int64(4096), res.Resources.Memory)
+	assert.Equal(t, 1, len(res.Resources.Disks))
+	assert.Equal(t, int64(10240*1024), res.Resources.Disks[0].Size)
 }
 
 func TestVirtualMachineConvertFromNetbox_WithIPAddresses(t *testing.T) {
