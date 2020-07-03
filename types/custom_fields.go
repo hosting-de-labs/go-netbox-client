@@ -1,12 +1,13 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 )
 
 type CustomFields struct {
-	ids    map[string]int
+	ids    map[string]int64
 	fields map[string]*string
 }
 
@@ -16,7 +17,7 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 		return fmt.Errorf("customfields is nil")
 	}
 
-	c.ids = make(map[string]int)
+	c.ids = make(map[string]int64)
 	c.fields = make(map[string]*string)
 
 	for k, f := range cf.(map[string]interface{}) {
@@ -26,14 +27,20 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 		case map[string]interface{}:
 			f := f.(map[string]interface{})
 			if _, ok := f["value"]; !ok {
-				return fmt.Errorf("invalid custom fields: no Value field")
+				return fmt.Errorf("invalid custom fields: no value field")
 			}
 
 			if _, ok := f["label"]; !ok {
-				return fmt.Errorf("invalid custom fields: no Label field")
+				return fmt.Errorf("invalid custom fields: no label field")
 			}
 
-			c.ids[k] = f["value"].(int)
+			tmpId := f["value"].(json.Number)
+			id, err := tmpId.Int64()
+			if err != nil {
+				return fmt.Errorf("invalid custom fields: id cannot be converted: %s", err)
+			}
+
+			c.ids[k] = id
 
 			val := f["label"].(string)
 			c.fields[k] = &val

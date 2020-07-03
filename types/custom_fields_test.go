@@ -1,6 +1,8 @@
 package types_test
 
 import (
+	"encoding/json"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,8 +14,8 @@ func createNetboxCustomFields() interface{} {
 	fields := make(map[string]interface{}, 2)
 
 	extfield := make(map[string]interface{}, 2)
-	extfield["Value"] = 1
-	extfield["Label"] = "Value 1"
+	extfield["value"] = json.Number(strconv.FormatInt(1, 10))
+	extfield["label"] = "Value 1"
 
 	fields["ext_field"] = extfield
 	fields["string_field"] = "string"
@@ -48,5 +50,5 @@ func TestCustomFields_ValMap(t *testing.T) {
 	m := c.ValMap()
 
 	assert.Equal(t, "string", m["string_field"].(string))
-	assert.Equal(t, 1, m["ext_field"].(int))
+	assert.Equal(t, 1, m["ext_field"].(json.Number))
 }
