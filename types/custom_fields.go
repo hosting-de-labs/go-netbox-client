@@ -16,7 +16,7 @@ type CustomFields struct {
 //Load accepts and parses an interface representing go-netbox compatible custom fields.
 func (c *CustomFields) Load(cf interface{}) (err error) {
 	if cf == nil {
-		return fmt.Errorf("customfields is nil")
+		return nil
 	}
 
 	c.ids = make(map[string]int64)
