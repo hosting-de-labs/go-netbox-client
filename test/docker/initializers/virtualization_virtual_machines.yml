@@ -1,9 +1,32 @@
-- cluster: cluster1
-  comments: VM1
-  disk: 200
-  memory: 4096
-  name: virtual machine 1
+- name: virtual machine 1
   platform: Platform 1
+  cluster: cluster1
   status: active
   tenant: tenant1
   vcpus: 8
+  disk: 200
+  memory: 4096
+  comments: VM1
+- name: virtual machine 2
+  platform: Platform 1
+  cluster: cluster1
+  status: active
+  tenant: tenant1
+  vcpus: 8
+  disk: 200
+  memory: 4096
+  comments: VM2
+  custom_fields:
+    hypervisor_label: host1
+    selection: 1
+- name: virtual machine 3
+  platform: Platform 1
+  cluster: cluster1
+  status: active
+  tenant: tenant1
+  vcpus: 8
+  disk: 200
+  memory: 4096
+  comments: VM3
+  custom_fields:
+    selection: 2

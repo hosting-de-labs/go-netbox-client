@@ -68,6 +68,30 @@ func TestVirtualMachineConvertFromNetbox(t *testing.T) {
 	assert.Empty(t, vm.Hypervisor)
 }
 
+func TestVirtualMachineConvertFromNetbox_WithHypervisor(t *testing.T) {
+	netboxClient := netbox.NewNetboxWithAPIKey("localhost:8080", "0123456789abcdef0123456789abcdef01234567")
+	c := virtualization.NewClient(*netboxClient)
+
+	vm, err := c.VirtualMachineFind("virtual machine 2")
+	assert.Nil(t, err)
+	assert.NotNil(t, vm)
+
+	assert.Equal(t, "virtual machine 2", vm.Hostname)
+	assert.Equal(t, 8, vm.Resources.Cores)
+	assert.Equal(t, int64(4096), vm.Resources.Memory)
+	assert.NotEmpty(t, vm.Resources.Disks)
+	assert.Len(t, vm.Resources.Disks, 1)
+	assert.Equal(t, int64(204800), vm.Resources.Disks[0].Size)
+
+	assert.Nil(t, vm.PrimaryIPv4)
+	assert.Nil(t, vm.PrimaryIPv6)
+
+	assert.Empty(t, vm.Tags)
+	assert.False(t, vm.IsManaged)
+
+	assert.Equal(t, "host1", vm.Hypervisor)
+}
+
 func TestVirtualMachineConvertFromNetbox_WithUnknownType(t *testing.T) {
 	c := virtualization.NewClient(client.NetBox{})
 
@@ -86,10 +110,10 @@ func TestVirtualMachineConvertFromNetbox_WithResources(t *testing.T) {
 	res, err := c.VirtualMachineConvertFromNetbox(vm, []*models.VirtualMachineInterface{})
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, res.Resources.Cores, 1)
-	assert.Equal(t, res.Resources.Memory, int64(4096))
-	assert.Equal(t, len(res.Resources.Disks), 1)
-	assert.Equal(t, res.Resources.Disks[0].Size, int64(10240*1024))
+	assert.Equal(t, 1, res.Resources.Cores)
+	assert.Equal(t, int64(4096), res.Resources.Memory)
+	assert.Equal(t, 1, len(res.Resources.Disks))
+	assert.Equal(t, int64(10240*1024), res.Resources.Disks[0].Size)
 }
 
 func TestVirtualMachineConvertFromNetbox_WithIPAddresses(t *testing.T) {
