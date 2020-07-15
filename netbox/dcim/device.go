@@ -95,22 +95,6 @@ func (c Client) DeviceUpdate(host *types.DedicatedServer) error {
 	return nil
 }
 
-//HypervisorFindByHostname is like NetboxDeviceGet but checks if the device has a cluster assigned
-func (c Client) HypervisorFindByHostname(hostname string) (*types.DedicatedServer, error) {
-	res, err := c.DeviceFind(hostname)
-
-	if err != nil {
-		return nil, err
-	}
-
-	d := res.Meta.NetboxEntity.(models.DeviceWithConfigContext)
-	if d.Cluster == nil {
-		return nil, fmt.Errorf("device %s not assigned to a Virtualization Cluster", hostname)
-	}
-
-	return res, nil
-}
-
 func (c Client) PopulateDevice(device *types.DedicatedServer) (err error) {
 	if device.HasNetboxEntity() {
 		return nil
