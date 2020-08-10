@@ -45,6 +45,10 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 			val := f["label"].(string)
 			c.fields[k] = &val
 
+		case json.Number:
+			val := f.(json.Number).String()
+			c.fields[k] = &val
+
 		case string:
 			val := f.(string)
 			c.fields[k] = &val
