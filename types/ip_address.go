@@ -18,14 +18,14 @@ const (
 	IPAddressFamilyIPv4 IPAddressFamily = "IPv4"
 )
 
-type IPAddressStatus int
+type IPAddressStatus string
 
 const (
-	_ IPAddressStatus = iota
-	IPAddressStatusActive
-	IPAddressStatusReserved
-	IPAddressStatusDeprecated
-	IPAddressStatusDHCP
+	IPAddressStatusUnknown    IPAddressStatus = "unknown"
+	IPAddressStatusActive     IPAddressStatus = "active"
+	IPAddressStatusReserved   IPAddressStatus = "reserved"
+	IPAddressStatusDeprecated IPAddressStatus = "deprecated"
+	IPAddressStatusDHCP       IPAddressStatus = "dhcp"
 )
 
 type IPAddressRole int

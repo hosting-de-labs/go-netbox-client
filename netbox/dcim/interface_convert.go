@@ -84,6 +84,8 @@ func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.
 			addr.Family = types.IPAddressFamilyIPv6
 		}
 
+		addr.Status = types.IPAddressStatus(*netboxAddress.Status.Value)
+
 		netIf.IPAddresses = append(netIf.IPAddresses, addr)
 	}
 
