@@ -119,7 +119,7 @@ func NewNetworkInterface() *NetworkInterface {
 
 //IsEqual compares the current NetworkInterface object against another NetworkInterface
 func (netIf NetworkInterface) IsEqual(netIf2 NetworkInterface) bool {
-	if !utils.CompareStruct(netIf, netIf2, []string{}, []string{"IPAddresses"}) {
+	if !utils.CompareStruct(netIf, netIf2, []string{}, []string{"CommonEntity", "IPAddresses"}) {
 		return false
 	}
 
