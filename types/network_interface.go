@@ -123,6 +123,11 @@ func (netIf NetworkInterface) IsEqual(netIf2 NetworkInterface) bool {
 		return false
 	}
 
+	//compare length of ip-address slices
+	if len(netIf.IPAddresses) != len(netIf2.IPAddresses) {
+		return false
+	}
+
 	//sort ip addresses
 	sort.Slice(netIf.IPAddresses, func(i, j int) bool { return netIf.IPAddresses[i].Address < netIf.IPAddresses[j].Address })
 	sort.Slice(netIf2.IPAddresses, func(i, j int) bool { return netIf2.IPAddresses[i].Address < netIf2.IPAddresses[j].Address })
