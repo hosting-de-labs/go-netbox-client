@@ -21,7 +21,6 @@ const (
 type IPAddressStatus string
 
 const (
-	IPAddressStatusUnknown    IPAddressStatus = "unknown"
 	IPAddressStatusActive     IPAddressStatus = "active"
 	IPAddressStatusReserved   IPAddressStatus = "reserved"
 	IPAddressStatusDeprecated IPAddressStatus = "deprecated"
