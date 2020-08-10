@@ -23,8 +23,6 @@ func (c *CustomFields) Load(cf interface{}) (err error) {
 	c.fields = make(map[string]*string)
 
 	for k, f := range cf.(map[string]interface{}) {
-		fmt.Printf("%s: %+v\n", k, f)
-
 		switch f.(type) {
 		case map[string]interface{}:
 			f := f.(map[string]interface{})
