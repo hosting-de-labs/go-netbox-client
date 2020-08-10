@@ -30,6 +30,8 @@ func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.
 		netIf.Name = *nbIf.Name
 	}
 
+	netIf.IsManagement = nbIf.MgmtOnly
+
 	if nbIf.MacAddress != nil {
 		mac, err := net.ParseMAC(*nbIf.MacAddress)
 		if err != nil {
