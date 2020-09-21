@@ -16,7 +16,7 @@ import (
 )
 
 //InterfaceConvertFromNetbox allows to convert a DeviceInterface to a NetworkInterface
-func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.NetworkInterface, error) {
+func (c Client) InterfaceConvertFromNetbox(nbIf models.Interface) (*types.NetworkInterface, error) {
 	netIf := types.NewNetworkInterface()
 	netIf.SetNetboxEntity(nbIf.ID, nbIf)
 
@@ -61,7 +61,9 @@ func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.
 		}
 	}
 
-	netIf.Tags = nbIf.Tags
+	for _, tag := range nbIf.Tags {
+		netIf.Tags = append(netIf.Tags, *tag.Name)
+	}
 
 	ipamClient := netboxIpam.NewClient(c.client)
 	netboxAddresses, err := ipamClient.IPAddressFindByInterfaceID(nbIf.ID)
@@ -95,7 +97,7 @@ func (c Client) InterfaceConvertFromNetbox(nbIf models.DeviceInterface) (*types.
 }
 
 //InterfaceConvertToNetbox allows to convert a NetworkInterface to a netbox compatible device interface
-func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInterface) (out *models.WritableDeviceInterface, err error) {
+func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInterface) (out *models.WritableInterface, err error) {
 	device, err := c.DeviceGet(deviceID)
 	if err != nil {
 		return nil, err
@@ -124,11 +126,10 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 		return nil, fmt.Errorf("Unsupported type for device: %s", reflect.TypeOf(device.Meta.NetboxEntity))
 	}
 
-	out = &models.WritableDeviceInterface{}
-
-	out.Device = deviceID
-	out.Name = intf.Name
-	out.Type = string(intf.Type)
+	out = &models.WritableInterface{}
+	out.Device = &deviceID
+	out.Name = &intf.Name
+	out.Type = swag.String(string(intf.Type))
 	out.Enabled = intf.Enabled
 	out.MgmtOnly = intf.IsManagement
 
@@ -136,7 +137,11 @@ func (c Client) InterfaceConvertToNetbox(deviceID int64, intf types.NetworkInter
 		out.MacAddress = swag.String(intf.MACAddress.String())
 	}
 
-	out.Tags = intf.Tags
+	for _, tag := range intf.Tags {
+		out.Tags = append(out.Tags, &models.NestedTag{
+			Name: &tag,
+		})
+	}
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
 		//Tagged mode

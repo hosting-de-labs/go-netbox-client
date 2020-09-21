@@ -16,7 +16,11 @@ func VlanConvertFromNetbox(netboxVlan interface{}) (*types.VLAN, error) {
 		vlan.ID = uint16(*v.Vid)
 		vlan.Name = *v.Name
 		vlan.Description = v.Description
-		vlan.Tags = v.Tags
+
+		for _, tag := range v.Tags {
+			vlan.Tags = append(vlan.Tags, *tag.Name)
+		}
+
 		vlanStatus = *v.Status.Value
 	case models.NestedVLAN:
 		vlan.ID = uint16(*v.Vid)

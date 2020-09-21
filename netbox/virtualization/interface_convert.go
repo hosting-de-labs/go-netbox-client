@@ -14,13 +14,11 @@ import (
 	"github.com/hosting-de-labs/go-netbox-client/types"
 )
 
-func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachineInterface) (*types.NetworkInterface, error) {
+func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VMInterface) (*types.NetworkInterface, error) {
 	netIf := types.NewNetworkInterface()
 	netIf.SetNetboxEntity(netboxInterface.ID, netboxInterface)
 
-	if netboxInterface.Type != nil {
-		netIf.Type = types.InterfaceType(*netboxInterface.Type.Value)
-	}
+	netIf.Type = types.InterfaceTypeVirtualInterfacesVirtual
 
 	if netboxInterface.Name != nil {
 		netIf.Name = *netboxInterface.Name
@@ -81,7 +79,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VirtualMachine
 }
 
 //InterfaceConvertToNetbox allows to convert a NetworkInterface to a netbox compatible device interface
-func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface) (out *models.WritableVirtualMachineInterface, err error) {
+func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface) (out *models.WritableVMInterface, err error) {
 	vm, err := c.VirtualMachineGet(vmID)
 	if err != nil {
 		return nil, err
@@ -101,17 +99,20 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 		return nil, fmt.Errorf("Unsupported type for vm: %s", reflect.TypeOf(vm.Meta.NetboxEntity))
 	}
 
-	out = &models.WritableVirtualMachineInterface{}
+	out = &models.WritableVMInterface{}
 
 	out.VirtualMachine = &vmID
-	out.Name = intf.Name
-	out.Type = string(intf.Type)
+	out.Name = &intf.Name
 
 	if intf.MACAddress != nil && intf.MACAddress.String() != "" {
 		out.MacAddress = swag.String(intf.MACAddress.String())
 	}
 
-	out.Tags = intf.Tags
+	for _, tag := range intf.Tags {
+		out.Tags = append(out.Tags, &models.NestedTag{
+			Name: &tag,
+		})
+	}
 
 	if intf.UntaggedVlan != nil && len(intf.TaggedVlans) > 0 {
 		//Tagged mode

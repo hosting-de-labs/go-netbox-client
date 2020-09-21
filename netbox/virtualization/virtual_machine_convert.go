@@ -10,7 +10,7 @@ import (
 )
 
 //VirtualMachineConvertFromNetbox converts a netbox virtual machine entity to a VirtualServer entity
-func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces []*models.VirtualMachineInterface) (out *types.VirtualServer, err error) {
+func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces []*models.VMInterface) (out *types.VirtualServer, err error) {
 	out = types.NewVirtualServer()
 
 	var cf interface{}
@@ -28,7 +28,10 @@ func (c Client) VirtualMachineConvertFromNetbox(netboxVM interface{}, interfaces
 		}
 
 		out.Hostname = *vm.Name
-		out.Tags = vm.Tags
+
+		for _, tag := range vm.Tags {
+			out.Tags = append(out.Tags, *tag.Name)
+		}
 
 		if vm.Vcpus != nil {
 			out.Resources.Cores = int(*vm.Vcpus)

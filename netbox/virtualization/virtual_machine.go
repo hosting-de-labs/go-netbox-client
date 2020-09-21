@@ -13,10 +13,9 @@ import (
 //VirtualMachineCreate creates a new VM object in Netbox.
 func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
 	var netboxVM models.WritableVirtualMachineWithConfigContext
-	netboxVM.Name = vm.Hostname
-	netboxVM.Tags = []string{}
+	netboxVM.Name = &vm.Hostname
 
-	netboxVM.Cluster = clusterID
+	netboxVM.Cluster = &clusterID
 
 	netboxVM.Vcpus = swag.Int64(int64(vm.Resources.Cores))
 	netboxVM.Memory = swag.Int64(vm.Resources.Memory)
@@ -146,9 +145,15 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 
 	data := new(models.WritableVirtualMachineWithConfigContext)
 
-	data.Name = vm.Hostname
-	data.Tags = vm.Tags
-	data.Cluster = nbVM.Cluster.ID
+	data.Name = &vm.Hostname
+
+	for _, tag := range vm.Tags {
+		data.Tags = append(data.Tags, &models.NestedTag{
+			Name: &tag,
+		})
+	}
+
+	data.Cluster = &nbVM.Cluster.ID
 	data.Comments = utils.GenerateVMComment(vm)
 
 	//custom fields
@@ -231,8 +236,8 @@ func (c Client) deleteOldIPAddressAssignments(vm types.VirtualServer) (updated b
 			continue
 		}
 
-		if netIP.Interface != nil && netIP.Interface.VirtualMachine != nil {
-			if netIP.Interface.VirtualMachine.ID != netIP.ID {
+		if netIP.AssignedObject != nil && netIP.AssignedObject.VirtualMachine != nil {
+			if netIP.AssignedObject.VirtualMachine.ID != netIP.ID {
 				err = ipamClient.IPAddressDelete(netIP.ID)
 				if err != nil {
 					updated = true

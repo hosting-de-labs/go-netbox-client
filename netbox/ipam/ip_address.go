@@ -50,7 +50,6 @@ func (c Client) IPAddressFindByInterfaceID(interfaceID int64) ([]*models.IPAddre
 func (c Client) IPAddressCreate(ipAddress types.IPAddress) (*models.IPAddress, error) {
 	data := new(models.WritableIPAddress)
 	data.Address = swag.String(ipAddress.String())
-	data.Tags = []string{}
 
 	params := ipam.NewIpamIPAddressesCreateParams()
 	params.WithData(data)
@@ -85,14 +84,13 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	}
 
 	//Do not update ipAddress if interface is already correct
-	if ipAddress2.Interface != nil && ipAddress2.Interface.ID == interfaceID {
+	if *ipAddress2.AssignedObjectID == interfaceID {
 		return ipAddress2, nil
 	}
 
 	data := new(models.WritableIPAddress)
 	data.Address = swag.String(ipAddress.String())
-	data.Tags = []string{}
-	data.Interface = &interfaceID
+	data.AssignedObjectID = &interfaceID
 
 	params := ipam.NewIpamIPAddressesPartialUpdateParams()
 	params.WithID(ipAddress2.ID)

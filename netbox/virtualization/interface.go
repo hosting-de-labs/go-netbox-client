@@ -23,7 +23,7 @@ func (c Client) InterfaceGet(interfaceID int64) (out *types.NetworkInterface, er
 }
 
 //InterfaceFindAll returns all interfaces of a virtual machine identified by it's id
-func (c Client) InterfaceFindAll(vmID int64) ([]*models.VirtualMachineInterface, error) {
+func (c Client) InterfaceFindAll(vmID int64) ([]*models.VMInterface, error) {
 	params := virtualization.NewVirtualizationInterfacesListParams()
 	params.VirtualMachineID = swag.Int64(vmID)
 

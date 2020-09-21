@@ -38,7 +38,11 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 		}
 
 		out.SerialNumber = d.Serial
-		out.Tags = d.Tags
+
+		for _, tag := range d.Tags {
+			out.Tags = append(out.Tags, *tag.Name)
+		}
+
 		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
 		primaryIPv4 = d.PrimaryIp4
@@ -59,8 +63,11 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 			out.AssetTag = *d.AssetTag
 		}
 
+		for _, tag := range d.Tags {
+			out.Tags = append(out.Tags, *tag.Name)
+		}
+
 		out.SerialNumber = d.Serial
-		out.Tags = d.Tags
 		out.Comments = strings.Split(d.Comments, "\n") //TODO: use utils.ParseVMComment
 
 		primaryIPv4 = d.PrimaryIp4
@@ -109,13 +116,18 @@ func (c Client) DeviceConvertFromNetbox(device interface{}) (out *types.Dedicate
 	return out, nil
 }
 
-func (c Client) DeviceConvertToNetbox(server types.DedicatedServer) (out *models.WritableDeviceWithConfigContext, intf []*models.WritableDeviceInterface, err error) {
+func (c Client) DeviceConvertToNetbox(server types.DedicatedServer) (out *models.WritableDeviceWithConfigContext, intf []*models.WritableInterface, err error) {
 	out = &models.WritableDeviceWithConfigContext{
 		Name:        &server.Hostname,
-		Tags:        server.Tags,
 		AssetTag:    &server.AssetTag,
 		Serial:      server.SerialNumber,
 		LastUpdated: strfmt.DateTime(time.Now()),
+	}
+
+	for _, tag := range server.Tags {
+		out.Tags = append(out.Tags, &models.NestedTag{
+			Name: &tag,
+		})
 	}
 
 	if server.Created != nil {

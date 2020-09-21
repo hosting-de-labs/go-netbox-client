@@ -42,7 +42,11 @@ func (c *Client) InventoryItemConvertToNetbox(i types.InventoryItem, deviceID in
 	}
 
 	if i.Tags != nil {
-		out.Tags = i.Tags
+		for _, tag := range i.Tags {
+			out.Tags = append(out.Tags, &models.NestedTag{
+				Name: &tag,
+			})
+		}
 	}
 
 	descriptionByte, err := json.Marshal(i.Details)
