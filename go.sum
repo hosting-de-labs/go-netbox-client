@@ -135,6 +135,8 @@ github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6 h1:77NffZvUVbDFLKVpwdraBUOk
 github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6/go.mod h1:SZGPe0kHX1xzLe6bcIEgfvN64fkRzUkamZjaANoH4j0=
 github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6.0.20200916160400-07a47db3677b h1:0ffHKoy9Ne9oGMEudU8Qjq2odcdkV0fZwTd/f5ty5aE=
 github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6.0.20200916160400-07a47db3677b/go.mod h1:SZGPe0kHX1xzLe6bcIEgfvN64fkRzUkamZjaANoH4j0=
+github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6.0.20200921115105-3b4544530e41 h1:zCT9lqeZSQgmeS9Ql+CI1GshQ94Z+cWDJtRyQmz0fm8=
+github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6.0.20200921115105-3b4544530e41/go.mod h1:SZGPe0kHX1xzLe6bcIEgfvN64fkRzUkamZjaANoH4j0=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=
