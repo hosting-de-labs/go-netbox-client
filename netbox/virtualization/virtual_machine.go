@@ -237,7 +237,7 @@ func (c Client) deleteOldIPAddressAssignments(vm types.VirtualServer) (updated b
 		}
 
 		if netIP.AssignedObject != nil && netIP.AssignedObject.VirtualMachine != nil {
-			if netIP.AssignedObject.VirtualMachine.ID != netIP.ID {
+			if netIP.AssignedObject.VirtualMachine.ID != vm.GetMetaID() {
 				err = ipamClient.IPAddressDelete(netIP.ID)
 				if err != nil {
 					updated = true
