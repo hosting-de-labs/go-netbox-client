@@ -31,10 +31,27 @@ func (c Client) IPAddressFind(ipAddress types.IPAddress) (*models.IPAddress, err
 	return res.Payload.Results[0], nil
 }
 
-//IPAddressGetByInterfaceID returns all ip addresses assigned to an interface identified by it's ID
+//IPAddressFindByInterfaceID returns all ip addresses assigned to a dcim.interface
 func (c Client) IPAddressFindByInterfaceID(interfaceID int64) ([]*models.IPAddress, error) {
 	params := ipam.NewIpamIPAddressesListParams()
+
 	params.WithInterfaceID(swag.Int64(interfaceID))
+
+	res, err := c.client.Ipam.IpamIPAddressesList(params, nil)
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	return res.Payload.Results, nil
+}
+
+//IPAddressFindByVMInterfaceID returns all ip addresses assigned to a dcim.interface
+func (c Client) IPAddressFindByVMInterfaceID(vmInterfaceID int64) ([]*models.IPAddress, error) {
+	params := ipam.NewIpamIPAddressesListParams()
+
+	params.WithVminterfaceID(swag.Int64(vmInterfaceID))
 
 	res, err := c.client.Ipam.IpamIPAddressesList(params, nil)
 

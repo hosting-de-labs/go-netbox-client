@@ -54,7 +54,7 @@ func (c Client) InterfaceConvertFromNetbox(netboxInterface models.VMInterface) (
 	}
 
 	ipamClient := netboxIpam.NewClient(c.client)
-	netboxAddresses, err := ipamClient.IPAddressFindByInterfaceID(netboxInterface.ID)
+	netboxAddresses, err := ipamClient.IPAddressFindByVMInterfaceID(netboxInterface.ID)
 	if err != nil {
 		return nil, err
 	}
