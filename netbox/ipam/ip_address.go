@@ -104,7 +104,7 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	}
 
 	//Do not update ipAddress if interface is already correct
-	if ipAddress2 != nil && *ipAddress2.AssignedObjectID == interfaceID {
+	if ipAddress2 != nil && ipAddress2.AssignedObjectID != nil && *ipAddress2.AssignedObjectID == interfaceID {
 		return ipAddress2, nil
 	}
 
