@@ -12,7 +12,9 @@ import (
 
 //VirtualMachineCreate creates a new VM object in Netbox.
 func (c Client) VirtualMachineCreate(clusterID int64, vm types.VirtualServer) (*types.VirtualServer, error) {
-	var netboxVM models.WritableVirtualMachineWithConfigContext
+	netboxVM := models.WritableVirtualMachineWithConfigContext{
+		Tags: []*models.NestedTag{},
+	}
 	netboxVM.Name = &vm.Hostname
 
 	netboxVM.Cluster = &clusterID
