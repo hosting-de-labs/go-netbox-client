@@ -99,7 +99,9 @@ func (c Client) InterfaceConvertToNetbox(vmID int64, intf types.NetworkInterface
 		return nil, fmt.Errorf("Unsupported type for vm: %s", reflect.TypeOf(vm.Meta.NetboxEntity))
 	}
 
-	out = &models.WritableVMInterface{}
+	out = &models.WritableVMInterface{
+		Tags: []*models.NestedTag{},
+	}
 
 	out.VirtualMachine = &vmID
 	out.Name = &intf.Name
