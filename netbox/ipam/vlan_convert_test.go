@@ -19,7 +19,6 @@ func mockNetboxVlan() models.VLAN {
 			Label: swag.String("Enabled"),
 		},
 		Description: "This is Public VLAN description",
-		Tags:        []string{"public"},
 	}
 }
 
@@ -41,7 +40,6 @@ func TestVlanConvertFromNetbox(t *testing.T) {
 	assert.Equal(t, types.VLANStatus(types.VLANStatusActive), vlan400.Status)
 
 	assert.Equal(t, "This is Public VLAN description", vlan400.Description)
-	assert.Equal(t, []string{"public"}, vlan400.Tags)
 }
 
 func TestVlanConvertFromNetboxWithNestedVlan(t *testing.T) {
