@@ -65,7 +65,10 @@ func (c Client) IPAddressFindByVMInterfaceID(vmInterfaceID int64) ([]*models.IPA
 
 //IPAddressCreate creates an ip-address based on the given ip/cidr string.
 func (c Client) IPAddressCreate(ipAddress types.IPAddress) (*models.IPAddress, error) {
-	data := new(models.WritableIPAddress)
+	data := &models.WritableIPAddress{
+		Tags: []*models.NestedTag{},
+	}
+
 	data.Address = swag.String(ipAddress.String())
 
 	params := ipam.NewIpamIPAddressesCreateParams()
