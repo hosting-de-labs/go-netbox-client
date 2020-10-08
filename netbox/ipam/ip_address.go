@@ -109,6 +109,8 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	}
 
 	data := &models.WritableIPAddress{}
+	data.Tags = []*models.NestedTag{}
+
 	data.Address = swag.String(ipAddress.String())
 	data.AssignedObjectID = &interfaceID
 
