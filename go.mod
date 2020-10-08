@@ -6,7 +6,7 @@ require (
 	github.com/go-openapi/runtime v0.19.19
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/swag v0.19.9
-	github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6.0.20200921115105-3b4544530e41
+	github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6.0.20201008082204-6631543235d4
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/text v0.3.3 // indirect
 )

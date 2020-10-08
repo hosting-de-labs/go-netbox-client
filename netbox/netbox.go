@@ -14,7 +14,7 @@ import (
 )
 
 type NetBox struct {
-	NetboxClient netboxClient.NetBox
+	NetboxClient netboxClient.NetBoxAPI
 
 	DCIM           dcimClient.Client
 	IPAM           ipamClient.Client

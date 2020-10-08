@@ -3,10 +3,10 @@ package dcim
 import "github.com/hosting-de-labs/go-netbox/netbox/client"
 
 type Client struct {
-	client client.NetBox
+	client client.NetBoxAPI
 }
 
-func NewClient(netboxClient client.NetBox) Client {
+func NewClient(netboxClient client.NetBoxAPI) Client {
 	return Client{
 		client: netboxClient,
 	}
