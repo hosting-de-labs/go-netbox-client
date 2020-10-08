@@ -104,11 +104,11 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	}
 
 	//Do not update ipAddress if interface is already correct
-	if *ipAddress2.AssignedObjectID == interfaceID {
+	if ipAddress2 != nil && *ipAddress2.AssignedObjectID == interfaceID {
 		return ipAddress2, nil
 	}
 
-	data := new(models.WritableIPAddress)
+	data := &models.WritableIPAddress{}
 	data.Address = swag.String(ipAddress.String())
 	data.AssignedObjectID = &interfaceID
 
