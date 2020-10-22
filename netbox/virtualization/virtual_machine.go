@@ -145,34 +145,32 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		}
 	}
 
-	data := new(models.WritableVirtualMachineWithConfigContext)
+	// Custom fields
+	customFields := make(map[string]string)
+	customFields["hypervisor_label"] = vm.Hypervisor
 
-	data.Name = &vm.Hostname
+	data := &models.WritableVirtualMachineWithConfigContext{
+		Name:         &vm.Hostname,
+		Cluster:      &nbVM.Cluster.ID,
+		Comments:     utils.GenerateVMComment(vm),
+		Vcpus:        swag.Int64(int64(vm.Resources.Cores)),
+		Memory:       swag.Int64(vm.Resources.Memory),
+		CustomFields: customFields,
+	}
 
+	// Disks
+	if len(vm.Resources.Disks) > 0 {
+		data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
+	}
+
+	// Tags
 	for _, tag := range vm.Tags {
 		data.Tags = append(data.Tags, &models.NestedTag{
 			Name: &tag,
 		})
 	}
 
-	data.Cluster = &nbVM.Cluster.ID
-	data.Comments = utils.GenerateVMComment(vm)
-
-	//custom fields
-	customFields := make(map[string]string)
-	customFields["hypervisor_label"] = vm.Hypervisor
-
-	data.CustomFields = customFields
-
-	//Resources
-	data.Vcpus = swag.Int64(int64(vm.Resources.Cores))
-	data.Memory = swag.Int64(vm.Resources.Memory)
-
-	if len(vm.Resources.Disks) > 0 {
-		data.Disk = swag.Int64(vm.Resources.Disks[0].Size / 1024)
-	}
-
-	//delete old ip address assignments
+	// Delete old ip address assignments
 	u, err := c.deleteOldIPAddressAssignments(vm)
 	if err != nil {
 		return false, err
@@ -182,8 +180,8 @@ func (c Client) VirtualMachineUpdate(vm types.VirtualServer) (updated bool, err 
 		updated = true
 	}
 
-	//we need to update interfaces before we possibly assign new primary ip addresses
-	//otherwise netbox might complain about ip addresses not being assigned to a virtual machine
+	// We need to update interfaces before we possibly assign new primary ip addresses
+	// otherwise netbox might complain about ip addresses not being assigned to a virtual machine
 	u, err = c.updateInterfaces(vm)
 	if err != nil {
 		return false, err
@@ -238,13 +236,17 @@ func (c Client) deleteOldIPAddressAssignments(vm types.VirtualServer) (updated b
 			continue
 		}
 
-		if netIP.AssignedObject != nil && netIP.AssignedObject.VirtualMachine != nil {
-			if netIP.AssignedObject.VirtualMachine.ID != vm.GetMetaID() {
-				err = ipamClient.IPAddressDelete(netIP.ID)
-				if err != nil {
-					updated = true
-				}
-			}
+		if netIP.AssignedObject == nil || netIP.AssignedObject.VirtualMachine == nil {
+			continue
+		}
+
+		if netIP.AssignedObject.VirtualMachine.ID == vm.GetMetaID() {
+			continue
+		}
+
+		err = ipamClient.IPAddressDelete(netIP.ID)
+		if err != nil {
+			updated = true
 		}
 	}
 

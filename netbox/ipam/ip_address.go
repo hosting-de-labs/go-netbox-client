@@ -108,15 +108,15 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 		return ipAddress2, nil
 	}
 
-	data := &models.WritableIPAddress{}
-	data.Tags = []*models.NestedTag{}
-
-	data.Address = swag.String(ipAddress.String())
-	data.AssignedObjectID = &interfaceID
-
 	params := ipam.NewIpamIPAddressesPartialUpdateParams()
 	params.WithID(ipAddress2.ID)
-	params.WithData(data)
+	params.WithData(
+		&models.WritableIPAddress{
+			Address:          swag.String(ipAddress.String()),
+			AssignedObjectID: &interfaceID,
+			Tags:             []*models.NestedTag{},
+		},
+	)
 
 	_, err = c.client.Ipam.IpamIPAddressesPartialUpdate(params, nil)
 	if err != nil {
