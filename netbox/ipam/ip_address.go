@@ -112,9 +112,10 @@ func (c Client) IPAddressAssignInterface(ipAddress types.IPAddress, interfaceID 
 	params.WithID(ipAddress2.ID)
 	params.WithData(
 		&models.WritableIPAddress{
-			Address:          swag.String(ipAddress.String()),
-			AssignedObjectID: &interfaceID,
-			Tags:             []*models.NestedTag{},
+			Address:            swag.String(ipAddress.String()),
+			AssignedObjectID:   &interfaceID,
+			AssignedObjectType: "virtualization.vminterface",
+			Tags:               []*models.NestedTag{},
 		},
 	)
 
