@@ -8,5 +8,5 @@ require (
 	github.com/go-openapi/swag v0.19.9
 	github.com/hosting-de-labs/go-netbox v1.1.6-api2.7.6
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/text v0.3.8 // indirect
 )
